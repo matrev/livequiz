@@ -1,19 +1,20 @@
-import { prisma } from "../../prisma.js";
-import { QuestionType } from "../../../generated/prisma/client.js";
+import { PrismaContext } from "../../prisma.js";
+import { QuestionType } from "../../../generated/graphql.js";
+import { Resolvers, Question } from "../../../generated/graphql.js";
 
-const QuestionResolvers = {
+const QuestionResolvers: Resolvers = {
     Query: {
-        getQuestion(_: any, args: { id: number }) {
+        getQuestion(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;
-            return prisma.question.findUnique({
+            return context.prisma.question.findUnique({
                 where: {
                     id,
                 },
-            });
+            }) as unknown as Question;
         },
-        isQuestionCorrect(_: any, args: { questionId: number; answer: string }) {
+        isQuestionCorrect(_: any, args: { questionId: number; answer: string }, context: PrismaContext) {
             const { questionId, answer } = args;
-            return prisma.question.findUnique({
+            return context.prisma.question.findUnique({
                 where: {
                     id: questionId,
                 },
@@ -22,32 +23,44 @@ const QuestionResolvers = {
                     throw new Error("Question not found");
                 }
                 return question.correctAnswer === answer;
-            });
+            }) as unknown as boolean;
         }
     },
     Mutation: {
-        async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer: string; quizId: number }) {
-            const { text, questionType, correctAnswer, quizId } = args;
-            // Import Prisma QuestionType enum
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const {  } = require("@prisma/client");
-            const newQuestion = await prisma.question.create({
+        async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer?: string; quizId: number }, context: PrismaContext) {
+            const { text, questionType, quizId, correctAnswer = null } = args;
+            const newQuestion = await context.prisma.question.create({
                 data: {
                     text,
                     questionType,
-                    correctAnswer,
                     quizId,
+                    correctAnswer
                 },
             });
-            return newQuestion;
+            return newQuestion as Question;
         },
-        async deleteQuestion(_: any, args: { id: number }) {
+        async deleteQuestion(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;
             // Implementation for deleting a question by ID
+            return context.prisma.question.delete({
+                where: {
+                    id,
+                },
+            }) as unknown as Question;
         },
-        async updateQuestion(_: any, args: { id: number; text?: string; questionType?: string; correctAnswer?: string }) {
+        async updateQuestion(_: any, args: { id: number; text?: string; questionType?: QuestionType; correctAnswer?: string }, context: PrismaContext) {
             const { id, text, questionType, correctAnswer } = args;
             // Implementation for updating a question by ID
+            return context.prisma.question.update({
+                where: {
+                    id,
+                },
+                data: {
+                    text,
+                    questionType,
+                    correctAnswer
+                },
+            }) as unknown as Question;
         },
     }
 }

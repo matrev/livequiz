@@ -8,4 +8,11 @@ const adapter = new PrismaPg({ connectionString });
 
 const prisma = new PrismaClient({ adapter });
 
-export { prisma };
+export interface PrismaContext {
+ //add prisma context here
+ prisma: PrismaClient;
+}
+
+export async function createPrismaContext(): Promise<PrismaContext> {
+ return { prisma };
+}

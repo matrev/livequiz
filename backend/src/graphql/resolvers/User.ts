@@ -1,23 +1,24 @@
-import { prisma } from '../../prisma.js';
+import { Resolvers, User } from '../../../generated/graphql.js';
+import { PrismaContext } from '../../prisma.js';
 import { DateTimeResolver } from 'graphql-scalars';
 
-const UserResolvers = {
-    DateTime: DateTimeResolver,
+const UserResolvers: Resolvers = {
+    // DateTime: DateTimeResolver,
     Query: {
-        getAllUsers() {
-            return prisma.user.findMany();
+        getAllUsers(_: any, __: any, context: PrismaContext) {
+            return context.prisma.user.findMany() as Promise<User[]>;
         },
-        getUser(_: any, args: { id: number }) {
+        getUser(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;
-            return prisma.user.findUnique({
+            return context.prisma.user.findUnique({
                 where: {
                     id,
                 },
-            });
+            }) as unknown as User | null;
         },
-        getUsersForQuiz(_: any, args: { quizId: number }) {
+        getUsersForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
             const { quizId } = args;
-            return prisma.user.findMany({
+            return context.prisma.user.findMany({
                 where: {
                     entries: {
                         some: {
@@ -25,33 +26,33 @@ const UserResolvers = {
                         },
                     },
                 },
-            });
+            }) as Promise<User[]>;
         }
     },
     Mutation: {
-        async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }) {
-            const { name, email, isAdmin = false } = args;
-            const newUser = await prisma.user.create({
+        async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }, context: PrismaContext) {
+            const { name, email, isAdmin = false} = args;
+            const newUser: User = await context.prisma.user.create({
                 data: {
                     name,
                     email,
-                    isAdmin,
+                    isAdmin
                 },
             });
             return newUser;
         },
-        async deleteUser(_: any, args: { id: number }) {
+        async deleteUser(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;
-            const deletedUser = await prisma.user.delete({
+            const deletedUser: User = await context.prisma.user.delete({
                 where: {
                     id,
                 },
             });
             return deletedUser;
         },
-        async updateUser(_: any, args: { id: number; name?: string; email?: string }) { 
+        async updateUser(_: any, args: { id: number; name?: string; email?: string }, context: PrismaContext) { 
             const { id, name, email } = args;
-            const updatedUser = await prisma.user.update({
+            const updatedUser: User = await context.prisma.user.update({
                 where: {
                     id,
                 },

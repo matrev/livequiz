@@ -1,88 +1,92 @@
-import { prisma } from '../../prisma.js';
+import { Resolvers, Quiz, Question } from '../../../generated/graphql.js';
+import { PrismaContext } from '../../prisma.js';
 
-const QuizResolvers = {
+const QuizResolvers: Resolvers = {
     Query: {
-        getAllQuizzes() {
-            return prisma.quiz.findMany();
+        getAllQuizzes: (_: any, __: any, context: PrismaContext) => {
+            return context.prisma.quiz.findMany() as Promise<Quiz[]>;
         },
-        getQuiz(_: any, args: { id: number }) {
+        getQuiz(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;
-            return prisma.quiz.findUnique({
+            return context.prisma.quiz.findUnique({
                 where: {
                     id,
                 },
-            });
+            }) as unknown as Quiz | null;
         },
-        getQuestionsByQuiz(_: any, args: { quizId: number }) {
+        getQuestionsForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
             const { quizId } = args;
-            return prisma.question.findMany({
+            return context.prisma.question.findMany({
                 where: {
                     quizId,
                 },
-            });
+            }) as Promise<Question[]>;
         }
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; questions: any[] }) {
-            const { title, questions } = args;
-            const newQuiz = await prisma.quiz.create({
+        async createQuiz(_: any, args: { title: string; }, context: PrismaContext) {
+            const { title } = args;
+            const newQuiz: Quiz = await context.prisma.quiz.create({
                 data: {
                     title,
-                    questions: {
-                        create: questions,
-                    },
-                },
-                include: {
-                    questions: true,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),  
                 },
             });
             return newQuiz;
         },
-        async deleteQuiz(_: any, args: { id: number }) {
+        async deleteQuiz(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;
-            return prisma.quiz.delete({
+            return context.prisma.quiz.delete({
                 where: {
                     id,
                 },
-            });
+            }) as unknown as Quiz;
         },
-        async updateQuiz(_: any, args: { id: number; title?: string; questions?: any[] }) {
+        async updateQuiz(_: any, args: { id: number; title?: string; questions?: any[] }, context: PrismaContext) {
             const { id, title, questions } = args;
-            return prisma.quiz.update({
+            return context.prisma.quiz.update({
                 where: {
                     id,
                 },
                 data: {
                     title,
+                    updatedAt: new Date(),
                     // Note: Updating questions would require more complex logic
                 },
-            });
+            }) as unknown as Quiz;
         },
-        async addQuestionToQuiz(_: any, args: { quizId: number; question: any }) {
-            const { quizId, question } = args;
-            const newQuestion = await prisma.question.create({
+        async addQuestionToQuiz(_: any, args: { quizId: number; questionId: number }, context: PrismaContext) {
+            const { quizId, questionId } = args;
+            const quiz = await context.prisma.quiz.findUnique({
+                where: { id: quizId },
+            });
+            if (!quiz) {
+                throw new Error('Quiz not found');
+            }
+            const newQuestion = await context.prisma.question.update({
+                where: { id: questionId },
+                data: { quizId: quiz.id },
+            }) as unknown as Quiz;
+            // update quiz's questions list
+            await context.prisma.quiz.update({
+                where: { id: quizId },
                 data: {
-                    ...question,
-                    quizId,
+                    questions: {
+                        connect: { id: questionId },
+                    },
                 },
             });
             return newQuestion;
         },
-        async removeQuestionFromQuiz(_: any, args: { quizId: number; questionId: number }) {
+        async removeQuestionFromQuiz(_: any, args: { quizId: number; questionId: number }, context: PrismaContext) {
             const { quizId, questionId } = args;
-            return prisma.question.deleteMany({
+            return context.prisma.question.deleteMany({
                 where: {
                     id: questionId,
                     quizId,
                 },
-            });
-        }
-    },
-    Subscription: {
-        quizUpdated: {
-            subscribe(_: any, args: { quizId: number }) {
-                const { quizId } = args;
-            }
+            }) as unknown as Quiz;
         }
     }
 }

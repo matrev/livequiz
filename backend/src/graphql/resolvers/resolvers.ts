@@ -1,9 +1,9 @@
 import { QuestionResolvers } from "./Question.js";
 import { QuizResolvers } from "./Quiz.js";
 import { UserResolvers } from "./User.js";
+import { Resolvers } from "../../../generated/graphql.js";
 
-const resolvers = {
-  DateTime: UserResolvers.DateTime,
+const resolvers: Resolvers = {
   Query: {
     ...UserResolvers.Query,
     ...QuizResolvers.Query,
