@@ -50,4 +50,10 @@ export const typeDefs = `#graphql
         getQuiz(id: Int!): Quiz
         getQuestionsByQuiz(quizId: Int!): [Question!]!
     }
+
+    type Mutation {
+        createUser(email: String!, name: String): User!
+        deleteUser(id: Int!): User!
+        updateUser(id: Int!, email: String, name: String): User!
+    }
 `;
