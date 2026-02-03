@@ -1,5 +1,7 @@
 {
+  // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
+    // File Layout
     "rootDirs": ["src"],
     "outDir": "dist",
     "lib": ["es2023"],
@@ -7,6 +9,10 @@
     "module": "esnext",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["node"],
+    // Recommended Options
+    // "strict": true,
+    // "ignoreDeprecations": "6.0",
+    "skipLibCheck": true,
   }
 }
