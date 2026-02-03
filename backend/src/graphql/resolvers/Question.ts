@@ -11,14 +11,6 @@ const QuestionResolvers = {
                 },
             });
         },
-        getQuestionsByQuiz(_: any, args: { quizId: number }) {
-            const { quizId } = args;
-            return prisma.question.findMany({
-                where: {
-                    quizId,
-                },
-            });
-        },
         isQuestionCorrect(_: any, args: { questionId: number; answer: string }) {
             const { questionId, answer } = args;
             return prisma.question.findUnique({

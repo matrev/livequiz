@@ -6,15 +6,36 @@ const UserResolvers = {
     Query: {
         getAllUsers() {
             return prisma.user.findMany();
+        },
+        getUser(_: any, args: { id: number }) {
+            const { id } = args;
+            return prisma.user.findUnique({
+                where: {
+                    id,
+                },
+            });
+        },
+        getUsersForQuiz(_: any, args: { quizId: number }) {
+            const { quizId } = args;
+            return prisma.user.findMany({
+                where: {
+                    entries: {
+                        some: {
+                            quizId,
+                        },
+                    },
+                },
+            });
         }
     },
     Mutation: {
-        async createUser(_: any, args: { name: string; email: string }) {
-            const { name, email } = args;
+        async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }) {
+            const { name, email, isAdmin = false } = args;
             const newUser = await prisma.user.create({
                 data: {
                     name,
                     email,
+                    isAdmin,
                 },
             });
             return newUser;

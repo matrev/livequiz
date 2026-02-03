@@ -77,6 +77,13 @@ const QuizResolvers = {
                 },
             });
         }
+    },
+    Subscription: {
+        quizUpdated: {
+            subscribe(_: any, args: { quizId: number }) {
+                const { quizId } = args;
+            }
+        }
     }
 }
 
