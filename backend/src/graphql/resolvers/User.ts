@@ -1,6 +1,6 @@
 import { Resolvers, User } from '../../../generated/graphql.js';
 import { PrismaContext } from '../../prisma.js';
-import { DateTimeResolver } from 'graphql-scalars';
+// import { DateTimeResolver } from 'graphql-scalars';
 
 const UserResolvers: Resolvers = {
     // DateTime: DateTimeResolver,
