@@ -9,9 +9,7 @@ const config: Config = {
     moduleNameMapper: {
         "^(\\.{1,2}/.+)\\.js$": "$1",
     },
-    // extensionsToTreatAsEsm: ['.ts'],
-    transform: {
-    },
+    testPathIgnorePatterns: ["/dist/"],
 };
 
 export default config;

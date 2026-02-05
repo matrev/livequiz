@@ -10,7 +10,7 @@ const config: CodegenConfig = {
     },
   },
   config: {
-    contextType: "../dist/src/index#PrismaContext"
+    contextType: "../dist/src/index.js#PrismaContext"
   }
 
 };

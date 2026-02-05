@@ -1,10 +1,9 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { readFileSync } from 'fs';
+
 import { resolvers } from './graphql/resolvers/resolvers.js';
 import { PrismaContext, createPrismaContext } from './prisma.js';
-
-const typeDefs = readFileSync('./src/graphql/schema.graphql', { encoding: 'utf8' });
+import { typeDefs } from './graphql/utils.js';
 
 const server = new ApolloServer<PrismaContext>({
   typeDefs,
