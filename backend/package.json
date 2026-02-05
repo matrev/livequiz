@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "jest": "./jest-config.ts",
+  "jest": "./config/jest-config.ts",
   "scripts": {
     "test": "jest",
     "compile": "npm run generate && npx prisma generate && tsc",
