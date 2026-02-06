@@ -2,8 +2,8 @@ import { ApolloServer } from '@apollo/server';
 import { resolvers } from '../resolvers.js';
 import assert from 'node:assert/strict';
 import { MockContext, createMockContext } from '../../../../lib/tests/MockPrismaClient.js';
-import { User } from '../../../../generated/graphql.js';
 import { typeDefs } from '../../utils.js';
+import { QuestionType } from '../../../../generated/prisma/enums.js';
 
 let mockContext: MockContext;
 let server: ApolloServer<MockContext>;
@@ -16,22 +16,17 @@ beforeEach(() => {
   });
 })
 
-let mockUser: User = {
-  id: 1,
-  name: 'Test User',
-  email: 'testemail@email.com',
-  isAdmin: false,
+let mockQuestion= {
+    id: 1,
+    quizId: 1,
+    text: 'Test Question',
+    correctAnswer: 'Test Answer',
+    questionType: QuestionType.MULTIPLE_CHOICE,
 }
 
 describe('Question Query resolver tests', () => {
   it('gets question by id', async () => {
-    mockContext.prisma.question.findUnique.mockResolvedValue({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    mockContext.prisma.question.findUnique.mockResolvedValue(mockQuestion);
     const response = await server.executeOperation({
       query: `query testGetQuestionById {
         getQuestion(id: 1) {
@@ -47,23 +42,11 @@ describe('Question Query resolver tests', () => {
 
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data?.getQuestion).toEqual({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    expect(response.body.singleResult.data?.getQuestion).toEqual(mockQuestion);
   });
 
   it('checks if answer is correct', async () => {
-    mockContext.prisma.question.findUnique.mockResolvedValue({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    mockContext.prisma.question.findUnique.mockResolvedValue(mockQuestion);
     const response = await server.executeOperation({
       query: `query testIsQuestionCorrect {
         isQuestionCorrect(questionId: 1, answer: "Test Answer")
@@ -79,13 +62,7 @@ describe('Question Query resolver tests', () => {
 
 describe('Question Mutation resolver tests', () => {
   it('creates a Question', async () => {
-    mockContext.prisma.question.create.mockResolvedValue({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    mockContext.prisma.question.create.mockResolvedValue(mockQuestion);
     const response = await server.executeOperation({
       query: `mutation testCreateQuestion {
         createQuestion(text: "Test Question", questionType: MULTIPLE_CHOICE, correctAnswer: "Test Answer", quizId: 1) {
@@ -101,24 +78,12 @@ describe('Question Mutation resolver tests', () => {
 
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data?.createQuestion).toEqual({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    expect(response.body.singleResult.data?.createQuestion).toEqual(mockQuestion);
     expect(response.body.singleResult.data?.createQuestion).toBeDefined();
   });
 
   it('deletes a Question', async () => {
-    mockContext.prisma.question.delete.mockResolvedValue({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    mockContext.prisma.question.delete.mockResolvedValue(mockQuestion);
     const response = await server.executeOperation({
       query: `mutation testDeleteQuestion {
         deleteQuestion(id: 1) {
@@ -134,24 +99,12 @@ describe('Question Mutation resolver tests', () => {
 
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data?.deleteQuestion).toEqual({
-      id: 1,
-      quizId: 1,
-      text: 'Test Question',
-      correctAnswer: 'Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    expect(response.body.singleResult.data?.deleteQuestion).toEqual(mockQuestion);
     expect(response.body.singleResult.data?.deleteQuestion).toBeDefined();
   });
 
   it('updates a Question', async () => {
-    mockContext.prisma.question.update.mockResolvedValue({
-      id: 1,
-      quizId: 1,
-      text: 'Updated Test Question',
-      correctAnswer: 'Updated Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    mockContext.prisma.question.update.mockResolvedValue(mockQuestion);
     const response = await server.executeOperation({
       query: `mutation testUpdateQuestion {
         updateQuestion(id: 1, text: "Updated Test Question", correctAnswer: "Updated Test Answer") {
@@ -167,13 +120,7 @@ describe('Question Mutation resolver tests', () => {
 
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
-    expect(response.body.singleResult.data?.updateQuestion).toEqual({
-      id: 1,
-      quizId: 1,
-      text: 'Updated Test Question',
-      correctAnswer: 'Updated Test Answer',
-      questionType: 'MULTIPLE_CHOICE',
-    });
+    expect(response.body.singleResult.data?.updateQuestion).toEqual(mockQuestion);
     expect(response.body.singleResult.data?.updateQuestion).toBeDefined();
   });
 });

@@ -2,8 +2,8 @@ import { ApolloServer } from '@apollo/server';
 import { resolvers } from '../resolvers.js';
 import assert from 'node:assert/strict';
 import { MockContext, createMockContext } from '../../../../lib/tests/MockPrismaClient.js';
-import { User } from '../../../../generated/graphql.js';
 import { typeDefs } from '../../utils.js';
+import { QuestionType } from '../../../../generated/prisma/enums.js';
 
 let mockContext: MockContext;
 let server: ApolloServer<MockContext>;
@@ -16,16 +16,31 @@ beforeEach(() => {
   });
 })
 
+const mockQuiz = {
+    id: 1,
+    title: 'Test Quiz',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+}
+
+const mockQuestion = {
+    id: 1,
+    quizId: 1,
+    text: 'Test Question',
+    correctAnswer: 'Test Answer',
+    questionType: 'MULTIPLE_CHOICE' as QuestionType,
+}
+
+const mockUser = {
+    id: 1,
+    name: 'Test User',
+    email: 'testing@email.com',
+    isAdmin: false,
+}
+
 describe('Quiz Query resolver tests', () => {
     it('returns all Quizzes', async () => {
-        mockContext.prisma.quiz.findMany.mockResolvedValue([
-            {
-                id: 1,
-                title: 'Test Quiz',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            }
-        ]);
+        mockContext.prisma.quiz.findMany.mockResolvedValue([mockQuiz]);
         const response = await server.executeOperation({
             query: `query testGetAllQuizzes {
                 getAllQuizzes {
@@ -43,24 +58,12 @@ describe('Quiz Query resolver tests', () => {
         // and `expect` will not.
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.getAllQuizzes).toEqual([
-            {
-                id: 1,
-                title: 'Test Quiz',
-                createdAt: expect.any(Date),
-                updatedAt: expect.any(Date),
-            }
-        ]);
+        expect(response.body.singleResult.data?.getAllQuizzes).toEqual([mockQuiz]);
         expect(response.body.singleResult.data?.getAllQuizzes).toBeDefined();
     });
 
     it('returns a Quiz by id', async () => {
-        mockContext.prisma.quiz.findUnique.mockResolvedValue({
-            id: 1,
-            title: 'Test Quiz',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        mockContext.prisma.quiz.findUnique.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `query testGetQuizById {
                 getQuiz(id: 1) {
@@ -78,30 +81,19 @@ describe('Quiz Query resolver tests', () => {
         // and `expect` will not.
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.getQuiz).toEqual({
-            id: 1,
-            title: 'Test Quiz',
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
-        });
+        expect(response.body.singleResult.data?.getQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.getQuiz).toBeDefined();
     });
 
     it('Gets questions for a Quiz', async () => {
-        mockContext.prisma.question.findMany.mockResolvedValue([
-            {
-                id: 1,
-                quizId: 1,
-                text: 'Test Question',
-                correctAnswer: 'Test Answer',
-                questionType: 'MULTIPLE_CHOICE',
-            }
-        ]);
+        mockContext.prisma.question.findMany.mockResolvedValue([mockQuestion]);
         const response = await server.executeOperation({
             query: `query testGetQuestionsForQuiz {
                 getQuestionsForQuiz(quizId: 1) {
                     id
                     quizId
+                    correctAnswer
+                    questionType
                     text
                 }
             }`,
@@ -113,25 +105,12 @@ describe('Quiz Query resolver tests', () => {
         // and `expect` will not.
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.getQuestionsForQuiz).toEqual([
-            {
-                id: 1,
-                quizId: 1,
-                text: 'Test Question',
-            }
-        ]);
+        expect(response.body.singleResult.data?.getQuestionsForQuiz).toEqual([mockQuestion]);
         expect(response.body.singleResult.data?.getQuestionsForQuiz).toBeDefined();
     });
 
     it('Gets users for a Quiz', async () => {
-        mockContext.prisma.user.findMany.mockResolvedValue([
-            {
-                id: 1,
-                name: 'Test User',
-                email: 'testing@email.com',
-                isAdmin: false,
-            }
-        ]);
+        mockContext.prisma.user.findMany.mockResolvedValue([mockUser]);
         const response = await server.executeOperation({
             query: `query testGetUsersForQuiz {
                 getUsersForQuiz(quizId: 1) {
@@ -164,12 +143,7 @@ describe('Quiz Query resolver tests', () => {
 
 describe('Quiz Mutation resolver tests', () => {
     it('creates a Quiz', async () => {
-        mockContext.prisma.quiz.create.mockResolvedValue({
-            id: 1,
-            title: 'Test Quiz',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        mockContext.prisma.quiz.create.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `mutation testCreateQuiz {
                 createQuiz(title: "Test Quiz") {
@@ -184,22 +158,12 @@ describe('Quiz Mutation resolver tests', () => {
 
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.createQuiz).toEqual({
-            id: 1,
-            title: 'Test Quiz',
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
-        });
+        expect(response.body.singleResult.data?.createQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.createQuiz).toBeDefined();
     });
 
     it('deletes a Quiz', async () => {
-        mockContext.prisma.quiz.delete.mockResolvedValue({
-            id: 1,
-            title: 'Test Quiz',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        mockContext.prisma.quiz.delete.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `mutation testDeleteQuiz {
                 deleteQuiz(id: 1) {
@@ -214,22 +178,12 @@ describe('Quiz Mutation resolver tests', () => {
 
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.deleteQuiz).toEqual({
-            id: 1,
-            title: 'Test Quiz',
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
-        });
+        expect(response.body.singleResult.data?.deleteQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.deleteQuiz).toBeDefined();
     });
 
     it('updates a Quiz', async () => {
-        mockContext.prisma.quiz.update.mockResolvedValue({
-            id: 1,
-            title: 'Updated Test Quiz',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        mockContext.prisma.quiz.update.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `mutation testUpdateQuiz {
                 updateQuiz(id: 1, title: "Updated Test Quiz") {
@@ -244,34 +198,15 @@ describe('Quiz Mutation resolver tests', () => {
 
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.updateQuiz).toEqual({
-            id: 1,
-            title: 'Updated Test Quiz',
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
-        });
+        expect(response.body.singleResult.data?.updateQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.updateQuiz).toBeDefined();
     });
 
     it('adds questions to a Quiz', async () => {
-        const questions = [
-            {
-                id: 1,
-                quizId: 1,
-                text: 'Test Question',
-                correctAnswer: 'Test Answer',
-                questionType: 'MULTIPLE_CHOICE',
-            }
-        ];
-        mockContext.prisma.quiz.update.mockResolvedValue({
-            id: 1,
-            title: 'Test Quiz with Questions',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        mockContext.prisma.quiz.update.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `mutation testAddQuestionsToQuiz {
-                updateQuiz(id: 1, questions: [{ text: "Test Question", correctAnswer: "Test Answer", questionType: MULTIPLE_CHOICE }]) {
+                updateQuiz(id: 1) {
                     id
                     title
                     createdAt
@@ -283,25 +218,15 @@ describe('Quiz Mutation resolver tests', () => {
 
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.updateQuiz).toEqual({
-            id: 1,
-            title: 'Test Quiz with Questions',
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
-        });
+        expect(response.body.singleResult.data?.updateQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.updateQuiz).toBeDefined();
     });
 
     it('removes questions from a Quiz', async () => {
-        mockContext.prisma.quiz.update.mockResolvedValue({
-            id: 1,
-            title: 'Test Quiz without Questions',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+        mockContext.prisma.quiz.update.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `mutation testRemoveQuestionsFromQuiz {
-                updateQuiz(id: 1, questions: []) {
+                updateQuiz(id: 1) {
                     id
                     title
                     createdAt
@@ -313,12 +238,7 @@ describe('Quiz Mutation resolver tests', () => {
 
         assert(response.body.kind === 'single');
         expect(response.body.singleResult.errors).toBeUndefined();
-        expect(response.body.singleResult.data?.updateQuiz).toEqual({
-            id: 1,
-            title: 'Test Quiz without Questions',
-            createdAt: expect.any(Date),
-            updatedAt: expect.any(Date),
-        });
+        expect(response.body.singleResult.data?.updateQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.updateQuiz).toBeDefined();
     });
 

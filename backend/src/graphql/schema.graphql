@@ -34,8 +34,8 @@ type Question {
     id: Int!
     text: String!
     questionType: QuestionType!
-    correctAnswer: String
     quizId: Int!
+    correctAnswer: String
 }
 
 type Query {
@@ -66,8 +66,8 @@ type Mutation {
     updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String): Question!
     
     # Quiz Mutations
-    createQuiz(title: String!, questions: [String!]!): Quiz!
-    updateQuiz(id: Int!, title: String, questions: [String!]): Quiz!
+    createQuiz(title: String!, questions: [String!]): Quiz!
+    updateQuiz(id: Int!, title: String): Quiz!
     addQuestionToQuiz(quizId: Int!, questionId: Int!): Quiz!
     removeQuestionFromQuiz(quizId: Int!, questionId: Int!): Quiz!
     deleteQuiz(id: Int!): Quiz!

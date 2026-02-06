@@ -56,7 +56,7 @@ const QuizResolvers: Resolvers = {
             }) as unknown as Quiz;
         },
         async updateQuiz(_: any, args: { id: number; title?: string; questions?: any[] }, context: PrismaContext) {
-            const { id, title, questions } = args;
+            const { id, title } = args;
             return context.prisma.quiz.update({
                 where: {
                     id,
@@ -64,7 +64,6 @@ const QuizResolvers: Resolvers = {
                 data: {
                     title,
                     updatedAt: new Date(),
-                    // Note: Updating questions would require more complex logic
                 },
             }) as unknown as Quiz;
         },
