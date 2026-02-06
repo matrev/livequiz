@@ -16,18 +16,7 @@ const UserResolvers: Resolvers = {
                 },
             }) as unknown as User | null;
         },
-        getUsersForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
-            const { quizId } = args;
-            return context.prisma.user.findMany({
-                where: {
-                    entries: {
-                        some: {
-                            quizId,
-                        },
-                    },
-                },
-            }) as Promise<User[]>;
-        }
+        
     },
     Mutation: {
         async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }, context: PrismaContext) {

@@ -1,4 +1,4 @@
-import { Resolvers, Quiz, Question } from '../../../generated/graphql.js';
+import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
 import { PrismaContext } from '../../prisma.js';
 
 const QuizResolvers: Resolvers = {
@@ -21,6 +21,18 @@ const QuizResolvers: Resolvers = {
                     quizId,
                 },
             }) as Promise<Question[]>;
+        },
+        getUsersForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
+            const { quizId } = args;
+            return context.prisma.user.findMany({
+                where: {
+                    entries: {
+                        some: {
+                            quizId,
+                        },
+                    },
+                },
+            }) as Promise<User[]>;
         }
     },
     Mutation: {
