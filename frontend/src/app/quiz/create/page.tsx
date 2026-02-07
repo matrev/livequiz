@@ -4,26 +4,17 @@
 import { MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/graphql";
 import { QuestionType } from "@/generated/types";
 import { gql, TypedDocumentNode } from "@apollo/client";
+import { useMutation } from "@apollo/client/react";
 
-// use the generated types for your query
-import { useMutation, useQuery } from "@apollo/client/react";
 import Link from "next/link";
 import { ChangeEvent, useState } from "react";
-
-// const getQuizzes: TypedDocumentNode<GetQuizzesQuery, GetQuizzesQueryVariables> = gql`
-//     query GetQuizzes {
-//         getAllQuizzes {
-//             id
-//             title
-//         }
-//     }
-// `
 
 const CREATE_QUIZ: TypedDocumentNode<Quiz,MutationCreateQuizArgs> = gql`
     mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {
     createQuiz(title: $title, questions: $questions) {
         title
         questions{
+            options
             correctAnswer
             text
             questionType
@@ -33,7 +24,6 @@ const CREATE_QUIZ: TypedDocumentNode<Quiz,MutationCreateQuizArgs> = gql`
 `
 
 export default function Home() {
-    //   const { loading, error, data } = useQuery(getQuizzes);
     const [createQuiz, { data, loading, error }] = useMutation<Quiz,MutationCreateQuizArgs>(CREATE_QUIZ, {
         variables: {
             title: "placeholder",
@@ -51,10 +41,33 @@ export default function Home() {
         ]);
     }
 
+    const addQuestionOption = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, i: number) => {
+        setQuestions((prevQuestions): QuestionInput[] => {
+            console.log('attempting to add question option: ' + i)
+            return prevQuestions.map((item, index) => {
+                if (index !== i) {
+                    return item;
+                }
+                const newOptions = item.options ? [...item.options, ""] : [""];
+                return {...item, options: newOptions}
+            })
+        });
+    }
+
     const handleQuestionTypeChange =(e: ChangeEvent<HTMLInputElement, HTMLInputElement>, i: number) => {
         setQuestions((prevQuestions): QuestionInput[] => {
             return prevQuestions.map((item, index) => {
                 if (index === i) {
+                    switch (e.target.value) {
+                        case QuestionType.ShortAnswer:
+                            item.options = null
+                            break
+                        case QuestionType.TrueFalse:
+                            item.options = ["True", "False"]
+                            break
+                        default:
+                            item.options = [""]
+                    }
                     return {...item, questionType: e.target.value as QuestionType}
                 }
                 return item;
@@ -127,6 +140,32 @@ export default function Home() {
                                 checked={question.questionType === QuestionType.TrueFalse} 
                                  /> True / False
                             </label>
+                            {question.options !== null && <>
+                                {question.options?.map((option, optionIndex) => {
+                                    return (<div key={optionIndex}>
+                                        <label htmlFor={`Question-${index}-Option-${optionIndex}`}>Enter the Option:</label>
+                                        <input
+                                            type="text"
+                                            onChange={(e) => {
+                                                const newValue = e.target.value;
+                                                setQuestions(prev => {
+                                                    return prev.map((q, qIdx) => {
+                                                    if (qIdx !== index) return q;
+                                                    const updatedOpts = q.options?.map((opt, optIdx) =>
+                                                        optIdx === optionIndex ? newValue : opt
+                                                    );
+                                                    return { ...q, options: updatedOpts };
+                                                    });
+                                                });
+                                            }}
+                                            value={String(option)}
+                                            name={`Question-${index}-Option-${optionIndex}`}
+                                            id={`Question-${index}-Option-${optionIndex}`}
+                                        />
+                                    </div>)
+                                })}
+                                <button type="button" onClick={(e) => addQuestionOption(e, index)}>Add Option</button>
+                            </>}
                         </div>
                 )})
                 }

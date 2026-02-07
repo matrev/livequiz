@@ -18,7 +18,7 @@ export type Scalars = {
 export type Entry = {
   __typename?: 'Entry';
   author: User;
-  id: Scalars['Int']['output'];
+  id?: Maybe<Scalars['Int']['output']>;
   quiz: Quiz;
   title: Scalars['String']['output'];
 };
@@ -153,7 +153,8 @@ export type QueryIsQuestionCorrectArgs = {
 export type Question = {
   __typename?: 'Question';
   correctAnswer?: Maybe<Scalars['String']['output']>;
-  id: Scalars['Int']['output'];
+  id?: Maybe<Scalars['Int']['output']>;
+  options?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   questionType: QuestionType;
   quizId: Scalars['Int']['output'];
   text: Scalars['String']['output'];
@@ -161,9 +162,10 @@ export type Question = {
 
 export type QuestionInput = {
   correctAnswer?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['Int']['input'];
+  id?: InputMaybe<Scalars['Int']['input']>;
+  options?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   questionType: QuestionType;
-  quizId: Scalars['Int']['input'];
+  quizId?: InputMaybe<Scalars['Int']['input']>;
   text: Scalars['String']['input'];
 };
 
@@ -177,7 +179,7 @@ export type Quiz = {
   __typename?: 'Quiz';
   createdAt: Scalars['DateTime']['output'];
   entries?: Maybe<Array<Entry>>;
-  id: Scalars['Int']['output'];
+  id?: Maybe<Scalars['Int']['output']>;
   questions?: Maybe<Array<Question>>;
   title: Scalars['String']['output'];
   updatedAt: Scalars['DateTime']['output'];
@@ -197,7 +199,7 @@ export type User = {
   __typename?: 'User';
   email: Scalars['String']['output'];
   entries?: Maybe<Array<Entry>>;
-  id: Scalars['Int']['output'];
+  id?: Maybe<Scalars['Int']['output']>;
   isAdmin: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
 };
@@ -208,9 +210,9 @@ export type CreateQuizMutationVariables = Exact<{
 }>;
 
 
-export type CreateQuizMutation = { __typename?: 'Mutation', createQuiz: { __typename?: 'Quiz', title: string, questions?: Array<{ __typename?: 'Question', correctAnswer?: string | null, text: string, questionType: QuestionType }> | null } };
+export type CreateQuizMutation = { __typename?: 'Mutation', createQuiz: { __typename?: 'Quiz', title: string, questions?: Array<{ __typename?: 'Question', options?: Array<string | null> | null, correctAnswer?: string | null, text: string, questionType: QuestionType }> | null } };
 
 export type GetQuizzesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetQuizzesQuery = { __typename?: 'Query', getAllQuizzes: Array<{ __typename?: 'Quiz', id: number, title: string }> };
+export type GetQuizzesQuery = { __typename?: 'Query', getAllQuizzes: Array<{ __typename?: 'Quiz', id?: number | null, title: string }> };

@@ -33,6 +33,7 @@ model Question {
   quizId   Int
   questionType QuestionType @default(MULTIPLE_CHOICE)
   correctAnswer String @default("")
+  options String[] @default([])
   quiz     Quiz    @relation(fields: [quizId], references: [id])
 }
 

@@ -28,6 +28,7 @@ const mockQuestion = {
     quizId: 1,
     text: 'Test Question',
     correctAnswer: 'Test Answer',
+    options: [],
     questionType: 'MULTIPLE_CHOICE' as QuestionType,
 }
 

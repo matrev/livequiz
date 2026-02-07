@@ -16,11 +16,12 @@ beforeEach(() => {
   });
 })
 
-let mockQuestion= {
+let mockQuestion = {
     id: 1,
     quizId: 1,
     text: 'Test Question',
     correctAnswer: 'Test Answer',
+    options: [],
     questionType: QuestionType.MULTIPLE_CHOICE,
 }
 
