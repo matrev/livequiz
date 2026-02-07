@@ -1,9 +1,8 @@
 // pull quiz data from the server and display it
 'use client'
 
-import QuestionInput from "@/components/QuestionInput";
-import { Question, Quiz } from "@/generated/graphql";
-import { GetQuizzesQueryVariables, GetQuizzesQuery, QuestionType } from "@/generated/types";
+import { MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/graphql";
+import { QuestionType } from "@/generated/types";
 import { gql, TypedDocumentNode } from "@apollo/client";
 
 // use the generated types for your query
@@ -20,29 +19,40 @@ import { ChangeEvent, useState } from "react";
 //     }
 // `
 
-const CREATE_QUIZ = gql`
-    mutation CreateQuiz($title: String!) {
-    createQuiz(title: $title) {
+const CREATE_QUIZ: TypedDocumentNode<Quiz,MutationCreateQuizArgs> = gql`
+    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {
+    createQuiz(title: $title, questions: $questions) {
         title
+        questions{
+            correctAnswer
+            text
+            questionType
+        }
     }
 }
 `
 
 export default function Home() {
     //   const { loading, error, data } = useQuery(getQuizzes);
-    const [createQuiz, { data, loading, error }] = useMutation(CREATE_QUIZ);
-    const [questions, setQuestions] = useState<Question[]>([]);
-    const [quiz, setQuiz] = useState<Quiz>({} as Quiz);
+    const [createQuiz, { data, loading, error }] = useMutation<Quiz,MutationCreateQuizArgs>(CREATE_QUIZ, {
+        variables: {
+            title: "placeholder",
+            questions: [],
+        }
+    }
+    );
+    const [questions, setQuestions] = useState<QuestionInput[]>([]);
+    const [title, setTitle] = useState<string>("");
 
     const addQuestion = () => {
         setQuestions(prev => [
             ...prev,
-            { text: "", questionType: QuestionType.MultipleChoice, id: 1, quizId: 2}
+            {} as QuestionInput
         ]);
     }
 
     const handleQuestionTypeChange =(e: ChangeEvent<HTMLInputElement, HTMLInputElement>, i: number) => {
-        setQuestions((prevQuestions): Question[] => {
+        setQuestions((prevQuestions): QuestionInput[] => {
             return prevQuestions.map((item, index) => {
                 if (index === i) {
                     return {...item, questionType: e.target.value as QuestionType}
@@ -59,41 +69,54 @@ export default function Home() {
                 onSubmit={(e) => {
                     e.preventDefault();
                     console.log('questions: ', questions)
-                    // createQuiz({ variables: { type: quiz }})
-                    // setQuiz({} as Quiz);
+                    createQuiz({ variables: { title: title, questions: questions }})
+                    setTitle("");
+                    setQuestions([]);
                 }}
             >
+                <label htmlFor="QuizTitle">Enter the Title for the Quiz:</label>
+                <input
+                    type="text"
+                    onChange={(e) => {
+                        setTitle(e.target.value);
+                    }}
+                    name={`QuizTitle`}
+                    id={`QuizTitle`}
+                />
+                <br />
                 {questions.map
                 (
                     (question, index) => {
                     return (
                         <div key={index}>
-                            <label htmlFor="QuestionName">Enter the Question:</label>
-                            <input
-                                type="text"
-                                onChange={(e) => {
-                                    question.text = e.target.value;
-                                }}
-                                name={`QuestionName-${index}`}
-                                id={`QuestionName-${index}`}
-                            />
+                            <label htmlFor={`QuestionName-${index}`}>Enter the Question:</label>
+                                <input
+                                    type="text"
+                                    onChange={(e) => {
+                                        question.text = e.target.value;
+                                    }}
+                                    name={`QuestionName-${index}`}
+                                    id={`QuestionName-${index}`}
+                                    />
                             <label>
                                 <input 
-                                type="radio"
-                                name={`QuestionType-${index}`}
-                                value={QuestionType.MultipleChoice}
-                                onChange={(e) => handleQuestionTypeChange(e, index)} 
-                                checked={question.questionType === QuestionType.MultipleChoice} 
-                                 /> Multiple Choice
+                                    type="radio"
+                                    name={`QuestionType-${index}`}
+                                    value={QuestionType.MultipleChoice}
+                                    onChange={(e) => handleQuestionTypeChange(e, index)} 
+                                    checked={question.questionType === QuestionType.MultipleChoice} 
+                                />
+                                Multiple Choice
                             </label>
                             <label>
                                 <input 
-                                type="radio" 
-                                name={`QuestionType-${index}`} 
-                                value={QuestionType.ShortAnswer} 
-                                onChange={(e) => handleQuestionTypeChange(e, index)}
-                                checked={question.questionType === QuestionType.ShortAnswer} 
-                                 /> Short Answer
+                                    type="radio" 
+                                    name={`QuestionType-${index}`} 
+                                    value={QuestionType.ShortAnswer} 
+                                    onChange={(e) => handleQuestionTypeChange(e, index)}
+                                    checked={question.questionType === QuestionType.ShortAnswer} 
+                                />
+                                Short Answer
                             </label>
                             <label>
                                 <input 
@@ -106,8 +129,8 @@ export default function Home() {
                             </label>
                         </div>
                 )})
-                };
-                <button onClick={addQuestion}>Add Question</button>
+                }
+                <button type="button" onClick={addQuestion}>Add Question</button>
                 <br></br>
                 <button type="submit">Create Quiz</button>
             </form>

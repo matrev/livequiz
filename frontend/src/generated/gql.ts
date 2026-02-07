@@ -14,9 +14,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "\n    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {\n    createQuiz(title: $title, questions: $questions) {\n        title\n        questions{\n            correctAnswer\n            text\n            questionType\n        }\n    }\n}\n": typeof types.CreateQuizDocument,
     "\n    query GetQuizzes {\n        getAllQuizzes {\n            id\n            title\n        }\n    }\n": typeof types.GetQuizzesDocument,
 };
 const documents: Documents = {
+    "\n    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {\n    createQuiz(title: $title, questions: $questions) {\n        title\n        questions{\n            correctAnswer\n            text\n            questionType\n        }\n    }\n}\n": types.CreateQuizDocument,
     "\n    query GetQuizzes {\n        getAllQuizzes {\n            id\n            title\n        }\n    }\n": types.GetQuizzesDocument,
 };
 
@@ -34,6 +36,10 @@ const documents: Documents = {
  */
 export function gql(source: string): unknown;
 
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {\n    createQuiz(title: $title, questions: $questions) {\n        title\n        questions{\n            correctAnswer\n            text\n            questionType\n        }\n    }\n}\n"): (typeof documents)["\n    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {\n    createQuiz(title: $title, questions: $questions) {\n        title\n        questions{\n            correctAnswer\n            text\n            questionType\n        }\n    }\n}\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -2,7 +2,6 @@ import { ApolloServer } from '@apollo/server';
 import { resolvers } from '../resolvers.js';
 import assert from 'node:assert/strict';
 import { MockContext, createMockContext } from '../../../../lib/tests/MockPrismaClient.js';
-import { User } from '../../../../generated/graphql.js';
 import { typeDefs } from '../../utils.js';
 
 let mockContext: MockContext;
@@ -16,7 +15,7 @@ beforeEach(() => {
   });
 })
 
-let mockUser: User = {
+let mockUser = {
   id: 1,
   name: 'Test User',
   email: 'testemail@email.com',

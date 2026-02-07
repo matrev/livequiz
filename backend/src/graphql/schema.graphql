@@ -7,7 +7,7 @@ enum QuestionType {
 }
 
 type User {
-    id: Int!
+    id: Int
     email: String!
     isAdmin: Boolean!
     name: String!
@@ -15,14 +15,14 @@ type User {
 }
 
 type Entry {
-    id: Int!
+    id: Int
     title: String!
     quiz: Quiz!
     author: User!
 }
 
 type Quiz {
-    id: Int!
+    id: Int
     title: String!
     questions: [Question!]
     createdAt: DateTime!
@@ -30,8 +30,16 @@ type Quiz {
     entries: [Entry!]
 }
 
+input QuestionInput {
+    id: Int
+    text: String!
+    questionType: QuestionType!
+    quizId: Int
+    correctAnswer: String
+}
+
 type Question {
-    id: Int!
+    id: Int
     text: String!
     questionType: QuestionType!
     quizId: Int!
@@ -66,7 +74,7 @@ type Mutation {
     updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String): Question!
     
     # Quiz Mutations
-    createQuiz(title: String!, questions: [String!]): Quiz!
+    createQuiz(title: String!, questions: [QuestionInput]): Quiz!
     updateQuiz(id: Int!, title: String): Quiz!
     addQuestionToQuiz(quizId: Int!, questionId: Int!): Quiz!
     removeQuestionFromQuiz(quizId: Int!, questionId: Int!): Quiz!

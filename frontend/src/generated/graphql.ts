@@ -56,7 +56,7 @@ export type MutationCreateQuestionArgs = {
 
 
 export type MutationCreateQuizArgs = {
-  questions?: InputMaybe<Array<Scalars['String']['input']>>;
+  questions?: InputMaybe<Array<InputMaybe<QuestionInput>>>;
   title: Scalars['String']['input'];
 };
 
@@ -161,6 +161,14 @@ export type Question = {
   text: Scalars['String']['output'];
 };
 
+export type QuestionInput = {
+  correctAnswer?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  questionType: QuestionType;
+  quizId: Scalars['Int']['input'];
+  text: Scalars['String']['input'];
+};
+
 export enum QuestionType {
   MultipleChoice = 'MULTIPLE_CHOICE',
   ShortAnswer = 'SHORT_ANSWER',
@@ -196,10 +204,19 @@ export type User = {
   name: Scalars['String']['output'];
 };
 
+export type CreateQuizMutationVariables = Exact<{
+  title: Scalars['String']['input'];
+  questions?: InputMaybe<Array<InputMaybe<QuestionInput>> | InputMaybe<QuestionInput>>;
+}>;
+
+
+export type CreateQuizMutation = { __typename?: 'Mutation', createQuiz: { __typename?: 'Quiz', title: string, questions?: Array<{ __typename?: 'Question', correctAnswer?: string | null, text: string, questionType: QuestionType }> | null } };
+
 export type GetQuizzesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GetQuizzesQuery = { __typename?: 'Query', getAllQuizzes: Array<{ __typename?: 'Quiz', id: number, title: string }> };
 
 
+export const CreateQuizDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateQuiz"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"title"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"questions"}},"type":{"kind":"ListType","type":{"kind":"NamedType","name":{"kind":"Name","value":"QuestionInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createQuiz"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"title"},"value":{"kind":"Variable","name":{"kind":"Name","value":"title"}}},{"kind":"Argument","name":{"kind":"Name","value":"questions"},"value":{"kind":"Variable","name":{"kind":"Name","value":"questions"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"questions"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"correctAnswer"}},{"kind":"Field","name":{"kind":"Name","value":"text"}},{"kind":"Field","name":{"kind":"Name","value":"questionType"}}]}}]}}]}}]} as unknown as DocumentNode<CreateQuizMutation, CreateQuizMutationVariables>;
 export const GetQuizzesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetQuizzes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getAllQuizzes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}}]}}]}}]} as unknown as DocumentNode<GetQuizzesQuery, GetQuizzesQueryVariables>;

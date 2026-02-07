@@ -54,7 +54,7 @@ export type MutationCreateQuestionArgs = {
 
 
 export type MutationCreateQuizArgs = {
-  questions?: InputMaybe<Array<Scalars['String']['input']>>;
+  questions?: InputMaybe<Array<InputMaybe<QuestionInput>>>;
   title: Scalars['String']['input'];
 };
 
@@ -159,6 +159,14 @@ export type Question = {
   text: Scalars['String']['output'];
 };
 
+export type QuestionInput = {
+  correctAnswer?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['Int']['input'];
+  questionType: QuestionType;
+  quizId: Scalars['Int']['input'];
+  text: Scalars['String']['input'];
+};
+
 export enum QuestionType {
   MultipleChoice = 'MULTIPLE_CHOICE',
   ShortAnswer = 'SHORT_ANSWER',
@@ -193,6 +201,14 @@ export type User = {
   isAdmin: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
 };
+
+export type CreateQuizMutationVariables = Exact<{
+  title: Scalars['String']['input'];
+  questions?: InputMaybe<Array<InputMaybe<QuestionInput>> | InputMaybe<QuestionInput>>;
+}>;
+
+
+export type CreateQuizMutation = { __typename?: 'Mutation', createQuiz: { __typename?: 'Quiz', title: string, questions?: Array<{ __typename?: 'Question', correctAnswer?: string | null, text: string, questionType: QuestionType }> | null } };
 
 export type GetQuizzesQueryVariables = Exact<{ [key: string]: never; }>;
 

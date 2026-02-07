@@ -1,4 +1,4 @@
-import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
+import { Resolvers, Quiz, Question, User, QuestionInput } from '../../../generated/graphql.js';
 import { PrismaContext } from '../../prisma.js';
 
 const QuizResolvers: Resolvers = {
@@ -36,14 +36,20 @@ const QuizResolvers: Resolvers = {
         }
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; }, context: PrismaContext) {
-            const { title } = args;
+        async createQuiz(_: any, args: { title: string; questions?: [QuestionInput] }, context: PrismaContext) {
+            const { title, questions = null } = args;
             const newQuiz: Quiz = await context.prisma.quiz.create({
                 data: {
                     title,
+                    questions: {
+                        createMany: {
+                            data: [
+                            ...questions
+                        ]}
+                    },
                     createdAt: new Date(),
                     updatedAt: new Date(),  
-                },
+                }
             });
             return newQuiz;
         },
