@@ -12,19 +12,34 @@ const getQuizzes: TypedDocumentNode<GetQuizzesQuery, GetQuizzesQueryVariables> =
         getAllQuizzes {
             id
             title
+            questions {
+                id
+                text
+                questionType
+                options
+            }
         }
     }
 `
 
 export default function Home() {
-  const { loading, error, data } = useQuery(getQuizzes);
+    const { loading, error, data } = useQuery(getQuizzes);
+    console.log('data', data);
     return (
         <div>
             {loading && <p>Loading...</p>}
             {error && <p>Error : {error.message}</p>}
-            {data?.getAllQuizzes.map(({ id, title }) => (
+            {data?.getAllQuizzes.map(({ id, title, questions}) => (
                 <div key={id}>
                     <h3>{title}</h3>
+                    <h2>questions</h2>
+                    <ul>
+                        {questions?.map((question) => {
+                            return (
+                                <>{question}</>
+                            )
+                        })}
+                    </ul>
                 </div>
             ))}
         </div>

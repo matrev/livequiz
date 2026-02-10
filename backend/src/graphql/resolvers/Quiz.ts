@@ -4,7 +4,11 @@ import { PrismaContext } from '../../prisma.js';
 const QuizResolvers: Resolvers = {
     Query: {
         getAllQuizzes: (_: any, __: any, context: PrismaContext) => {
-            return context.prisma.quiz.findMany() as Promise<Quiz[]>;
+            return context.prisma.quiz.findMany({
+                include: {
+                    questions: true
+                }
+            }) as Promise<Quiz[]>;
         },
         getQuiz(_: any, args: { id: number }, context: PrismaContext) {
             const { id } = args;

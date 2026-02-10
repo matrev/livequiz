@@ -1,13 +1,11 @@
-// pull quiz data from the server and display it
 'use client'
 
-import { MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/graphql";
-import { QuestionType } from "@/generated/types";
+import { QuestionType, MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/types";
 import { gql, TypedDocumentNode } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 
 import Link from "next/link";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, SubmitEvent, useState } from "react";
 
 const CREATE_QUIZ: TypedDocumentNode<Quiz,MutationCreateQuizArgs> = gql`
     mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {
@@ -43,7 +41,6 @@ export default function Home() {
 
     const addQuestionOption = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, i: number) => {
         setQuestions((prevQuestions): QuestionInput[] => {
-            console.log('attempting to add question option: ' + i)
             return prevQuestions.map((item, index) => {
                 if (index !== i) {
                     return item;
@@ -54,7 +51,7 @@ export default function Home() {
         });
     }
 
-    const handleQuestionTypeChange =(e: ChangeEvent<HTMLInputElement, HTMLInputElement>, i: number) => {
+    const handleQuestionTypeChange = (e: ChangeEvent<HTMLInputElement, HTMLInputElement>, i: number) => {
         setQuestions((prevQuestions): QuestionInput[] => {
             return prevQuestions.map((item, index) => {
                 if (index === i) {
@@ -75,18 +72,17 @@ export default function Home() {
         });
     }
 
+    const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        createQuiz({ variables: { title: title, questions: questions }});
+        setTitle("");
+        setQuestions([]);
+    }
+
     return (
         <div>
-            <Link href="/"> back to home</Link>
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    console.log('questions: ', questions)
-                    createQuiz({ variables: { title: title, questions: questions }})
-                    setTitle("");
-                    setQuestions([]);
-                }}
-            >
+            <Link href="/">back to home</Link>
+            <form onSubmit={handleSubmit}>
                 <label htmlFor="QuizTitle">Enter the Title for the Quiz:</label>
                 <input
                     type="text"
@@ -140,7 +136,8 @@ export default function Home() {
                                 checked={question.questionType === QuestionType.TrueFalse} 
                                  /> True / False
                             </label>
-                            {question.options !== null && <>
+                            <br/>
+                            {(question.options !== null && question.questionType !== QuestionType.TrueFalse) && <>
                                 {question.options?.map((option, optionIndex) => {
                                     return (<div key={optionIndex}>
                                         <label htmlFor={`Question-${index}-Option-${optionIndex}`}>Enter the Option:</label>
