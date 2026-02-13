@@ -1,10 +1,6 @@
 import { gql, TypedDocumentNode } from "@apollo/client";
-import { Question, MutationUpdateQuestionArgs } from "@/generated/types";
+import { UpdateQuestionMutation, MutationUpdateQuestionArgs } from "@/generated/types";
 import { questionFullFields } from "../fragments";
-
-type UpdateQuestionMutation = {
-    updateQuestion: Question;
-};
 
 export const updateQuestion: TypedDocumentNode<UpdateQuestionMutation, MutationUpdateQuestionArgs> = gql`
     ${questionFullFields}
