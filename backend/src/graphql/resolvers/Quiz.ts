@@ -16,6 +16,9 @@ const QuizResolvers: Resolvers = {
                 where: {
                     id,
                 },
+                include: {
+                    questions: true,
+                }
             }) as unknown as Quiz | null;
         },
         getQuestionsForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {

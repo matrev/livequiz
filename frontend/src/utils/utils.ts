@@ -1,26 +1,41 @@
-import { Quiz, MutationCreateQuizArgs, QuestionType } from "@/generated/types";
+import { MutationCreateQuizArgs, QuestionType } from "@/generated/types";
+import { LiveQuizError } from "./error";
 
-export function validateQuizInput(quizMutationArgs: MutationCreateQuizArgs): string | null {
-    // validate quiz questions are there
+export function validateQuizInput(quizMutationArgs: MutationCreateQuizArgs) {
+    let errorMessage: string = "";
+    if (quizMutationArgs.title === "") {
+        errorMessage = "A Title for a quiz is required.";
+    }
+
+    if (quizMutationArgs.questions?.length === 0) {
+        errorMessage = "A quiz must have atleast one question.";
+    }
     quizMutationArgs.questions?.forEach((question) => {
         if(question === null) {
-            return "A quiz must have atleast one question.";
+            errorMessage = "A quiz must have atleast one question.";
+            return;
         }
-        if (question?.text === null) {
-            return "Each question needs a title.";
+        if(!question.questionType) {
+            errorMessage = "Each question needs a question type."
+        }
+        if (question.text === null) {
+            errorMessage = "Each question needs a title.";
         };
         //only go though options when the question type is multiple choice
         if (question.questionType === QuestionType.MultipleChoice) {
-            question?.options?.forEach((option) => {
+            if(question.options?.length as number <= 1) {
+                errorMessage = "a mutliple choice question needs at least two options."
+            }
+            question.options?.forEach((option) => {
                 if (option === null) {
-                    return false;
+                    errorMessage = "A multiple choice question needs at least two option";
                 }
             })
+
         }
     })
 
-    if (quizMutationArgs.title === null) {
-        return "A Title for a quiz is required.";
+    if (errorMessage !== "") {
+        throw new LiveQuizError(errorMessage);
     }
-    return null;
 }

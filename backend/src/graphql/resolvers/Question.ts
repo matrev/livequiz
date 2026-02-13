@@ -48,8 +48,8 @@ const QuestionResolvers: Resolvers = {
                 },
             }) as unknown as Question;
         },
-        async updateQuestion(_: any, args: { id: number; text?: string; questionType?: QuestionType; correctAnswer?: string }, context: PrismaContext) {
-            const { id, text, questionType, correctAnswer } = args;
+        async updateQuestion(_: any, args: { id: number; text?: string; questionType?: QuestionType; correctAnswer?: string, options?: (string | null)[] }, context: PrismaContext) {
+            const { id, text, questionType, correctAnswer, options } = args;
             // Implementation for updating a question by ID
             return context.prisma.question.update({
                 where: {
@@ -58,7 +58,8 @@ const QuestionResolvers: Resolvers = {
                 data: {
                     text,
                     questionType,
-                    correctAnswer
+                    correctAnswer,
+                    options: options ? options : undefined,
                 },
             }) as unknown as Question;
         },

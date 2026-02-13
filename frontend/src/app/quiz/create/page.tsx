@@ -1,36 +1,24 @@
 'use client'
 
 import { QuestionType, MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/types";
-import { gql, TypedDocumentNode } from "@apollo/client";
+import { LiveQuizError } from "@/utils/error";
+import { validateQuizInput } from "@/utils/utils";
 import { useMutation } from "@apollo/client/react";
+import { createQuiz as createQuizMutation } from "@/graphql/mutations";
 
 import Link from "next/link";
 import { ChangeEvent, SubmitEvent, useState } from "react";
 
-const CREATE_QUIZ: TypedDocumentNode<Quiz,MutationCreateQuizArgs> = gql`
-    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {
-    createQuiz(title: $title, questions: $questions) {
-        title
-        questions{
-            options
-            correctAnswer
-            text
-            questionType
-        }
-    }
-}
-`
-
 export default function Home() {
-    const [createQuiz, { data, loading, error }] = useMutation<Quiz,MutationCreateQuizArgs>(CREATE_QUIZ, {
+    const [createQuiz, { data, loading, error }] = useMutation<Quiz,MutationCreateQuizArgs>(createQuizMutation, {
         variables: {
             title: "placeholder",
             questions: [],
         }
-    }
-    );
+    });
     const [questions, setQuestions] = useState<QuestionInput[]>([]);
     const [title, setTitle] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const addQuestion = () => {
         setQuestions(prev => [
@@ -74,8 +62,17 @@ export default function Home() {
 
     const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
-        createQuiz({ variables: { title: title, questions: questions }});
+        try {
+            validateQuizInput({title, questions})
+            createQuiz({ variables: { title: title, questions: questions }});
+        } catch (error) {
+            if (error instanceof LiveQuizError) {
+                setErrorMessage(error.message);
+            }
+            return;
+        }
         setTitle("");
+        setErrorMessage("");
         setQuestions([]);
     }
 
@@ -89,6 +86,7 @@ export default function Home() {
                     onChange={(e) => {
                         setTitle(e.target.value);
                     }}
+                    value={title}
                     name={`QuizTitle`}
                     id={`QuizTitle`}
                 />
@@ -161,13 +159,16 @@ export default function Home() {
                                         />
                                     </div>)
                                 })}
-                                <button type="button" onClick={(e) => addQuestionOption(e, index)}>Add Option</button>
+                                {question.questionType === QuestionType.MultipleChoice && 
+                                    <button type="button" onClick={(e) => addQuestionOption(e, index)}>Add Option</button>
+                                }
                             </>}
                         </div>
                 )})
                 }
                 <button type="button" onClick={addQuestion}>Add Question</button>
                 <br></br>
+                <p>{errorMessage !== null && errorMessage}</p>
                 <button type="submit">Create Quiz</button>
             </form>
         </div>
