@@ -1,14 +1,20 @@
 'use client'
 
-import { useState } from "react";
-import { useQuery } from "@apollo/client/react";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { QuestionType } from "@/generated/types";
 import { useParams, useRouter } from "next/navigation";
 import { getQuiz } from "@/graphql/queries";
+import { upsertEntry } from "@/graphql/mutations";
 
 interface UserAnswers {
     [questionId: number]: string;
 }
+
+type SignedInUser = {
+    id: number;
+    email: string;
+};
 
 export default function JoinQuizPage() {
     const params = useParams();
@@ -17,6 +23,11 @@ export default function JoinQuizPage() {
     
     const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
     const [submitted, setSubmitted] = useState(false);
+    const [user, setUser] = useState<SignedInUser | null>(null);
+    const [isLoadingUser, setIsLoadingUser] = useState(true);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+
+    const [upsertEntryMutation, { loading: savingEntry }] = useMutation(upsertEntry);
 
     const { loading, error, data } = useQuery(getQuiz, {
         variables: { id: quizId },
@@ -29,12 +40,61 @@ export default function JoinQuizPage() {
         }));
     };
 
-    const handleSubmit = () => {
-        // Here you can add logic to submit the answers to the backend
-        console.log('Submitted answers:', userAnswers);
-        setSubmitted(true);
-        // You could add a mutation to save the user's entry here
+    const handleSubmit = async () => {
+        if (!data?.getQuiz) {
+            return;
+        }
+        if (!user) {
+            setSubmitError("Please sign in to submit your answers.");
+            return;
+        }
+
+        try {
+            await upsertEntryMutation({
+                variables: {
+                    quizId,
+                    userId: user.id,
+                    title: data.getQuiz.title,
+                    answers: Object.fromEntries(
+                        Object.entries(userAnswers).map(([key, value]) => [String(key), value])
+                    ),
+                },
+            });
+            setSubmitted(true);
+        } catch (error) {
+            setSubmitError("Unable to submit your answers. Please try again.");
+        }
     };
+
+    useEffect(() => {
+        let isActive = true;
+
+        const loadUser = async () => {
+            try {
+                const response = await fetch("/api/auth/me");
+                if (!response.ok) {
+                    return;
+                }
+                const payload = (await response.json()) as {
+                    user?: { id: number; email: string };
+                };
+                if (payload.user?.email && payload.user?.id && isActive) {
+                    setUser(payload.user);
+                }
+            } catch (error) {
+                setSubmitError("Please sign in to submit your answers.");
+            } finally {
+                if (isActive) {
+                    setIsLoadingUser(false);
+                }
+            }
+        };
+
+        loadUser();
+        return () => {
+            isActive = false;
+        };
+    }, []);
 
     if (loading) return <div>Loading quiz...</div>;
     if (error) return <div>Error loading quiz: {error.message}</div>;
@@ -51,6 +111,11 @@ export default function JoinQuizPage() {
                 <h1>Thank you for completing the quiz!</h1>
                 <h2>{quiz.title}</h2>
                 <p>Your answers have been submitted.</p>
+                {isLoadingUser ? null : (
+                    <button onClick={() => router.push(`/quiz/responses/${quizId}`)}>
+                        View or edit your responses
+                    </button>
+                )}
                 <button onClick={() => router.push('/quiz/join')}>
                     Back to Quiz List
                 </button>
@@ -146,18 +211,18 @@ export default function JoinQuizPage() {
             <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
                 <button
                     onClick={handleSubmit}
-                    disabled={!allQuestionsAnswered}
+                    disabled={!allQuestionsAnswered || savingEntry || !user}
                     style={{
                         padding: '12px 24px',
                         fontSize: '16px',
-                        backgroundColor: allQuestionsAnswered ? '#0070f3' : '#ccc',
+                        backgroundColor: allQuestionsAnswered && user ? '#0070f3' : '#ccc',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: allQuestionsAnswered ? 'pointer' : 'not-allowed'
+                        cursor: allQuestionsAnswered && user ? 'pointer' : 'not-allowed'
                     }}
                 >
-                    Submit Quiz
+                    {savingEntry ? 'Submitting...' : 'Submit Quiz'}
                 </button>
                 <button
                     onClick={() => router.push('/quiz/join')}
@@ -174,6 +239,12 @@ export default function JoinQuizPage() {
                     Cancel
                 </button>
             </div>
+            {submitError ? (
+                <p style={{ marginTop: '12px', color: '#b91c1c' }}>{submitError}</p>
+            ) : null}
+            {!user && !isLoadingUser ? (
+                <p style={{ marginTop: '12px' }}>Sign in to submit your answers.</p>
+            ) : null}
         </div>
     );
 }

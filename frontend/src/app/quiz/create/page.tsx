@@ -9,7 +9,7 @@ import { createQuiz as createQuizMutation } from "@/graphql/mutations";
 import Link from "next/link";
 import { ChangeEvent, SubmitEvent, useState } from "react";
 
-export default function Home() {
+export default function CreateQuizPage() {
     const [createQuiz, { data, loading, error }] = useMutation<Quiz,MutationCreateQuizArgs>(createQuizMutation, {
         variables: {
             title: "placeholder",

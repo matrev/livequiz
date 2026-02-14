@@ -1,4 +1,5 @@
 scalar DateTime
+scalar JSON
 
 enum QuestionType {
     MULTIPLE_CHOICE
@@ -17,8 +18,12 @@ type User {
 type Entry {
     id: Int
     title: String!
-    quiz: Quiz!
+    quizId: Int!
+    authorId: Int!
     author: User!
+    answers: JSON!
+    createdAt: DateTime!
+    updatedAt: DateTime!
 }
 
 type Quiz {
@@ -59,6 +64,11 @@ type Query {
     getUsersForQuiz(quizId: Int!): [User!]!
     getQuestionsForQuiz(quizId: Int!): [Question!]!
 
+    # Entry Queries
+    getAllEntries: [Entry!]!
+    getEntriesForUser(userId: Int!): [Entry!]!
+    getEntryForUser(quizId: Int!, userId: Int!): Entry
+
     # Question Queries
     getQuestion(id: Int!): Question
     isQuestionCorrect(questionId: Int!, answer: String!): Boolean!
@@ -69,6 +79,9 @@ type Mutation {
     createUser(email: String!, name: String!, isAdmin: Boolean): User!
     deleteUser(id: Int!): User!
     updateUser(id: Int!, email: String, name: String): User!
+
+    # Entry Mutations
+    upsertEntry(quizId: Int!, userId: Int!, title: String!, answers: JSON!): Entry!
     
     # Question Mutations
     createQuestion(text: String!, questionType: QuestionType!, correctAnswer: String, quizId: Int!): Question!
@@ -83,6 +96,19 @@ type Mutation {
     deleteQuiz(id: Int!): Quiz!
 }
 
+type LeaderboardEntry {
+    userId: Int!
+    userName: String!
+    correctAnswers: Int!
+    totalQuestions: Int!
+    score: Float!
+}
+
+type QuizUpdatePayload {
+    quiz: Quiz!
+    leaderboard: [LeaderboardEntry!]!
+}
+
 type Subscription {
-    quizUpdated(quizId: Int!): Quiz!
+    quizUpdated(quizId: Int!): QuizUpdatePayload!
 }

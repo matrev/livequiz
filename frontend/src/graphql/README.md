@@ -11,10 +11,14 @@ graphql/
 │   └── index.ts         # Fragment exports
 ├── queries/
 │   ├── quiz.ts          # Quiz-related queries
+│   ├── user.ts          # User-related queries
+│   ├── entry.ts         # Entry-related queries
 │   └── index.ts         # Query exports
 └── mutations/
     ├── quiz.ts          # Quiz-related mutations
     ├── question.ts      # Question-related mutations
+  ├── user.ts          # User-related mutations
+  ├── entry.ts         # Entry-related mutations
     └── index.ts         # Mutation exports
 ```
 
@@ -73,6 +77,33 @@ import { getQuizzes } from '@/graphql/queries';
 const { data } = useQuery(getQuizzes);
 ```
 
+### `getAllUsers`
+Fetches all users for sign-in lookup.
+
+```typescript
+import { getAllUsers } from '@/graphql/queries';
+
+const { data } = useQuery(getAllUsers);
+```
+
+### `getEntriesForUser`
+Fetches quiz entries for a user.
+
+```typescript
+import { getEntriesForUser } from '@/graphql/queries';
+
+const { data } = useQuery(getEntriesForUser, { variables: { userId } });
+```
+
+### `getEntryForUser`
+Fetches a single quiz entry for a user.
+
+```typescript
+import { getEntryForUser } from '@/graphql/queries';
+
+const { data } = useQuery(getEntryForUser, { variables: { quizId, userId } });
+```
+
 ## Mutations
 
 ### `createQuiz`
@@ -91,6 +122,24 @@ Updates an existing question.
 import { updateQuestion } from '@/graphql/mutations';
 
 const [updateQuestionMutation] = useMutation(updateQuestion);
+```
+
+### `createUser`
+Creates a new user during sign-in.
+
+```typescript
+import { createUser } from '@/graphql/mutations';
+
+const [createUserMutation] = useMutation(createUser);
+```
+
+### `upsertEntry`
+Creates or updates a quiz entry for a user.
+
+```typescript
+import { upsertEntry } from '@/graphql/mutations';
+
+const [upsertEntryMutation] = useMutation(upsertEntry);
 ```
 
 ## Best Practices

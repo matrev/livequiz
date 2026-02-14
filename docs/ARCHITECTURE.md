@@ -15,6 +15,12 @@ Data flow (short)
 6. Codegen ensures type safety between GraphQL API and domain models
 7. Strict TypeScript settings prevent runtime type errors and ensure all public APIs are fully typed
 
+Frontend entry points
+- Landing page provides a basic sign-in form (name + email) with a role selector
+- Admin role exposes quiz creation and editing routes
+- Player role exposes quiz join routes
+- UI role selection is client-only and does not persist yet
+
 Important invariants
 - Session IDs are UUIDv4 strings
 - Domain reducers must never mutate inputs
