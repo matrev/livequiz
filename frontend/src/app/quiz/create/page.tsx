@@ -14,11 +14,19 @@ export default function CreateQuizPage() {
         variables: {
             title: "placeholder",
             questions: [],
+        },
+        onCompleted: () => {
+            setSuccessMessage("Quiz created successfully.");
+            setErrorMessage(null);
+        },
+        onError: () => {
+            setSuccessMessage(null);
         }
     });
     const [questions, setQuestions] = useState<QuestionInput[]>([]);
     const [title, setTitle] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     const addQuestion = () => {
         setQuestions(prev => [
@@ -72,7 +80,7 @@ export default function CreateQuizPage() {
             return;
         }
         setTitle("");
-        setErrorMessage("");
+        setErrorMessage(null);
         setQuestions([]);
     }
 
@@ -168,8 +176,11 @@ export default function CreateQuizPage() {
                 }
                 <button type="button" onClick={addQuestion}>Add Question</button>
                 <br></br>
-                <p>{errorMessage !== null && errorMessage}</p>
-                <button type="submit">Create Quiz</button>
+                {errorMessage && <p>{errorMessage}</p>}
+                {successMessage && <p>{successMessage}</p>}
+                <button type="submit" disabled={loading}>
+                    {loading ? "Creating..." : "Create Quiz"}
+                </button>
             </form>
         </div>
     );

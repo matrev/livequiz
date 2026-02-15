@@ -2,7 +2,6 @@ import { QuestionResolvers } from "./Question.js";
 import { QuizResolvers } from "./Quiz.js";
 import { UserResolvers } from "./User.js";
 import { EntryResolvers } from "./Entry.js";
-import { SubscriptionResolvers } from "./Subscription.js";
 import { Resolvers } from "../../../generated/graphql.js";
 import { GraphQLJSON } from "graphql-scalars";
 
@@ -21,7 +20,7 @@ const resolvers: Resolvers = {
     ...EntryResolvers.Mutation,
   },
   Subscription: {
-    ...SubscriptionResolvers.Subscription,
+    ...QuizResolvers.Subscription,
   },
 };
 
