@@ -20,7 +20,6 @@ export default function QuizResponseDetailPage() {
   const quizId = Number(params.id);
 
   const [user, setUser] = useState<SignedInUser | null>(null);
-  const [answers, setAnswers] = useState<UserAnswers>({});
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -67,12 +66,12 @@ export default function QuizResponseDetailPage() {
 
   const quizTitle = useMemo(() => data?.getQuiz?.title ?? "", [data]);
 
-  useEffect(() => {
+  const answers = useMemo(() => {
     if (!entryData?.getEntryForUser?.answers) {
-      return;
+      return {};
     }
 
-    const parsedAnswers = Object.entries(entryData.getEntryForUser.answers as Record<string, string>).reduce<UserAnswers>(
+    return Object.entries(entryData.getEntryForUser.answers as Record<string, string>).reduce<UserAnswers>(
       (acc, [key, value]) => {
         const questionId = Number(key);
         if (!Number.isNaN(questionId)) {
@@ -82,11 +81,16 @@ export default function QuizResponseDetailPage() {
       },
       {}
     );
-    setAnswers(parsedAnswers);
   }, [entryData]);
 
+  const [editedAnswers, setEditedAnswers] = useState<UserAnswers>({});
+
+  useEffect(() => {
+    setEditedAnswers(answers);
+  }, [answers]);
+
   const handleAnswerChange = (questionId: number, value: string) => {
-    setAnswers((prev) => ({
+    setEditedAnswers((prev) => ({
       ...prev,
       [questionId]: value,
     }));
@@ -109,7 +113,7 @@ export default function QuizResponseDetailPage() {
         userId: user.id,
         title: data.getQuiz.title,
         answers: Object.fromEntries(
-          Object.entries(answers).map(([key, value]) => [String(key), value])
+          Object.entries(editedAnswers).map(([key, value]) => [String(key), value])
         ),
       },
     })
@@ -140,7 +144,22 @@ export default function QuizResponseDetailPage() {
 
   return (
     <div style={{ padding: "24px", maxWidth: "820px", margin: "0 auto" }}>
-      <button onClick={() => router.push("/quiz/responses")}>Back</button>
+      <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+        <button onClick={() => router.push("/quiz/responses")}>Back</button>
+        <button 
+          onClick={() => router.push(`/quiz/leaderboard/${quizId}`)}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          View Leaderboard
+        </button>
+      </div>
       <h1 style={{ marginTop: "16px" }}>{quizTitle}</h1>
       {error ? <p style={{ color: "#b91c1c" }}>{error}</p> : null}
       {success ? <p style={{ color: "#16a34a" }}>{success}</p> : null}
@@ -168,7 +187,7 @@ export default function QuizResponseDetailPage() {
                       type="radio"
                       name={`question-${question.id}`}
                       value={option ?? ""}
-                      checked={answers[question.id] === option}
+                      checked={editedAnswers[question.id!] === option}
                       onChange={(event) =>
                         handleAnswerChange(question.id!, event.target.value)
                       }
@@ -186,7 +205,7 @@ export default function QuizResponseDetailPage() {
                       type="radio"
                       name={`question-${question.id}`}
                       value={option}
-                      checked={answers[question.id] === option}
+                      checked={editedAnswers[question.id!] === option}
                       onChange={(event) =>
                         handleAnswerChange(question.id!, event.target.value)
                       }
@@ -199,7 +218,7 @@ export default function QuizResponseDetailPage() {
             ) : (
               <input
                 type="text"
-                value={answers[question.id] ?? ""}
+                value={editedAnswers[question.id] ?? ""}
                 onChange={(event) =>
                   handleAnswerChange(question.id!, event.target.value)
                 }

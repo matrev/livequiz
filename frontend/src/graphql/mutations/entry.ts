@@ -10,6 +10,7 @@ export const upsertEntry: TypedDocumentNode<
       id
       title
       quizId
+      authorId
       answers
       updatedAt
     }
