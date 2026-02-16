@@ -4,10 +4,12 @@ import { questionFullFields } from "../fragments";
 
 export const getQuiz: TypedDocumentNode<GetQuizQuery, QueryGetQuizArgs> = gql`
     ${questionFullFields}
-    query GetQuiz($id: Int!) {
-        getQuiz(id: $id) {
+    query GetQuiz($joinCode: String!) {
+        getQuiz(joinCode: $joinCode) {
             id
+            joinCode
             title
+            deadline
             questions {
                 ...QuestionFullFields
             }

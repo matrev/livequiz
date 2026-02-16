@@ -4,9 +4,11 @@ import { questionFullFields } from "../fragments";
 
 export const createQuiz: TypedDocumentNode<CreateQuizMutation, MutationCreateQuizArgs> = gql`
     ${questionFullFields}
-    mutation CreateQuiz($title: String!, $questions: [QuestionInput]) {
-        createQuiz(title: $title, questions: $questions) {
+    mutation CreateQuiz($title: String!, $questions: [QuestionInput], $deadline: DateTime) {
+        createQuiz(title: $title, questions: $questions, deadline: $deadline) {
             title
+            joinCode
+            deadline
             questions {
                 ...QuestionFullFields
             }

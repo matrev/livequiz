@@ -1,5 +1,6 @@
 import { Resolvers, Quiz, Question, User, QuestionInput } from '../../../generated/graphql.js';
 import { PrismaContext } from '../../prisma.js';
+import { generateJoinCode } from '../../utils/generateJoinCode.js';
 
 const QuizResolvers: Resolvers = {
     Query: {
@@ -10,11 +11,11 @@ const QuizResolvers: Resolvers = {
                 }
             }) as Promise<Quiz[]>;
         },
-        getQuiz(_: any, args: { id: number }, context: PrismaContext) {
-            const { id } = args;
+        getQuiz(_: any, args: { joinCode: string }, context: PrismaContext) {
+            const { joinCode } = args;
             return context.prisma.quiz.findUnique({
                 where: {
-                    id,
+                    joinCode,
                 },
                 include: {
                     questions: true,
@@ -43,11 +44,15 @@ const QuizResolvers: Resolvers = {
         }
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; questions?: [QuestionInput] }, context: PrismaContext) {
-            const { title, questions = null } = args;
+        async createQuiz(_: any, args: { title: string; questions?: [QuestionInput]; deadline?: string }, context: PrismaContext) {
+            const { title, questions = null, deadline } = args;
+            const joinCode = generateJoinCode();
+            
             const newQuiz: Quiz = await context.prisma.quiz.create({
                 data: {
                     title,
+                    joinCode,
+                    deadline: deadline ? new Date(deadline) : null,
                     questions: {
                         createMany: {
                             data: [

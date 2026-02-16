@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { QuestionType } from "@/generated/types";
 import { useParams, useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ interface UserAnswers {
 export default function JoinQuizPage() {
     const params = useParams();
     const router = useRouter();
-    const quizId = parseInt(params.id as string);
+    const joinCode = params.id as string;
     
     const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
     const [submitted, setSubmitted] = useState(false);
@@ -23,7 +23,7 @@ export default function JoinQuizPage() {
     const [upsertEntryMutation, { loading: savingEntry }] = useMutation(upsertEntry);
 
     const { loading, error, data } = useQuery(getQuiz, {
-        variables: { id: quizId },
+        variables: { joinCode },
     });
 
     const handleAnswerChange = (questionId: number, answer: string) => {
@@ -34,10 +34,11 @@ export default function JoinQuizPage() {
     };
 
     const handleSubmit = async () => {
-        if (!data?.getQuiz) {
+        if (!data?.getQuiz?.id) {
             return;
         }
 
+        const quizId = data.getQuiz.id;
         try {
             await upsertEntryMutation({
                 variables: {

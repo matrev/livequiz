@@ -7,11 +7,6 @@ import { QuestionType } from "@/generated/types";
 import { getEntryForUser, getQuiz } from "@/graphql/queries";
 import { upsertEntry } from "@/graphql/mutations";
 
-type SignedInUser = {
-  id: number;
-  email: string;
-};
-
 type UserAnswers = Record<number, string>;
 
 export default function QuizResponseDetailPage() {
@@ -19,7 +14,6 @@ export default function QuizResponseDetailPage() {
   const router = useRouter();
   const quizId = Number(params.id);
 
-  const [user, setUser] = useState<SignedInUser | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -28,41 +22,11 @@ export default function QuizResponseDetailPage() {
   });
 
   const { data: entryData } = useQuery(getEntryForUser, {
-    variables: { quizId, userId: user?.id ?? 0 },
-    skip: !user?.id,
+    variables: { quizId, userId: 0 },
+    skip: true,
   });
 
   const [upsertEntryMutation, { loading: savingEntry }] = useMutation(upsertEntry);
-
-  useEffect(() => {
-    let isActive = true;
-
-    const loadUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me");
-        if (!response.ok) {
-          if (isActive) {
-            setError("Please sign in to view your responses.");
-          }
-          return;
-        }
-
-        const payload = (await response.json()) as { user?: SignedInUser };
-        if (payload.user && isActive) {
-          setUser(payload.user);
-        }
-      } catch (loadError) {
-        if (isActive) {
-          setError("Unable to load your responses.");
-        }
-      }
-    };
-
-    loadUser();
-    return () => {
-      isActive = false;
-    };
-  }, [quizId]);
 
   const quizTitle = useMemo(() => data?.getQuiz?.title ?? "", [data]);
 
@@ -97,11 +61,6 @@ export default function QuizResponseDetailPage() {
   };
 
   const handleSave = () => {
-    if (!user) {
-      setError("Please sign in to save your responses.");
-      return;
-    }
-
     if (!data?.getQuiz) {
       setError("Quiz not found.");
       return;
@@ -110,7 +69,7 @@ export default function QuizResponseDetailPage() {
     upsertEntryMutation({
       variables: {
         quizId,
-        userId: user.id,
+        userId: 0, // Replace with actual user ID if available
         title: data.getQuiz.title,
         answers: Object.fromEntries(
           Object.entries(editedAnswers).map(([key, value]) => [String(key), value])

@@ -33,6 +33,21 @@ const EntryResolvers: Resolvers = {
   Mutation: {
     async upsertEntry(_: any, args: { quizId: number; userId: number; title: string, answers: any }, context: PrismaContext) {
       const { quizId, userId, title, answers } = args;
+
+      // Check if quiz deadline has passed
+      const quiz = await context.prisma.quiz.findUnique({
+        where: { id: quizId },
+        select: { deadline: true },
+      });
+
+      if (!quiz) {
+        throw new Error(`Quiz with id ${quizId} not found`);
+      }
+
+      if (quiz.deadline && new Date() > new Date(quiz.deadline)) {
+        throw new Error("Quiz deadline has passed. Submissions are no longer accepted.");
+      }
+
       const existingEntry = await context.prisma.entry.findUnique({
         where: {
           quizId_authorId: {

@@ -29,6 +29,8 @@ type Entry {
 type Quiz {
     id: Int
     title: String!
+    joinCode: String!
+    deadline: DateTime
     questions: [Question!]
     createdAt: DateTime!
     updatedAt: DateTime!
@@ -60,7 +62,7 @@ type Query {
 
     # Quiz Queries
     getAllQuizzes: [Quiz!]!
-    getQuiz(id: Int!): Quiz
+    getQuiz(joinCode: String!): Quiz
     getUsersForQuiz(quizId: Int!): [User!]!
     getQuestionsForQuiz(quizId: Int!): [Question!]!
 
@@ -89,7 +91,7 @@ type Mutation {
     updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String): Question!
     
     # Quiz Mutations
-    createQuiz(title: String!, questions: [QuestionInput]): Quiz!
+    createQuiz(title: String!, questions: [QuestionInput], deadline: DateTime): Quiz!
     updateQuiz(id: Int!, title: String): Quiz!
     addQuestionToQuiz(quizId: Int!, questionId: Int!): Quiz!
     removeQuestionFromQuiz(quizId: Int!, questionId: Int!): Quiz!

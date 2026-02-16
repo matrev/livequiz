@@ -19,6 +19,8 @@ beforeEach(() => {
 const mockQuiz = {
     id: 1,
     title: 'Test Quiz',
+    joinCode: 'ABCDEFGH',
+    deadline: null,
     createdAt: new Date(),
     updatedAt: new Date(),
 }

@@ -25,6 +25,7 @@ export default function CreateQuizPage() {
     });
     const [questions, setQuestions] = useState<QuestionInput[]>([]);
     const [title, setTitle] = useState<string>("");
+    const [deadline, setDeadline] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -72,7 +73,8 @@ export default function CreateQuizPage() {
         e.preventDefault();
         try {
             validateQuizInput({title, questions})
-            createQuiz({ variables: { title: title, questions: questions }});
+            const deadlineIso = deadline ? new Date(deadline).toISOString() : undefined;
+            createQuiz({ variables: { title: title, questions: questions, deadline: deadlineIso }});
         } catch (error) {
             if (error instanceof LiveQuizError) {
                 setErrorMessage(error.message);
@@ -82,6 +84,7 @@ export default function CreateQuizPage() {
         setTitle("");
         setErrorMessage(null);
         setQuestions([]);
+        setDeadline("");
     }
 
     return (
@@ -97,6 +100,16 @@ export default function CreateQuizPage() {
                     value={title}
                     name={`QuizTitle`}
                     id={`QuizTitle`}
+                />
+                <label htmlFor="QuizDeadline">Deadline for Responses (optional):</label>
+                <input
+                    type="datetime-local"
+                    onChange={(e) => {
+                        setDeadline(e.target.value);
+                    }}
+                    value={deadline}
+                    name="QuizDeadline"
+                    id="QuizDeadline"
                 />
                 <br />
                 {questions.map
@@ -177,7 +190,7 @@ export default function CreateQuizPage() {
                 <button type="button" onClick={addQuestion}>Add Question</button>
                 <br></br>
                 {errorMessage && <p>{errorMessage}</p>}
-                {successMessage && <p>{successMessage}</p>}
+                {successMessage && <p>{successMessage} {data?.joinCode}</p>}
                 <button type="submit" disabled={loading}>
                     {loading ? "Creating..." : "Create Quiz"}
                 </button>

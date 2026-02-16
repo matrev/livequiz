@@ -35,28 +35,6 @@ export default function Home() {
             </Link>
           </div>
         </section>
-        <section className="fade-up flex w-full max-w-md flex-col gap-5">
-          <div className="landing-card">
-            <p className="text-xs uppercase tracking-[0.4em] text-white/60">
-              Live responses
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-white">
-              {isLoadingEntries
-                ? "Loading responses..."
-                : `${responseCount} responses submitted`}
-            </h2>
-            <p className="mt-2 text-white/70">
-              See the latest quiz submissions right on the homepage.
-            </p>
-            {allEntriesData?.getAllEntries?.length ? (
-              <div className="mt-4 flex flex-col gap-3">
-                {allEntriesData.getAllEntries.map((entry) => (
-                  <EntryCard key={entry.id ?? `${entry.quizId}-${entry.authorId}`} entry={entry} variant="dark" />
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </section>
       </main>
     </div>
   );

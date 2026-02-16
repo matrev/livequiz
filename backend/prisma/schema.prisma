@@ -19,11 +19,13 @@ model User {
 }
 
 model Quiz {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   title     String
+  joinCode  String    @unique
+  deadline  DateTime?
   entries   Entry[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   questions Question[]
 }
 
