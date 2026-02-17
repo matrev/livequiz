@@ -5,12 +5,12 @@ export const upsertEntry: TypedDocumentNode<
   UpsertEntryMutation,
   UpsertEntryMutationVariables
 > = gql`
-  mutation UpsertEntry($quizId: Int!, $userId: Int!, $title: String!, $answers: JSON!) {
-    upsertEntry(quizId: $quizId, userId: $userId, title: $title, answers: $answers) {
+  mutation UpsertEntry($quizId: Int!, $name: String!, $answers: JSON!, $userId: Int?) {
+    upsertEntry(quizId: $quizId, name: $name, title: $title, answers: $answers, userId: $userId) {
       id
-      title
+      name
       quizId
-      authorId
+      userId
       answers
       updatedAt
     }

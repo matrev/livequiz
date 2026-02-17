@@ -9,9 +9,9 @@ import {
 type GetAllEntriesQuery = {
   getAllEntries: Array<{
     id?: number | null;
-    title: string;
+    name: string;
     quizId: number;
-    authorId: number;
+    userId: number;
     answers: Record<string, string> | null;
     updatedAt: string;
   }>;
@@ -26,8 +26,9 @@ export const getEntriesForUser: TypedDocumentNode<
   query GetEntriesForUser($userId: Int!) {
     getEntriesForUser(userId: $userId) {
       id
-      title
+      name
       quizId
+      userId
       answers
       updatedAt
     }
@@ -41,8 +42,9 @@ export const getEntryForUser: TypedDocumentNode<
   query GetEntryForUser($quizId: Int!, $userId: Int!) {
     getEntryForUser(quizId: $quizId, userId: $userId) {
       id
-      title
+      name
       quizId
+      userId
       answers
       updatedAt
     }
@@ -56,9 +58,9 @@ export const getAllEntries: TypedDocumentNode<
   query GetAllEntries {
     getAllEntries {
       id
-      title
+      name
       quizId
-      authorId
+      userId
       answers
       updatedAt
     }
