@@ -6,13 +6,7 @@ import { QuestionType, Question, QuestionInput as QuestionInputType } from "@/ge
 import { useParams, useRouter } from "next/navigation";
 import { getQuiz } from "@/graphql/queries";
 import { updateQuestion } from "@/graphql/mutations";
-import QuestionInput from "@/components/QuestionInput";
 import QuestionEditor from "@/components/QuestionEditor";
-
-interface EditableQuestion extends Omit<Question, 'quizId'> {
-    isEditing?: boolean;
-    editedQuestion?: QuestionInputType;
-}
 
 export default function EditQuizPage() {
     const params = useParams();
@@ -30,11 +24,7 @@ export default function EditQuizPage() {
         variables: { joinCode }
     });
 
-    const [updateQuestionMutation, { loading: updateLoading }] = useMutation(updateQuestion, {
-        onError: (error) => {
-            alert(`Error updating question: ${error.message}`);
-        }
-    });
+    const [updateQuestionMutation, { loading: updateLoading }] = useMutation(updateQuestion);
 
     const handleEditToggle = (questionId: number) => {
         const question = data?.getQuiz?.questions?.find((q) => q.id === questionId);
@@ -182,7 +172,7 @@ export default function EditQuizPage() {
                                     {isEditing ? (
                                         <>
                                             <button
-                                                onClick={() => handleSaveQuestion(q.id!)}
+                                                onClick={() => handleSaveQuestion(q.id as number)}
                                                 disabled={updateLoading}
                                                 style={{
                                                     padding: '8px 16px',
@@ -197,7 +187,7 @@ export default function EditQuizPage() {
                                                 {updateLoading ? 'Saving...' : 'Save'}
                                             </button>
                                             <button
-                                                onClick={() => handleEditToggle(q.id!)}
+                                                onClick={() => handleEditToggle(q.id as number)}
                                                 disabled={updateLoading}
                                                 style={{
                                                     padding: '8px 16px',
@@ -214,7 +204,7 @@ export default function EditQuizPage() {
                                         </>
                                     ) : (
                                         <button
-                                            onClick={() => handleEditToggle(q.id!)}
+                                            onClick={() => handleEditToggle(q.id as number)}
                                             style={{
                                                 padding: '8px 16px',
                                                 backgroundColor: '#007bff',
@@ -235,7 +225,7 @@ export default function EditQuizPage() {
                                 <QuestionEditor
                                     question={editState.editedQuestion!}
                                     index={index}
-                                    onChange={(updated) => handleQuestionChange(q.id!, updated)}
+                                    onChange={(updated) => handleQuestionChange(q.id as number, updated)}
                                 />
                             ) : (
                                 <>
