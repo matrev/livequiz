@@ -21,6 +21,7 @@ export const getQuizzes: TypedDocumentNode<GetQuizzesQuery, GetQuizzesQueryVaria
     query GetQuizzes {
         getAllQuizzes {
             id
+            joinCode
             title
         }
     }

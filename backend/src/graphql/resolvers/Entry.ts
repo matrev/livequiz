@@ -22,17 +22,25 @@ const EntryResolvers: Resolvers = {
       const { quizId, userId } = args;
       return context.prisma.entry.findUnique({
         where: {
-          quizId_authorId: {
+          quizId_userId: {
             quizId,
-            authorId: userId
+            userId
           }
         }
       }) as unknown as Entry;
-    }
+    },
+    getEntriesForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
+      const { quizId } = args;
+      return context.prisma.entry.findMany({
+        where: {
+          quizId,
+        },
+      }) as unknown as Entry[];
+    },
   },
   Mutation: {
-    async upsertEntry(_: any, args: { quizId: number; userId: number; title: string, answers: any }, context: PrismaContext) {
-      const { quizId, userId, title, answers } = args;
+    async upsertEntry(_: any, args: { quizId: number; userId: number; name: string, answers: any }, context: PrismaContext) {
+      const { quizId, userId, name, answers } = args;
 
       // Check if quiz deadline has passed
       const quiz = await context.prisma.quiz.findUnique({
@@ -50,9 +58,9 @@ const EntryResolvers: Resolvers = {
 
       const existingEntry = await context.prisma.entry.findUnique({
         where: {
-          quizId_authorId: {
+          quizId_userId: {
             quizId,
-            authorId: userId
+            userId
           }
         }
       });
@@ -64,7 +72,7 @@ const EntryResolvers: Resolvers = {
             id: existingEntry.id,
           },
           data: {
-            title,
+            name,
             answers,
           },
         }) as unknown as Entry;
@@ -73,8 +81,8 @@ const EntryResolvers: Resolvers = {
         return context.prisma.entry.create({
           data: {
             quizId,
-            authorId: userId,
-            title,
+            userId,
+            name,
             answers,
           },
         }) as unknown as Entry;

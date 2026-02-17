@@ -18,8 +18,8 @@ beforeEach(() => {
 const mockEntry = {
   id: 1,
   quizId: 1,
-  authorId: 1,
-  title: 'Test Quiz',
+  userId: 1,
+  name: 'Test Quiz',
   answers: { question1: 'answer1' },
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -29,9 +29,12 @@ const mockQuiz = {
   id: 1,
   title: 'Test Quiz',
   joinCode: 'TEST123',
+  userId: 1,
   deadline: null,
+  entries: [],
   createdAt: new Date(),
   updatedAt: new Date(),
+  questions: [],
 };
 
 describe('Entry Mutation resolver - upsertEntry with deadline validation', () => {
@@ -42,10 +45,10 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
 
     const response = await server.executeOperation({
       query: `mutation testUpsertEntry {
-        upsertEntry(quizId: 1, userId: 1, title: "Test Quiz", answers: {question1: "answer1"}) {
+        upsertEntry(quizId: 1, userId: 1, name: "Test Quiz", answers: {question1: "answer1"}) {
           id
           quizId
-          title
+          name
         }
       }`,
     },
@@ -66,7 +69,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
 
     const response = await server.executeOperation({
       query: `mutation testUpsertEntryBeforeDeadline {
-        upsertEntry(quizId: 1, userId: 1, title: "Test Quiz", answers: {question1: "answer1"}) {
+        upsertEntry(quizId: 1, userId: 1, name: "Test Quiz", answers: {question1: "answer1"}) {
           id
         }
       }`,
@@ -86,7 +89,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
 
     const response = await server.executeOperation({
       query: `mutation testUpsertEntryAfterDeadline {
-        upsertEntry(quizId: 1, userId: 1, title: "Test Quiz", answers: {question1: "answer1"}) {
+        upsertEntry(quizId: 1, userId: 1, name: "Test Quiz", answers: {question1: "answer1"}) {
           id
         }
       }`,
@@ -104,7 +107,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
 
     const response = await server.executeOperation({
       query: `mutation testUpsertEntryQuizNotFound {
-        upsertEntry(quizId: 999, userId: 1, title: "Test Quiz", answers: {question1: "answer1"}) {
+        upsertEntry(quizId: 999, userId: 1, name: "Test Quiz", answers: {question1: "answer1"}) {
           id
         }
       }`,
@@ -127,7 +130,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
 
     const response = await server.executeOperation({
       query: `mutation testUpdateEntry {
-        upsertEntry(quizId: 1, userId: 1, title: "Test Quiz", answers: {question1: "updated_answer"}) {
+        upsertEntry(quizId: 1, userId: 1, name: "Test Quiz", answers: {question1: "updated_answer"}) {
           id
         }
       }`,
@@ -148,7 +151,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
 
     const response = await server.executeOperation({
       query: `mutation testUpdateEntryAfterDeadline {
-        upsertEntry(quizId: 1, userId: 1, title: "Test Quiz", answers: {question1: "updated_answer"}) {
+        upsertEntry(quizId: 1, userId: 1, name: "Test Quiz", answers: {question1: "updated_answer"}) {
           id
         }
       }`,
@@ -171,7 +174,7 @@ describe('Entry Query resolvers', () => {
         getAllEntries {
           id
           quizId
-          title
+          name
         }
       }`,
     },
@@ -190,7 +193,7 @@ describe('Entry Query resolvers', () => {
         getEntryForUser(quizId: 1, userId: 1) {
           id
           quizId
-          title
+          name
         }
       }`,
     },
@@ -200,4 +203,22 @@ describe('Entry Query resolvers', () => {
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(response.body.singleResult.data?.getEntryForUser).toBeDefined();
   });
+
+    it('gets entries for quiz', async () => {
+        mockContext.prisma.entry.findMany.mockResolvedValue([mockEntry]);
+        const response = await server.executeOperation({
+            query: `query testGetEntriesForQuiz {
+                getEntriesForQuiz(quizId: 1) {
+                    id
+                    quizId
+                    name
+                }
+            }`,
+        },
+        { contextValue: mockContext });
+
+        assert(response.body.kind === 'single');
+        expect(response.body.singleResult.errors).toBeUndefined();
+        expect(response.body.singleResult.data?.getEntriesForQuiz).toBeDefined();
+    });
 });

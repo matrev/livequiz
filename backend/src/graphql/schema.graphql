@@ -12,64 +12,68 @@ type User {
     email: String!
     isAdmin: Boolean!
     name: String!
+    quizzes: [Quiz!]
     entries: [Entry!]
-}
-
-type Entry {
-    id: Int
-    title: String!
-    quizId: Int!
-    authorId: Int!
-    author: User!
-    answers: JSON!
-    createdAt: DateTime!
-    updatedAt: DateTime!
 }
 
 type Quiz {
     id: Int
     title: String!
     joinCode: String!
+    userId: Int!
     deadline: DateTime
-    questions: [Question!]
+    entries: [Entry!]
     createdAt: DateTime!
     updatedAt: DateTime!
-    entries: [Entry!]
+    questions: [Question!]
 }
 
 input QuestionInput {
     id: Int
     text: String!
+    quizId: Int!
     questionType: QuestionType!
-    quizId: Int
-    options: [String]
     correctAnswer: String
+    options: [String]
 }
 
 type Question {
     id: Int
     text: String!
-    questionType: QuestionType!
     quizId: Int!
-    options: [String]
+    questionType: QuestionType!
     correctAnswer: String
+    options: [String]
+}
+
+type Entry {
+    id: Int
+    name: String!
+    quizId: Int!
+    userId: Int!
+    answers: JSON!
+    createdAt: DateTime!
+    updatedAt: DateTime!
 }
 
 type Query {
     # User Queries
     getAllUsers: [User!]!
     getUser(id: Int!): User
+    getUserByEmail(email: String!): User
 
     # Quiz Queries
     getAllQuizzes: [Quiz!]!
     getQuiz(joinCode: String!): Quiz
     getUsersForQuiz(quizId: Int!): [User!]!
     getQuestionsForQuiz(quizId: Int!): [Question!]!
+    getQuizzesForUser(userId: Int!): [Quiz!]!
 
     # Entry Queries
     getAllEntries: [Entry!]!
     getEntriesForUser(userId: Int!): [Entry!]!
     getEntryForUser(quizId: Int!, userId: Int!): Entry
+    getEntriesForQuiz(quizId: Int!): [Entry!]!
 
     # Question Queries
     getQuestion(id: Int!): Question
@@ -80,10 +84,10 @@ type Mutation {
     # User Mutations
     createUser(email: String!, name: String!, isAdmin: Boolean): User!
     deleteUser(id: Int!): User!
-    updateUser(id: Int!, email: String, name: String): User!
+    updateUser(id: Int!, email: String, name: String, isAdmin: Boolean): User!
 
     # Entry Mutations
-    upsertEntry(quizId: Int!, userId: Int!, title: String!, answers: JSON!): Entry!
+    upsertEntry(quizId: Int!, userId: Int!, name: String!, answers: JSON!): Entry!
     
     # Question Mutations
     createQuestion(text: String!, questionType: QuestionType!, correctAnswer: String, quizId: Int!): Question!
@@ -91,7 +95,7 @@ type Mutation {
     updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String): Question!
     
     # Quiz Mutations
-    createQuiz(title: String!, questions: [QuestionInput], deadline: DateTime): Quiz!
+    createQuiz(title: String!, userId: Int!, questions: [QuestionInput], deadline: DateTime): Quiz!
     updateQuiz(id: Int!, title: String): Quiz!
     addQuestionToQuiz(quizId: Int!, questionId: Int!): Quiz!
     removeQuestionFromQuiz(quizId: Int!, questionId: Int!): Quiz!

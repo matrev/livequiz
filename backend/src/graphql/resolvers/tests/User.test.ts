@@ -67,6 +67,26 @@ describe('User Query resolver tests', () => {
     expect(response.body.singleResult.data?.getUser).toEqual(mockUser);
     expect(response.body.singleResult.data?.getUser).toBeDefined();
   });
+
+  it('returns a User by email', async () => {
+    mockContext.prisma.user.findUnique.mockResolvedValue(mockUser);
+    const response = await server.executeOperation({
+      query: `query testGetUserByEmail {
+        getUserByEmail(email: "testemail@email.com") {
+          id
+          name
+          email
+          isAdmin
+        }
+      }`,
+    },
+    { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.getUserByEmail).toEqual(mockUser);
+    expect(response.body.singleResult.data?.getUserByEmail).toBeDefined();
+  });
 });
 
 describe('User Mutation resolver tests', () => {

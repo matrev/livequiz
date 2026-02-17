@@ -1,4 +1,4 @@
-import { Resolvers, Quiz, Question, User, QuestionInput } from '../../../generated/graphql.js';
+import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
 import { PrismaContext } from '../../prisma.js';
 import { generateJoinCode } from '../../utils/generateJoinCode.js';
 
@@ -41,24 +41,36 @@ const QuizResolvers: Resolvers = {
                     },
                 },
             }) as Promise<User[]>;
-        }
+        },
+        getQuizzesForUser(_: any, args: { userId: number }, context: PrismaContext) {
+            const { userId } = args;
+            return context.prisma.quiz.findMany({
+                where: {
+                    entries: {
+                        some: {
+                            userId,
+                        }
+                    }
+                },
+            }) as Promise<Quiz[]>;
+        },
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; questions?: [QuestionInput]; deadline?: string }, context: PrismaContext) {
-            const { title, questions = null, deadline } = args;
+        async createQuiz(_: any, args: { title: string; userId: number; questions?: [Question]; deadline?: string }, context: PrismaContext) {
+            const { title, userId, questions = null, deadline } = args;
             const joinCode = generateJoinCode();
             
             const newQuiz: Quiz = await context.prisma.quiz.create({
                 data: {
                     title,
                     joinCode,
+                    userId,
                     deadline: deadline ? new Date(deadline) : null,
-                    questions: {
+                    questions: questions ? {
                         createMany: {
-                            data: [
-                            ...questions
-                        ]}
-                    },
+                            data: questions
+                        }
+                    } : undefined,
                     createdAt: new Date(),
                     updatedAt: new Date(),  
                 }

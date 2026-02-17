@@ -3,7 +3,7 @@ import { resolvers } from '../resolvers.js';
 import assert from 'node:assert/strict';
 import { MockContext, createMockContext } from '../../../../lib/tests/MockPrismaClient.js';
 import { typeDefs } from '../../utils.js';
-import { QuestionType } from '../../../../generated/prisma/enums.js';
+import { QuestionType } from '../../../../generated/graphql.js';
 
 let mockContext: MockContext;
 let server: ApolloServer<MockContext>;
@@ -20,9 +20,12 @@ const mockQuiz = {
     id: 1,
     title: 'Test Quiz',
     joinCode: 'ABCDEFGH',
+    userId: 1,
     deadline: null,
+    entries: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    questions: [],
 }
 
 const mockQuestion = {
@@ -31,7 +34,7 @@ const mockQuestion = {
     text: 'Test Question',
     correctAnswer: 'Test Answer',
     options: [],
-    questionType: 'MULTIPLE_CHOICE' as QuestionType,
+    questionType: QuestionType.MultipleChoice,
 }
 
 const mockUser = {
@@ -49,6 +52,15 @@ describe('Quiz Query resolver tests', () => {
                 getAllQuizzes {
                     id
                     title
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                     createdAt
                     updatedAt
                 }
@@ -65,13 +77,22 @@ describe('Quiz Query resolver tests', () => {
         expect(response.body.singleResult.data?.getAllQuizzes).toBeDefined();
     });
 
-    it('returns a Quiz by id', async () => {
+    it('returns a Quiz by joinCode', async () => {
         mockContext.prisma.quiz.findUnique.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
-            query: `query testGetQuizById {
-                getQuiz(id: 1) {
+            query: `query testGetQuizByJoinCode {
+                getQuiz(joinCode: "ABCDEFGH") {
                     id
                     title
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                     createdAt
                     updatedAt
                 }
@@ -97,6 +118,7 @@ describe('Quiz Query resolver tests', () => {
                     quizId
                     correctAnswer
                     questionType
+                    options
                     text
                 }
             }`,
@@ -141,6 +163,38 @@ describe('Quiz Query resolver tests', () => {
         ]);
         expect(response.body.singleResult.data?.getUsersForQuiz).toBeDefined();
     });
+
+    it('Gets quizzes for a User', async () => {
+        mockContext.prisma.quiz.findMany.mockResolvedValue([mockQuiz]);
+        const response = await server.executeOperation({
+            query: `query testGetQuizzesForUser {
+                getQuizzesForUser(userId: 1) {
+                    id
+                    title
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
+                    createdAt
+                    updatedAt
+                }
+            }`,
+        },
+        { contextValue: mockContext });
+
+        // Note the use of Node's assert rather than Jest's expect; if using
+        // TypeScript, `assert`` will appropriately narrow the type of `body`
+        // and `expect` will not.
+        assert(response.body.kind === 'single');
+        expect(response.body.singleResult.errors).toBeUndefined();
+        expect(response.body.singleResult.data?.getQuizzesForUser).toEqual([mockQuiz]);
+        expect(response.body.singleResult.data?.getQuizzesForUser).toBeDefined();
+    });
 });
 
 
@@ -149,8 +203,17 @@ describe('Quiz Mutation resolver tests', () => {
         mockContext.prisma.quiz.create.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({
             query: `mutation testCreateQuiz {
-                createQuiz(title: "Test Quiz") {
+                createQuiz(title: "Test Quiz", userId: 1) {
                     id
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                     title
                     createdAt
                     updatedAt
@@ -174,6 +237,15 @@ describe('Quiz Mutation resolver tests', () => {
                     title
                     createdAt
                     updatedAt
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                 }
             }`,
         },
@@ -194,6 +266,15 @@ describe('Quiz Mutation resolver tests', () => {
                     title
                     createdAt
                     updatedAt
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                 }
             }`,
         },
@@ -212,6 +293,15 @@ describe('Quiz Mutation resolver tests', () => {
                 updateQuiz(id: 1) {
                     id
                     title
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                     createdAt
                     updatedAt
                 }
@@ -232,6 +322,15 @@ describe('Quiz Mutation resolver tests', () => {
                 updateQuiz(id: 1) {
                     id
                     title
+                    deadline
+                    entries {
+                        id
+                    }
+                    joinCode
+                    userId
+                    questions {
+                        id
+                    }
                     createdAt
                     updatedAt
                 }

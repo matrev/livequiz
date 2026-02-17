@@ -3,7 +3,7 @@ import { resolvers } from '../resolvers.js';
 import assert from 'node:assert/strict';
 import { MockContext, createMockContext } from '../../../../lib/tests/MockPrismaClient.js';
 import { typeDefs } from '../../utils.js';
-import { QuestionType } from '../../../../generated/prisma/enums.js';
+import { QuestionType } from '../../../../generated/graphql.js';
 
 let mockContext: MockContext;
 let server: ApolloServer<MockContext>;
@@ -18,11 +18,11 @@ beforeEach(() => {
 
 let mockQuestion = {
     id: 1,
-    quizId: 1,
     text: 'Test Question',
+    quizId: 1,
+    questionType: QuestionType.MultipleChoice,
     correctAnswer: 'Test Answer',
     options: [],
-    questionType: QuestionType.MULTIPLE_CHOICE,
 }
 
 describe('Question Query resolver tests', () => {
@@ -36,6 +36,7 @@ describe('Question Query resolver tests', () => {
           text
           correctAnswer
           questionType
+          options
         }
       }`,
     },
@@ -72,6 +73,7 @@ describe('Question Mutation resolver tests', () => {
           text
           correctAnswer
           questionType
+          options
         }
       }`,
     },
@@ -93,6 +95,7 @@ describe('Question Mutation resolver tests', () => {
           text
           correctAnswer
           questionType
+          options
         }
       }`,
     },
@@ -114,6 +117,7 @@ describe('Question Mutation resolver tests', () => {
           text
           correctAnswer
           questionType
+          options
         }
       }`,
     },
@@ -137,6 +141,7 @@ describe('Question Query resolver edge cases', () => {
           text
           correctAnswer
           questionType
+          options
         }
       }`,
     },

@@ -16,7 +16,14 @@ const UserResolvers: Resolvers = {
                 },
             }) as unknown as User | null;
         },
-        
+        getUserByEmail(_: any, args: { email: string }, context: PrismaContext) {
+            const { email } = args;
+            return context.prisma.user.findUnique({
+                where: {
+                    email,
+                },
+            }) as unknown as User | null;
+        },
     },
     Mutation: {
         async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }, context: PrismaContext) {
@@ -39,8 +46,8 @@ const UserResolvers: Resolvers = {
             });
             return deletedUser;
         },
-        async updateUser(_: any, args: { id: number; name?: string; email?: string }, context: PrismaContext) { 
-            const { id, name, email } = args;
+        async updateUser(_: any, args: { id: number; name?: string; email?: string, isAdmin?: boolean }, context: PrismaContext) { 
+            const { id, name, email, isAdmin } = args;
             const updatedUser: User = await context.prisma.user.update({
                 where: {
                     id,
@@ -48,6 +55,7 @@ const UserResolvers: Resolvers = {
                 data: {
                     name,
                     email,
+                    isAdmin,
                 },
             });
             return updatedUser;
