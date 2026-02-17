@@ -11,7 +11,7 @@ import Link from "next/link";
 import { SubmitEvent, useState } from "react";
 
 export default function CreateQuizPage() {
-    const [createQuiz, { data, loading, error }] = useMutation<Quiz,MutationCreateQuizArgs>(createQuizMutation, {
+    const [createQuiz, { data, loading }] = useMutation<Quiz,MutationCreateQuizArgs>(createQuizMutation, {
         variables: {
             title: "placeholder",
             questions: [],
@@ -41,6 +41,15 @@ export default function CreateQuizPage() {
 
     const updateQuestion = (index: number, updatedQuestion: QuestionInput) => {
         setQuestions(prev => prev.map((q, i) => i === index ? updatedQuestion : q));
+    }
+
+    const removeQuestion = (index: number) => {
+        const shouldRemove = window.confirm("Remove this question?");
+        if (!shouldRemove) {
+            return;
+        }
+
+        setQuestions(prev => prev.filter((_, i) => i !== index));
     }
 
     const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
@@ -170,7 +179,24 @@ export default function CreateQuizPage() {
                                     borderRadius: '8px'
                                 }}
                             >
-                                <h3 style={{ margin: '0 0 15px 0' }}>Question {index + 1}</h3>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                                    <h3 style={{ margin: 0 }}>Question {index + 1}</h3>
+                                    <button
+                                        type="button"
+                                        onClick={() => removeQuestion(index)}
+                                        style={{
+                                            padding: '8px 16px',
+                                            backgroundColor: '#dc3545',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        Remove
+                                    </button>
+                                </div>
                                 <QuestionInputComponent
                                     question={question}
                                     index={index}
