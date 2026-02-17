@@ -39,8 +39,8 @@ const EntryResolvers: Resolvers = {
     },
   },
   Mutation: {
-    async upsertEntry(_: any, args: { quizId: number; userId: number; name: string, answers: any }, context: PrismaContext) {
-      const { quizId, userId, name, answers } = args;
+    async upsertEntry(_: any, args: { quizId: number; name: string, answers: any, userId?: number }, context: PrismaContext) {
+      const { quizId, name, answers, userId = null } = args;
 
       // Check if quiz deadline has passed
       const quiz = await context.prisma.quiz.findUnique({

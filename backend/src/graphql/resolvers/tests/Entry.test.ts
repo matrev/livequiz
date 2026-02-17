@@ -163,6 +163,28 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
     expect(response.body.singleResult.errors?.[0].message).toContain('Quiz deadline has passed');
     expect(mockContext.prisma.entry.update).not.toHaveBeenCalled();
   });
+
+  it('allows submission when the deadline is in the future and userId is null', async () => {
+    const futureDeadline = new Date(Date.now() + 1000 * 60 * 60 * 24);
+    const quizWithFutureDeadline = { ...mockQuiz, deadline: futureDeadline };
+
+    mockContext.prisma.quiz.findUnique.mockResolvedValue(quizWithFutureDeadline);
+    mockContext.prisma.entry.findUnique.mockResolvedValue(null);
+    mockContext.prisma.entry.create.mockResolvedValue(mockEntry);
+
+    const response = await server.executeOperation({
+      query: `mutation testUpsertEntryNullUserId {
+        upsertEntry(quizId: 1, name: "Test Quiz", answers: {question1: "answer1"}) {
+          id
+        }
+      }`,
+    },
+    { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(mockContext.prisma.entry.create).toHaveBeenCalled();
+  });
 });
 
 describe('Entry Query resolvers', () => {

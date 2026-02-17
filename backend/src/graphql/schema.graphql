@@ -87,7 +87,7 @@ type Mutation {
     updateUser(id: Int!, email: String, name: String, isAdmin: Boolean): User!
 
     # Entry Mutations
-    upsertEntry(quizId: Int!, userId: Int!, name: String!, answers: JSON!): Entry!
+    upsertEntry(quizId: Int!, name: String!, answers: JSON!, userId: Int): Entry!
     
     # Question Mutations
     createQuestion(text: String!, questionType: QuestionType!, correctAnswer: String, quizId: Int!): Question!
