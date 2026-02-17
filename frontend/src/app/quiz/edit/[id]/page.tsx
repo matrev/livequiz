@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { QuestionType, Question, QuestionInput as QuestionInputType } from "@/generated/types";
 import { useParams, useRouter } from "next/navigation";
@@ -12,60 +12,103 @@ export default function EditQuizPage() {
     const params = useParams();
     const router = useRouter();
     const joinCode = params.id as string;
-    
-    const [editingStates, setEditingStates] = useState<{[key: number]: {
-        isEditing: boolean, 
-        editedQuestion: QuestionInputType
-    }}>({});
+
+    const [editingById, setEditingById] = useState<Record<number, boolean>>({});
+    const [draftById, setDraftById] = useState<Record<number, QuestionInputType>>({});
+    const [savingById, setSavingById] = useState<Record<number, boolean>>({});
 
     const [questionSuccessMessage, setQuestionSuccessMessage] = useState<Record<number,string>>({});
+    const [questionErrorMessage, setQuestionErrorMessage] = useState<Record<number, string>>({});
     const successTimeoutsRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
     const { loading, error, data } = useQuery(getQuiz, {
         variables: { joinCode }
     });
 
-    const [updateQuestionMutation, { loading: updateLoading }] = useMutation(updateQuestion);
+    const [updateQuestionMutation] = useMutation(updateQuestion);
+
+    useEffect(() => {
+        const timeoutMap = successTimeoutsRef.current;
+
+        return () => {
+            Object.values(timeoutMap).forEach((timeoutId) => {
+                clearTimeout(timeoutId);
+            });
+        };
+    }, []);
 
     const handleEditToggle = (questionId: number) => {
         const question = data?.getQuiz?.questions?.find((q) => q.id === questionId);
         if (!question) return;
-        
-        setEditingStates(prev => ({
+
+        const nextIsEditing = !editingById[questionId];
+
+        setEditingById(prev => ({
             ...prev,
-            [questionId]: {
-                isEditing: !prev[questionId]?.isEditing,
-                editedQuestion: prev[questionId]?.editedQuestion ?? {
+            [questionId]: nextIsEditing
+        }));
+
+        if (nextIsEditing) {
+            setDraftById(prev => ({
+                ...prev,
+                [questionId]: prev[questionId] ?? {
                     text: question.text,
                     correctAnswer: question.correctAnswer || '',
                     questionType: question.questionType,
                     options: question.options || []
                 }
-            }
-        }));
+            }));
+
+            setQuestionSuccessMessage(prev => ({
+                ...prev,
+                [questionId]: ""
+            }));
+
+            setQuestionErrorMessage(prev => ({
+                ...prev,
+                [questionId]: ""
+            }));
+        } else {
+            setQuestionErrorMessage(prev => ({
+                ...prev,
+                [questionId]: ""
+            }));
+        }
     };
 
     const handleQuestionChange = (questionId: number, updatedQuestion: QuestionInputType) => {
-        setEditingStates(prev => ({
+        setDraftById(prev => ({
             ...prev,
-            [questionId]: {
-                ...prev[questionId],
-                editedQuestion: updatedQuestion
-            }
+            [questionId]: updatedQuestion
+        }));
+
+        setQuestionErrorMessage(prev => ({
+            ...prev,
+            [questionId]: ""
         }));
     };
 
     const handleSaveQuestion = async (questionId: number) => {
-        const editState = editingStates[questionId];
-        if (!editState) return;
+        const questionDraft = draftById[questionId];
+        if (!questionDraft) return;
+
+        setSavingById(prev => ({
+            ...prev,
+            [questionId]: true
+        }));
+
+        setQuestionErrorMessage(prev => ({
+            ...prev,
+            [questionId]: ""
+        }));
 
         try {
             await updateQuestionMutation({
                 variables: {
                     id: questionId,
-                    text: editState.editedQuestion.text,
-                    correctAnswer: editState.editedQuestion.correctAnswer,
-                    questionType: editState.editedQuestion.questionType,
-                    options: editState.editedQuestion.options
+                    text: questionDraft.text,
+                    correctAnswer: questionDraft.correctAnswer,
+                    questionType: questionDraft.questionType,
+                    options: questionDraft.options
                 },
                 update: (cache, { data: mutationData }) => {
                     if (!mutationData?.updateQuestion) return
@@ -81,15 +124,20 @@ export default function EditQuizPage() {
                     });
                 }
             });
-            
-            setEditingStates((prev) => ({
+
+            setEditingById((prev) => ({
                 ...prev,
-                [questionId]: { ...prev[questionId], isEditing: false }
-            }))
+                [questionId]: false
+            }));
 
             setQuestionSuccessMessage(prev => ({
                 ...prev,
                 [questionId]: "Question updated successfully!"
+            }));
+
+            setQuestionErrorMessage(prev => ({
+                ...prev,
+                [questionId]: ""
             }));
 
             if (successTimeoutsRef.current[questionId]) {
@@ -103,10 +151,19 @@ export default function EditQuizPage() {
             }, 3000);
         } catch (err) {
             console.error("Error updating question:", err);
-            // Revert editing state on error
-            setEditingStates(prev => ({
+            setEditingById(prev => ({
                 ...prev,
-                [questionId]: { ...prev[questionId], isEditing: true }
+                [questionId]: true
+            }));
+
+            setQuestionErrorMessage(prev => ({
+                ...prev,
+                [questionId]: "Unable to update question. Please try again."
+            }));
+        } finally {
+            setSavingById(prev => ({
+                ...prev,
+                [questionId]: false
             }));
         }
     };
@@ -116,6 +173,9 @@ export default function EditQuizPage() {
     if (!data?.getQuiz) return <div style={{ padding: '20px' }}>Quiz not found</div>;
 
     const quiz = data.getQuiz;
+    const questionsWithId = (quiz.questions ?? []).filter(
+        (question): question is Omit<Question, 'quizId'> & { id: number } => question.id != null
+    );
 
     return (
         <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
@@ -136,13 +196,18 @@ export default function EditQuizPage() {
                 </button>
             </div>
 
-            {!quiz.questions || quiz.questions.length === 0 ? (
+            {questionsWithId.length === 0 ? (
                 <p>No questions found for this quiz.</p>
             ) : (
-                (quiz.questions as Omit<Question, 'quizId'>[]).map((q: Omit<Question, 'quizId'>, index: number) => {
-                    if (!q.id) return null;
-                    const editState = editingStates[q.id];
-                    const isEditing = editState?.isEditing || false;
+                questionsWithId.map((q, index: number) => {
+                    const isEditing = editingById[q.id] || false;
+                    const isSaving = savingById[q.id] || false;
+                    const questionDraft = draftById[q.id] ?? {
+                        text: q.text,
+                        correctAnswer: q.correctAnswer || '',
+                        questionType: q.questionType,
+                        options: q.options || []
+                    };
                     
                     return (
                         <div 
@@ -154,6 +219,18 @@ export default function EditQuizPage() {
                                 borderRadius: '8px',
                             }}
                         >
+                            {questionErrorMessage[q.id] && (
+                                <div style={{
+                                    padding: '10px',
+                                    marginBottom: '20px',
+                                    backgroundColor: '#f8d7da',
+                                    color: '#721c24',
+                                    border: '1px solid #f5c6cb',
+                                    borderRadius: '4px'
+                                }}>
+                                    {questionErrorMessage[q.id]}
+                                </div>
+                            )}
                             {questionSuccessMessage[q.id] && (
                                 <div style={{
                                     padding: '10px',
@@ -172,30 +249,30 @@ export default function EditQuizPage() {
                                     {isEditing ? (
                                         <>
                                             <button
-                                                onClick={() => handleSaveQuestion(q.id as number)}
-                                                disabled={updateLoading}
+                                                onClick={() => handleSaveQuestion(q.id)}
+                                                disabled={isSaving}
                                                 style={{
                                                     padding: '8px 16px',
                                                     backgroundColor: '#28a745',
                                                     color: 'white',
                                                     border: 'none',
                                                     borderRadius: '4px',
-                                                    cursor: updateLoading ? 'not-allowed' : 'pointer',
+                                                    cursor: isSaving ? 'not-allowed' : 'pointer',
                                                     fontSize: '14px'
                                                 }}
                                             >
-                                                {updateLoading ? 'Saving...' : 'Save'}
+                                                {isSaving ? 'Saving...' : 'Save'}
                                             </button>
                                             <button
-                                                onClick={() => handleEditToggle(q.id as number)}
-                                                disabled={updateLoading}
+                                                onClick={() => handleEditToggle(q.id)}
+                                                disabled={isSaving}
                                                 style={{
                                                     padding: '8px 16px',
                                                     backgroundColor: '#6c757d',
                                                     color: 'white',
                                                     border: 'none',
                                                     borderRadius: '4px',
-                                                    cursor: updateLoading ? 'not-allowed' : 'pointer',
+                                                    cursor: isSaving ? 'not-allowed' : 'pointer',
                                                     fontSize: '14px'
                                                 }}
                                             >
@@ -204,7 +281,7 @@ export default function EditQuizPage() {
                                         </>
                                     ) : (
                                         <button
-                                            onClick={() => handleEditToggle(q.id as number)}
+                                            onClick={() => handleEditToggle(q.id)}
                                             style={{
                                                 padding: '8px 16px',
                                                 backgroundColor: '#007bff',
@@ -223,9 +300,9 @@ export default function EditQuizPage() {
 
                             {isEditing ? (
                                 <QuestionEditor
-                                    question={editState.editedQuestion!}
+                                    question={questionDraft}
                                     index={index}
-                                    onChange={(updated) => handleQuestionChange(q.id as number, updated)}
+                                    onChange={(updated) => handleQuestionChange(q.id, updated)}
                                 />
                             ) : (
                                 <>
