@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { QuestionType, Question, QuestionInput as QuestionInputType } from "@/generated/types";
 import { useParams, useRouter } from "next/navigation";
@@ -23,17 +23,14 @@ export default function EditQuizPage() {
         isEditing: boolean, 
         editedQuestion: QuestionInputType
     }}>({});
-    const [successMessage, setSuccessMessage] = useState<string>("");
 
+    const [questionSuccessMessage, setQuestionSuccessMessage] = useState<Record<number,string>>({});
+    const successTimeoutsRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
     const { loading, error, data } = useQuery(getQuiz, {
         variables: { joinCode }
     });
 
     const [updateQuestionMutation, { loading: updateLoading }] = useMutation(updateQuestion, {
-        onCompleted: () => {
-            setSuccessMessage("Question updated successfully!");
-            setTimeout(() => setSuccessMessage(""), 3000);
-        },
         onError: (error) => {
             alert(`Error updating question: ${error.message}`);
         }
@@ -71,12 +68,6 @@ export default function EditQuizPage() {
         const editState = editingStates[questionId];
         if (!editState) return;
 
-        // Optimistically update UI before mutation
-        setEditingStates(prev => ({
-            ...prev,
-            [questionId]: { ...prev[questionId], isEditing: false }
-        }));
-
         try {
             await updateQuestionMutation({
                 variables: {
@@ -86,30 +77,40 @@ export default function EditQuizPage() {
                     questionType: editState.editedQuestion.questionType,
                     options: editState.editedQuestion.options
                 },
-                optimisticResponse: {
-                    updateQuestion: {
-                        __typename: 'Question',
-                        id: questionId,
-                        text: editState.editedQuestion.text,
-                        correctAnswer: editState.editedQuestion.correctAnswer,
-                        questionType: editState.editedQuestion.questionType,
-                        options: editState.editedQuestion.options
-                    }
-                },
                 update: (cache, { data: mutationData }) => {
-                    if (mutationData?.updateQuestion) {
-                        cache.modify({
-                            id: cache.identify(mutationData.updateQuestion),
-                            fields: {
-                                text: () => mutationData.updateQuestion.text,
-                                correctAnswer: () => mutationData.updateQuestion.correctAnswer,
-                                questionType: () => mutationData.updateQuestion.questionType,
-                                options: () => mutationData.updateQuestion.options,
-                            }
-                        });
-                    }
+                    if (!mutationData?.updateQuestion) return
+
+                    cache.modify({
+                        id: cache.identify(mutationData.updateQuestion),
+                        fields: {
+                            text: () => mutationData.updateQuestion.text,
+                            correctAnswer: () => mutationData.updateQuestion.correctAnswer,
+                            questionType: () => mutationData.updateQuestion.questionType,
+                            options: () => mutationData.updateQuestion.options,
+                        }
+                    });
                 }
             });
+            
+            setEditingStates((prev) => ({
+                ...prev,
+                [questionId]: { ...prev[questionId], isEditing: false }
+            }))
+
+            setQuestionSuccessMessage(prev => ({
+                ...prev,
+                [questionId]: "Question updated successfully!"
+            }));
+
+            if (successTimeoutsRef.current[questionId]) {
+                clearTimeout(successTimeoutsRef.current[questionId]);
+            }
+            successTimeoutsRef.current[questionId] = setTimeout(() => {
+                setQuestionSuccessMessage(prev => ({
+                    ...prev,
+                    [questionId]: ""
+                }));
+            }, 3000);
         } catch (err) {
             console.error("Error updating question:", err);
             // Revert editing state on error
@@ -145,19 +146,6 @@ export default function EditQuizPage() {
                 </button>
             </div>
 
-            {successMessage && (
-                <div style={{
-                    padding: '10px',
-                    marginBottom: '20px',
-                    backgroundColor: '#d4edda',
-                    color: '#155724',
-                    border: '1px solid #c3e6cb',
-                    borderRadius: '4px'
-                }}>
-                    {successMessage}
-                </div>
-            )}
-
             {!quiz.questions || quiz.questions.length === 0 ? (
                 <p>No questions found for this quiz.</p>
             ) : (
@@ -176,6 +164,18 @@ export default function EditQuizPage() {
                                 borderRadius: '8px',
                             }}
                         >
+                            {questionSuccessMessage[q.id] && (
+                                <div style={{
+                                    padding: '10px',
+                                    marginBottom: '20px',
+                                    backgroundColor: '#d4edda',
+                                    color: '#155724',
+                                    border: '1px solid #c3e6cb',
+                                    borderRadius: '4px'
+                                }}>
+                                    {questionSuccessMessage[q.id]}
+                                </div>
+                            )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                                 <h3 style={{ margin: 0 }}>Question {index + 1}</h3>
                                 <div style={{ display: 'flex', gap: '10px' }}>
