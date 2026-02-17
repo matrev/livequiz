@@ -7,7 +7,11 @@ const QuizResolvers: Resolvers = {
         getAllQuizzes: (_: any, __: any, context: PrismaContext) => {
             return context.prisma.quiz.findMany({
                 include: {
-                    questions: true
+                    questions: {
+                        orderBy: {
+                            id: 'asc',
+                        },
+                    }
                 }
             }) as Promise<Quiz[]>;
         },
@@ -18,7 +22,11 @@ const QuizResolvers: Resolvers = {
                     joinCode,
                 },
                 include: {
-                    questions: true,
+                    questions: {
+                        orderBy: {
+                            id: 'asc',
+                        },
+                    },
                 }
             }) as unknown as Quiz | null;
         },
@@ -27,6 +35,9 @@ const QuizResolvers: Resolvers = {
             return context.prisma.question.findMany({
                 where: {
                     quizId,
+                },
+                orderBy: {
+                    id: 'asc',
                 },
             }) as Promise<Question[]>;
         },

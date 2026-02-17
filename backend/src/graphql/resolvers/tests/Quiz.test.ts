@@ -107,6 +107,18 @@ describe('Quiz Query resolver tests', () => {
         expect(response.body.singleResult.errors).toBeUndefined();
         expect(response.body.singleResult.data?.getQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.getQuiz).toBeDefined();
+        expect(mockContext.prisma.quiz.findUnique).toHaveBeenCalledWith({
+            where: {
+                joinCode: 'ABCDEFGH',
+            },
+            include: {
+                questions: {
+                    orderBy: {
+                        id: 'asc',
+                    },
+                },
+            },
+        });
     });
 
     it('Gets questions for a Quiz', async () => {
