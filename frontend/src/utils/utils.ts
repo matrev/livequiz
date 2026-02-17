@@ -7,6 +7,10 @@ export function validateQuizInput(quizMutationArgs: MutationCreateQuizArgs) {
         errorMessage = "A Title for a quiz is required.";
     }
 
+    if (quizMutationArgs.userId === undefined) {
+        errorMessage = "A userId is required to create a quiz.";
+    }
+
     if (quizMutationArgs.questions?.length === 0) {
         errorMessage = "A quiz must have atleast one question.";
     }

@@ -31,7 +31,6 @@ type Quiz {
 input QuestionInput {
     id: Int
     text: String!
-    quizId: Int!
     questionType: QuestionType!
     correctAnswer: String
     options: [String]
@@ -92,7 +91,7 @@ type Mutation {
     # Question Mutations
     createQuestion(text: String!, questionType: QuestionType!, correctAnswer: String, quizId: Int!): Question!
     deleteQuestion(id: Int!): Question!
-    updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String): Question!
+    updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String, options: [String]): Question!
     
     # Quiz Mutations
     createQuiz(title: String!, userId: Int!, questions: [QuestionInput], deadline: DateTime): Quiz!

@@ -2,48 +2,32 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { QuestionType, Question } from "@/generated/types";
+import { QuestionType, Question, QuestionInput as QuestionInputType } from "@/generated/types";
 import { useParams, useRouter } from "next/navigation";
 import { getQuiz } from "@/graphql/queries";
 import { updateQuestion } from "@/graphql/mutations";
+import QuestionInput from "@/components/QuestionInput";
+import QuestionEditor from "@/components/QuestionEditor";
 
 interface EditableQuestion extends Omit<Question, 'quizId'> {
     isEditing?: boolean;
-    editedText?: string;
-    editedCorrectAnswer?: string;
-    editedQuestionType?: QuestionType;
-    editedOptions?: (string | null)[];
+    editedQuestion?: QuestionInputType;
 }
 
 export default function EditQuizPage() {
     const params = useParams();
     const router = useRouter();
-    const quizId = parseInt(params.id as string);
+    const joinCode = params.id as string;
     
     const [editingStates, setEditingStates] = useState<{[key: number]: {
         isEditing: boolean, 
-        editedText: string, 
-        editedCorrectAnswer: string,
-        editedQuestionType: QuestionType,
-        editedOptions: (string | null)[]
+        editedQuestion: QuestionInputType
     }}>({});
     const [successMessage, setSuccessMessage] = useState<string>("");
 
     const { loading, error, data } = useQuery(getQuiz, {
-        variables: { id: quizId }
+        variables: { joinCode }
     });
-
-    const getEditableQuestion = (q: Omit<Question, 'quizId'>): EditableQuestion => {
-        const editState = editingStates[q.id!];
-        return {
-            ...q,
-            isEditing: editState?.isEditing || false,
-            editedText: editState?.editedText ?? q.text,
-            editedCorrectAnswer: editState?.editedCorrectAnswer ?? (q.correctAnswer || ''),
-            editedQuestionType: editState?.editedQuestionType ?? q.questionType,
-            editedOptions: editState?.editedOptions ?? (q.options || [])
-        };
-    };
 
     const [updateQuestionMutation, { loading: updateLoading }] = useMutation(updateQuestion, {
         onCompleted: () => {
@@ -63,92 +47,24 @@ export default function EditQuizPage() {
             ...prev,
             [questionId]: {
                 isEditing: !prev[questionId]?.isEditing,
-                editedText: prev[questionId]?.editedText ?? question.text,
-                editedCorrectAnswer: prev[questionId]?.editedCorrectAnswer ?? (question.correctAnswer || ''),
-                editedQuestionType: prev[questionId]?.editedQuestionType ?? question.questionType,
-                editedOptions: prev[questionId]?.editedOptions ?? (question.options || [])
-            }
-        }));
-    };
-
-    const handleTextChange = (questionId: number, newText: string) => {
-        setEditingStates(prev => ({
-            ...prev,
-            [questionId]: { ...prev[questionId], editedText: newText }
-        }));
-    };
-
-    const handleCorrectAnswerChange = (questionId: number, newAnswer: string) => {
-        setEditingStates(prev => ({
-            ...prev,
-            [questionId]: { ...prev[questionId], editedCorrectAnswer: newAnswer }
-        }));
-    };
-
-    const handleQuestionTypeChange = (questionId: number, newType: QuestionType) => {
-        setEditingStates(prev => {
-            const currentState = prev[questionId];
-            let newOptions = currentState.editedOptions;
-            let newAnswer = currentState.editedCorrectAnswer;
-            
-            // If switching to MULTIPLE_CHOICE and no options exist, create default options
-            if (newType === QuestionType.MultipleChoice && (!newOptions || newOptions.length === 0)) {
-                newOptions = ['Option 1', 'Option 2', 'Option 3', 'Option 4'];
-            }
-            // If switching to TRUE_FALSE, clear options and reset answer
-            else if (newType === QuestionType.TrueFalse) {
-                newOptions = [];
-                newAnswer = '';
-            }
-            // If switching to SHORT_ANSWER, clear options
-            else if (newType === QuestionType.ShortAnswer) {
-                newOptions = [];
-            }
-            
-            return {
-                ...prev,
-                [questionId]: { 
-                    ...currentState, 
-                    editedQuestionType: newType,
-                    editedOptions: newOptions,
-                    editedCorrectAnswer: newAnswer
+                editedQuestion: prev[questionId]?.editedQuestion ?? {
+                    text: question.text,
+                    correctAnswer: question.correctAnswer || '',
+                    questionType: question.questionType,
+                    options: question.options || []
                 }
-            };
-        });
+            }
+        }));
     };
 
-    const handleOptionChange = (questionId: number, optionIndex: number, newValue: string) => {
-        setEditingStates(prev => {
-            const currentState = prev[questionId];
-            const newOptions = [...currentState.editedOptions];
-            newOptions[optionIndex] = newValue;
-            return {
-                ...prev,
-                [questionId]: { ...currentState, editedOptions: newOptions }
-            };
-        });
-    };
-
-    const handleAddOption = (questionId: number) => {
-        setEditingStates(prev => {
-            const currentState = prev[questionId];
-            const newOptions = [...currentState.editedOptions, `Option ${currentState.editedOptions.length + 1}`];
-            return {
-                ...prev,
-                [questionId]: { ...currentState, editedOptions: newOptions }
-            };
-        });
-    };
-
-    const handleRemoveOption = (questionId: number, optionIndex: number) => {
-        setEditingStates(prev => {
-            const currentState = prev[questionId];
-            const newOptions = currentState.editedOptions.filter((_, idx) => idx !== optionIndex);
-            return {
-                ...prev,
-                [questionId]: { ...currentState, editedOptions: newOptions }
-            };
-        });
+    const handleQuestionChange = (questionId: number, updatedQuestion: QuestionInputType) => {
+        setEditingStates(prev => ({
+            ...prev,
+            [questionId]: {
+                ...prev[questionId],
+                editedQuestion: updatedQuestion
+            }
+        }));
     };
 
     const handleSaveQuestion = async (questionId: number) => {
@@ -159,12 +75,12 @@ export default function EditQuizPage() {
             await updateQuestionMutation({
                 variables: {
                     id: questionId,
-                    text: editState.editedText,
-                    correctAnswer: editState.editedCorrectAnswer,
-                    questionType: editState.editedQuestionType,
-                    // options: editState.editedQuestionType === QuestionType.MultipleChoice ? editState.editedOptions : undefined
+                    text: editState.editedQuestion.text,
+                    correctAnswer: editState.editedQuestion.correctAnswer,
+                    questionType: editState.editedQuestion.questionType,
+                    options: editState.editedQuestion.options
                 },
-                refetchQueries: [{ query: getQuiz, variables: { id: quizId } }]
+                refetchQueries: [{ query: getQuiz, variables: { joinCode } }]
             });
             
             setEditingStates(prev => ({
@@ -219,26 +135,26 @@ export default function EditQuizPage() {
             ) : (
                 (quiz.questions as Omit<Question, 'quizId'>[]).map((q: Omit<Question, 'quizId'>, index: number) => {
                     if (!q.id) return null;
-                    const question = getEditableQuestion(q);
+                    const editState = editingStates[q.id];
+                    const isEditing = editState?.isEditing || false;
                     
                     return (
                         <div 
-                            key={question.id} 
+                            key={q.id} 
                             style={{ 
                                 marginBottom: '25px', 
                                 padding: '20px', 
                                 border: '2px solid #ddd',
                                 borderRadius: '8px',
-                                backgroundColor: '#f9f9f9'
                             }}
                         >
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                                 <h3 style={{ margin: 0 }}>Question {index + 1}</h3>
                                 <div style={{ display: 'flex', gap: '10px' }}>
-                                    {question.isEditing ? (
+                                    {isEditing ? (
                                         <>
                                             <button
-                                                onClick={() => handleSaveQuestion(question.id!)}
+                                                onClick={() => handleSaveQuestion(q.id!)}
                                                 disabled={updateLoading}
                                                 style={{
                                                     padding: '8px 16px',
@@ -253,7 +169,7 @@ export default function EditQuizPage() {
                                                 {updateLoading ? 'Saving...' : 'Save'}
                                             </button>
                                             <button
-                                                onClick={() => handleEditToggle(question.id!)}
+                                                onClick={() => handleEditToggle(q.id!)}
                                                 disabled={updateLoading}
                                                 style={{
                                                     padding: '8px 16px',
@@ -270,7 +186,7 @@ export default function EditQuizPage() {
                                         </>
                                     ) : (
                                         <button
-                                            onClick={() => handleEditToggle(question.id!)}
+                                            onClick={() => handleEditToggle(q.id!)}
                                             style={{
                                                 padding: '8px 16px',
                                                 backgroundColor: '#007bff',
@@ -287,205 +203,77 @@ export default function EditQuizPage() {
                                 </div>
                             </div>
 
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                    Question Text:
-                                </label>
-                                {question.isEditing ? (
-                                    <textarea
-                                        value={question.editedText || ''}
-                                        onChange={(e) => handleTextChange(question.id!, e.target.value)}
-                                        style={{
-                                            width: '100%',
-                                            padding: '10px',
-                                            fontSize: '16px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #ccc',
-                                            minHeight: '80px',
-                                            resize: 'vertical'
-                                        }}
-                                    />
-                                ) : (
-                                    <p style={{ 
-                                        padding: '10px', 
-                                        backgroundColor: 'white', 
-                                        borderRadius: '4px',
-                                        border: '1px solid #e0e0e0'
-                                    }}>
-                                        {question.text}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                    Question Type:
-                                </label>
-                                {question.isEditing ? (
-                                    <select
-                                        value={question.editedQuestionType}
-                                        onChange={(e) => handleQuestionTypeChange(question.id!, e.target.value as QuestionType)}
-                                        style={{
-                                            width: '100%',
-                                            padding: '10px',
-                                            fontSize: '16px',
-                                            borderRadius: '4px',
-                                            border: '1px solid #ccc'
-                                        }}
-                                    >
-                                        <option value={QuestionType.MultipleChoice}>MULTIPLE_CHOICE</option>
-                                        <option value={QuestionType.TrueFalse}>TRUE_FALSE</option>
-                                        <option value={QuestionType.ShortAnswer}>SHORT_ANSWER</option>
-                                    </select>
-                                ) : (
-                                    <p style={{ 
-                                        padding: '10px', 
-                                        backgroundColor: 'white', 
-                                        borderRadius: '4px',
-                                        border: '1px solid #e0e0e0'
-                                    }}>
-                                        {question.questionType}
-                                    </p>
-                                )}
-                            </div>
-
-                            {((question.isEditing && question.editedQuestionType === QuestionType.MultipleChoice) || 
-                              (!question.isEditing && question.questionType === QuestionType.MultipleChoice)) && (
-                                <div style={{ marginBottom: '15px' }}>
-                                    <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                        Options:
-                                    </label>
-                                    {question.isEditing ? (
-                                        <div>
-                                            {question.editedOptions?.map((option: string | null, idx: number) => (
-                                                <div key={idx} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={option || ''}
-                                                        onChange={(e) => handleOptionChange(question.id!, idx, e.target.value)}
-                                                        placeholder={`Option ${idx + 1}`}
-                                                        style={{
-                                                            flex: 1,
-                                                            padding: '8px',
-                                                            fontSize: '14px',
-                                                            borderRadius: '4px',
-                                                            border: '1px solid #ccc'
-                                                        }}
-                                                    />
-                                                    {question.editedOptions && question.editedOptions.length > 2 && (
-                                                        <button
-                                                            onClick={() => handleRemoveOption(question.id!, idx)}
-                                                            style={{
-                                                                padding: '8px 12px',
-                                                                backgroundColor: '#dc3545',
-                                                                color: 'white',
-                                                                border: 'none',
-                                                                borderRadius: '4px',
-                                                                cursor: 'pointer',
-                                                                fontSize: '14px'
-                                                            }}
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                            <button
-                                                onClick={() => handleAddOption(question.id!)}
-                                                style={{
-                                                    padding: '8px 16px',
-                                                    backgroundColor: '#28a745',
-                                                    color: 'white',
-                                                    border: 'none',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    fontSize: '14px',
-                                                    marginTop: '5px'
-                                                }}
-                                            >
-                                                + Add Option
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <ul style={{ 
-                                            padding: '10px 10px 10px 30px', 
-                                            backgroundColor: 'white', 
+                            {isEditing ? (
+                                <QuestionEditor
+                                    question={editState.editedQuestion!}
+                                    index={index}
+                                    onChange={(updated) => handleQuestionChange(q.id!, updated)}
+                                />
+                            ) : (
+                                <>
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                            Question Text:
+                                        </label>
+                                        <p style={{ 
+                                            padding: '10px', 
+                                            // backgroundColor: 'white', 
                                             borderRadius: '4px',
                                             border: '1px solid #e0e0e0'
                                         }}>
-                                            {question.options?.map((option: string | null, idx: number) => (
-                                                <li key={idx} style={{ marginBottom: '5px' }}>{option}</li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            )}
+                                            {q.text}
+                                        </p>
+                                    </div>
 
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
-                                    Correct Answer:
-                                </label>
-                                {question.isEditing ? (
-                                    question.editedQuestionType === QuestionType.TrueFalse ? (
-                                        <select
-                                            value={question.editedCorrectAnswer || ''}
-                                            onChange={(e) => handleCorrectAnswerChange(question.id!, e.target.value)}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                fontSize: '16px',
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                            Question Type:
+                                        </label>
+                                        <p style={{ 
+                                            padding: '10px', 
+                                            // backgroundColor: 'white', 
+                                            borderRadius: '4px',
+                                            border: '1px solid #e0e0e0'
+                                        }}>
+                                            {q.questionType}
+                                        </p>
+                                    </div>
+
+                                    {q.questionType === QuestionType.MultipleChoice && (
+                                        <div style={{ marginBottom: '15px' }}>
+                                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                                Options:
+                                            </label>
+                                            <ul style={{ 
+                                                padding: '10px 10px 10px 30px', 
+                                                // backgroundColor: 'white', 
                                                 borderRadius: '4px',
-                                                border: '1px solid #ccc'
-                                            }}
-                                        >
-                                            <option value="">Select answer...</option>
-                                            <option value="True">True</option>
-                                            <option value="False">False</option>
-                                        </select>
-                                    ) : question.editedQuestionType === QuestionType.MultipleChoice && question.editedOptions ? (
-                                        <select
-                                            value={question.editedCorrectAnswer || ''}
-                                            onChange={(e) => handleCorrectAnswerChange(question.id!, e.target.value)}
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                fontSize: '16px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #ccc'
-                                            }}
-                                        >
-                                            <option value="">Select correct answer...</option>
-                                            {question.editedOptions.map((option: string | null, idx: number) => (
-                                                <option key={idx} value={option || ''}>{option}</option>
-                                            ))}
-                                        </select>
-                                    ) : (
-                                        <input
-                                            type="text"
-                                            value={question.editedCorrectAnswer || ''}
-                                            onChange={(e) => handleCorrectAnswerChange(question.id!, e.target.value)}
-                                            placeholder="Enter correct answer"
-                                            style={{
-                                                width: '100%',
-                                                padding: '10px',
-                                                fontSize: '16px',
-                                                borderRadius: '4px',
-                                                border: '1px solid #ccc'
-                                            }}
-                                        />
-                                    )
-                                ) : (
-                                    <p style={{ 
-                                        padding: '10px', 
-                                        backgroundColor: question.correctAnswer ? '#e7f3ff' : '#fff3cd', 
-                                        borderRadius: '4px',
-                                        border: `1px solid ${question.correctAnswer ? '#b3d9ff' : '#ffc107'}`,
-                                        fontWeight: 'bold'
-                                    }}>
-                                        {question.correctAnswer || 'No correct answer set'}
-                                    </p>
-                                )}
-                            </div>
+                                                border: '1px solid #e0e0e0'
+                                            }}>
+                                                {q.options?.map((option: string | null, idx: number) => (
+                                                    <li key={idx} style={{ marginBottom: '5px' }}>{option}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    <div style={{ marginBottom: '15px' }}>
+                                        <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                                            Correct Answer:
+                                        </label>
+                                        <p style={{ 
+                                            padding: '10px', 
+                                            backgroundColor: q.correctAnswer ? '#e7f3ff' : '#fff3cd', 
+                                            borderRadius: '4px',
+                                            border: `1px solid ${q.correctAnswer ? '#b3d9ff' : '#ffc107'}`,
+                                            fontWeight: 'bold',
+                                            color: q.correctAnswer ? '#3178c6' : '#856404'
+                                        }}>
+                                            {q.correctAnswer || 'No correct answer set'}
+                                        </p>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     );
                 })

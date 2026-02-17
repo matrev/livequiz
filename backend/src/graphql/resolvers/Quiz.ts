@@ -67,14 +67,20 @@ const QuizResolvers: Resolvers = {
                     userId,
                     deadline: deadline ? new Date(deadline) : null,
                     questions: questions ? {
-                        createMany: {
-                            data: questions
-                        }
+                        create: questions.map((q) => ({
+                            text: q.text,
+                            questionType: q.questionType,
+                            correctAnswer: q.correctAnswer,
+                            ...(q.options && { options: q.options }),
+                        }))
                     } : undefined,
                     createdAt: new Date(),
                     updatedAt: new Date(),  
+                },
+                include: {
+                    questions: true,
                 }
-            });
+            }) as unknown as Quiz;
             return newQuiz;
         },
         async deleteQuiz(_: any, args: { id: number }, context: PrismaContext) {

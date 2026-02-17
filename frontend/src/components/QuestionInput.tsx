@@ -7,16 +7,20 @@ type QuestionInputProps = {
     question: QuestionInputType;
     index: number;
     onChange: (updatedQuestion: QuestionInputType) => void;
-    showCorrectAnswer?: boolean;
 };
 
-export default function QuestionInput({ 
-    question, 
-    index, 
-    onChange, 
-    showCorrectAnswer = false 
-}: QuestionInputProps) {
-
+/**
+ * Component for creating new questions in quiz creation flow.
+ * Uses radio buttons for question type selection and minimal styling.
+ * 
+ * @example
+ * <QuestionInput 
+ *   question={question} 
+ *   index={0} 
+ *   onChange={(updated) => setQuestions(prev => [...prev, updated])} 
+ * />
+ */
+export default function QuestionInput({ question, index, onChange }: QuestionInputProps) {
     const handleTextChange = (e: ChangeEvent<HTMLInputElement>) => {
         onChange({ ...question, text: e.target.value });
     };
@@ -33,7 +37,9 @@ export default function QuestionInput({
                 newOptions = ["True", "False"];
                 break;
             case QuestionType.MultipleChoice:
-                newOptions = [""];
+                newOptions = question.options && question.options.length > 0 
+                    ? question.options.filter((opt): opt is string => opt != null)
+                    : ["Option 1", "Option 2", "Option 3", "Option 4"];
                 break;
         }
         
@@ -52,10 +58,6 @@ export default function QuestionInput({
         onChange({ ...question, options: newOptions });
     };
 
-    const handleCorrectAnswerChange = (e: ChangeEvent<HTMLInputElement>) => {
-        onChange({ ...question, correctAnswer: e.target.value });
-    };
-
     return (
         <div>
             <label htmlFor={`QuestionName-${index}`}>Enter the Question:</label>
@@ -66,6 +68,8 @@ export default function QuestionInput({
                 name={`QuestionName-${index}`}
                 id={`QuestionName-${index}`}
             />
+
+            <label>Select Question Type:</label>
             <label>
                 <input 
                     type="radio"
@@ -97,11 +101,14 @@ export default function QuestionInput({
                 True / False
             </label>
             <br/>
-            {(question.options !== null && question.questionType !== QuestionType.TrueFalse) && <>
-                {question.options?.map((option, optionIndex) => {
-                    return (
+
+            {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
+                <div>
+                    {question.options?.map((option, optionIndex) => (
                         <div key={optionIndex}>
-                            <label htmlFor={`Question-${index}-Option-${optionIndex}`}>Enter the Option:</label>
+                            <label htmlFor={`Question-${index}-Option-${optionIndex}`}>
+                                Enter the Option:
+                            </label>
                             <input
                                 type="text"
                                 onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
@@ -110,22 +117,10 @@ export default function QuestionInput({
                                 id={`Question-${index}-Option-${optionIndex}`}
                             />
                         </div>
-                    );
-                })}
-                {question.questionType === QuestionType.MultipleChoice && 
-                    <button type="button" onClick={handleAddOption}>Add Option</button>
-                }
-            </>}
-            {showCorrectAnswer && (
-                <div>
-                    <label htmlFor={`CorrectAnswer-${index}`}>Correct Answer:</label>
-                    <input
-                        type="text"
-                        onChange={handleCorrectAnswerChange}
-                        value={question.correctAnswer || ""}
-                        name={`CorrectAnswer-${index}`}
-                        id={`CorrectAnswer-${index}`}
-                    />
+                    ))}
+                    <button type="button" onClick={handleAddOption}>
+                        Add Option
+                    </button>
                 </div>
             )}
         </div>

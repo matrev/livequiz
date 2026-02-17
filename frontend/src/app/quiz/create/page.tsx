@@ -15,12 +15,14 @@ export default function CreateQuizPage() {
         variables: {
             title: "placeholder",
             questions: [],
+            userId: 9,
         },
         onCompleted: () => {
             setSuccessMessage("Quiz created successfully.");
             setErrorMessage(null);
         },
         onError: () => {
+            setErrorMessage("Failed to create quiz. Please try again.");
             setSuccessMessage(null);
         }
     });
@@ -44,9 +46,9 @@ export default function CreateQuizPage() {
     const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            validateQuizInput({title, questions})
+            validateQuizInput({title, questions, userId: 9})
             const deadlineIso = deadline ? new Date(deadline).toISOString() : undefined;
-            createQuiz({ variables: { title: title, questions: questions, deadline: deadlineIso }});
+            createQuiz({ variables: { title: title, questions: questions, deadline: deadlineIso, userId: 9 }});
         } catch (error) {
             if (error instanceof LiveQuizError) {
                 setErrorMessage(error.message);
