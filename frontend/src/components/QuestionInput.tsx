@@ -39,7 +39,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
             case QuestionType.MultipleChoice:
                 newOptions = question.options && question.options.length > 0 
                     ? question.options.filter((opt): opt is string => opt != null)
-                    : ["Option 1", "Option 2", "Option 3", "Option 4"];
+                    : ["Option 1", "Option 2"];
                 break;
         }
         
@@ -58,67 +58,135 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
         onChange({ ...question, options: newOptions });
     };
 
+    const handleRemoveOption = (optionIndex: number) => {
+        const updatedOptions = question.options?.filter((_, idx) => idx !== optionIndex);
+        onChange({ ...question, options: updatedOptions });
+    };
+
     return (
         <div>
-            <label htmlFor={`QuestionName-${index}`}>Enter the Question:</label>
-            <input
-                type="text"
-                onChange={handleTextChange}
-                value={question.text || ""}
-                name={`QuestionName-${index}`}
-                id={`QuestionName-${index}`}
-            />
+            <div style={{ marginBottom: '15px' }}>
+                <label htmlFor={`QuestionName-${index}`} style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                    Question Text:
+                </label>
+                <input
+                    type="text"
+                    onChange={handleTextChange}
+                    value={question.text || ""}
+                    name={`QuestionName-${index}`}
+                    id={`QuestionName-${index}`}
+                    placeholder="Enter your question here"
+                    style={{
+                        width: '100%',
+                        padding: '10px',
+                        border: '1px solid #ddd',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        boxSizing: 'border-box'
+                    }}
+                />
+            </div>
 
-            <label>Select Question Type:</label>
-            <label>
-                <input 
-                    type="radio"
-                    name={`QuestionType-${index}`}
-                    value={QuestionType.MultipleChoice}
-                    onChange={handleQuestionTypeChange} 
-                    checked={question.questionType === QuestionType.MultipleChoice} 
-                />
-                Multiple Choice
-            </label>
-            <label>
-                <input 
-                    type="radio" 
-                    name={`QuestionType-${index}`} 
-                    value={QuestionType.ShortAnswer} 
-                    onChange={handleQuestionTypeChange}
-                    checked={question.questionType === QuestionType.ShortAnswer} 
-                />
-                Short Answer
-            </label>
-            <label>
-                <input 
-                    type="radio" 
-                    name={`QuestionType-${index}`} 
-                    value={QuestionType.TrueFalse} 
-                    onChange={handleQuestionTypeChange}
-                    checked={question.questionType === QuestionType.TrueFalse} 
-                />
-                True / False
-            </label>
-            <br/>
+            <div style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                    Question Type:
+                </label>
+                <div style={{ display: 'flex', gap: '20px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input 
+                            type="radio"
+                            name={`QuestionType-${index}`}
+                            value={QuestionType.MultipleChoice}
+                            onChange={handleQuestionTypeChange} 
+                            checked={question.questionType === QuestionType.MultipleChoice} 
+                        />
+                        Multiple Choice
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input 
+                            type="radio" 
+                            name={`QuestionType-${index}`} 
+                            value={QuestionType.ShortAnswer} 
+                            onChange={handleQuestionTypeChange}
+                            checked={question.questionType === QuestionType.ShortAnswer} 
+                        />
+                        Short Answer
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input 
+                            type="radio" 
+                            name={`QuestionType-${index}`} 
+                            value={QuestionType.TrueFalse} 
+                            onChange={handleQuestionTypeChange}
+                            checked={question.questionType === QuestionType.TrueFalse} 
+                        />
+                        True / False
+                    </label>
+                </div>
+            </div>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
-                <div>
-                    {question.options?.map((option, optionIndex) => (
-                        <div key={optionIndex}>
-                            <label htmlFor={`Question-${index}-Option-${optionIndex}`}>
-                                Enter the Option:
-                            </label>
-                            <input
-                                type="text"
-                                onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
-                                value={String(option)}
-                                name={`Question-${index}-Option-${optionIndex}`}
-                                id={`Question-${index}-Option-${optionIndex}`}
-                            />
-                        </div>
-                    ))}
-                    <button type="button" onClick={handleAddOption}>
+                <div style={{ marginBottom: '0' }}>
+                    <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                        Options:
+                    </label>
+                    <div style={{ marginBottom: '10px' }}>
+                        {question.options?.map((option, optionIndex) => (
+                            <div key={optionIndex} style={{ marginBottom: '10px' }}>
+                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>
+                                    Option {optionIndex + 1}:
+                                </label>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
+                                        value={String(option)}
+                                        name={`Question-${index}-Option-${optionIndex}`}
+                                        id={`Question-${index}-Option-${optionIndex}`}
+                                        placeholder={`Enter option ${optionIndex + 1}`}
+                                        style={{
+                                            flex: 1,
+                                            padding: '10px',
+                                            border: '1px solid #ddd',
+                                            borderRadius: '4px',
+                                            fontSize: '14px',
+                                            boxSizing: 'border-box'
+                                        }}
+                                    />
+                                    {question.options && question.options.length > 2 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveOption(optionIndex)}
+                                            style={{
+                                                padding: '8px 12px',
+                                                backgroundColor: '#dc3545',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '4px',
+                                                cursor: 'pointer',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <button 
+                        type="button" 
+                        onClick={handleAddOption}
+                        style={{
+                            padding: '8px 16px',
+                            backgroundColor: '#17a2b8',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '14px'
+                        }}
+                    >
                         Add Option
                     </button>
                 </div>

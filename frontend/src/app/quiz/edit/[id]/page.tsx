@@ -71,6 +71,12 @@ export default function EditQuizPage() {
         const editState = editingStates[questionId];
         if (!editState) return;
 
+        // Optimistically update UI before mutation
+        setEditingStates(prev => ({
+            ...prev,
+            [questionId]: { ...prev[questionId], isEditing: false }
+        }));
+
         try {
             await updateQuestionMutation({
                 variables: {
@@ -80,15 +86,37 @@ export default function EditQuizPage() {
                     questionType: editState.editedQuestion.questionType,
                     options: editState.editedQuestion.options
                 },
-                refetchQueries: [{ query: getQuiz, variables: { joinCode } }]
+                optimisticResponse: {
+                    updateQuestion: {
+                        __typename: 'Question',
+                        id: questionId,
+                        text: editState.editedQuestion.text,
+                        correctAnswer: editState.editedQuestion.correctAnswer,
+                        questionType: editState.editedQuestion.questionType,
+                        options: editState.editedQuestion.options
+                    }
+                },
+                update: (cache, { data: mutationData }) => {
+                    if (mutationData?.updateQuestion) {
+                        cache.modify({
+                            id: cache.identify(mutationData.updateQuestion),
+                            fields: {
+                                text: () => mutationData.updateQuestion.text,
+                                correctAnswer: () => mutationData.updateQuestion.correctAnswer,
+                                questionType: () => mutationData.updateQuestion.questionType,
+                                options: () => mutationData.updateQuestion.options,
+                            }
+                        });
+                    }
+                }
             });
-            
-            setEditingStates(prev => ({
-                ...prev,
-                [questionId]: { ...prev[questionId], isEditing: false }
-            }));
         } catch (err) {
             console.error("Error updating question:", err);
+            // Revert editing state on error
+            setEditingStates(prev => ({
+                ...prev,
+                [questionId]: { ...prev[questionId], isEditing: true }
+            }));
         }
     };
 

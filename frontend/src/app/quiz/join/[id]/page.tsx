@@ -44,7 +44,7 @@ export default function JoinQuizPage() {
                 variables: {
                     quizId,
                     userId: 8,
-                    title: data.getQuiz.title,
+                    name: "Test User",
                     answers: Object.fromEntries(
                         Object.entries(userAnswers).map(([key, value]) => [String(key), value])
                     ),

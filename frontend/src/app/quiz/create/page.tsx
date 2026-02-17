@@ -62,45 +62,157 @@ export default function CreateQuizPage() {
     }
 
     return (
-        <div>
-            <Link href="/">back to home</Link>
+        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h1>Create New Quiz</h1>
+                <Link href="/" style={{
+                    padding: '10px 20px',
+                    backgroundColor: '#666',
+                    color: 'white',
+                    textDecoration: 'none',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                }}>
+                    Back to Home
+                </Link>
+            </div>
+
+            {errorMessage && (
+                <div style={{
+                    padding: '10px',
+                    marginBottom: '20px',
+                    backgroundColor: '#f8d7da',
+                    color: '#721c24',
+                    border: '1px solid #f5c6cb',
+                    borderRadius: '4px'
+                }}>
+                    {errorMessage}
+                </div>
+            )}
+
+            {successMessage && (
+                <div style={{
+                    padding: '10px',
+                    marginBottom: '20px',
+                    backgroundColor: '#d4edda',
+                    color: '#155724',
+                    border: '1px solid #c3e6cb',
+                    borderRadius: '4px'
+                }}>
+                    {successMessage} {data?.joinCode}
+                </div>
+            )}
+
             <form onSubmit={handleSubmit}>
-                <label htmlFor="QuizTitle">Enter the Title for the Quiz:</label>
-                <input
-                    type="text"
-                    onChange={(e) => {
-                        setTitle(e.target.value);
-                    }}
-                    value={title}
-                    name={`QuizTitle`}
-                    id={`QuizTitle`}
-                />
-                <label htmlFor="QuizDeadline">Deadline for Responses (optional):</label>
-                <input
-                    type="datetime-local"
-                    onChange={(e) => {
-                        setDeadline(e.target.value);
-                    }}
-                    value={deadline}
-                    name="QuizDeadline"
-                    id="QuizDeadline"
-                />
-                <br />
-                {questions.map((question, index) => (
-                    <QuestionInputComponent
-                        key={index}
-                        question={question}
-                        index={index}
-                        onChange={(updated) => updateQuestion(index, updated)}
-                    />
-                ))}
-                <button type="button" onClick={addQuestion}>Add Question</button>
-                <br></br>
-                {errorMessage && <p>{errorMessage}</p>}
-                {successMessage && <p>{successMessage} {data?.joinCode}</p>}
-                <button type="submit" disabled={loading}>
-                    {loading ? "Creating..." : "Create Quiz"}
-                </button>
+                <div style={{
+                    marginBottom: '20px',
+                    padding: '20px',
+                    border: '2px solid #ddd',
+                    borderRadius: '8px'
+                }}>
+                    <div style={{ marginBottom: '15px' }}>
+                        <label htmlFor="QuizTitle" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                            Quiz Title:
+                        </label>
+                        <input
+                            type="text"
+                            onChange={(e) => setTitle(e.target.value)}
+                            value={title}
+                            name="QuizTitle"
+                            id="QuizTitle"
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                boxSizing: 'border-box'
+                            }}
+                            placeholder="Enter quiz title"
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '0' }}>
+                        <label htmlFor="QuizDeadline" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                            Deadline for Responses (optional):
+                        </label>
+                        <input
+                            type="datetime-local"
+                            onChange={(e) => setDeadline(e.target.value)}
+                            value={deadline}
+                            name="QuizDeadline"
+                            id="QuizDeadline"
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                boxSizing: 'border-box'
+                            }}
+                        />
+                    </div>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                    <h2 style={{ marginTop: 0, marginBottom: '15px' }}>Questions</h2>
+                    {questions.length === 0 ? (
+                        <p style={{ color: '#666', fontStyle: 'italic' }}>No questions added yet. Click &quot;Add Question&quot; to get started.</p>
+                    ) : (
+                        questions.map((question, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    marginBottom: '20px',
+                                    padding: '20px',
+                                    border: '2px solid #ddd',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                <h3 style={{ margin: '0 0 15px 0' }}>Question {index + 1}</h3>
+                                <QuestionInputComponent
+                                    question={question}
+                                    index={index}
+                                    onChange={(updated) => updateQuestion(index, updated)}
+                                />
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+                    <button
+                        type="button"
+                        onClick={addQuestion}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#17a2b8',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '14px'
+                        }}
+                    >
+                        Add Question
+                    </button>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: loading ? '#ccc' : '#28a745',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '14px'
+                        }}
+                    >
+                        {loading ? 'Creating...' : 'Create Quiz'}
+                    </button>
+                </div>
             </form>
         </div>
     );
