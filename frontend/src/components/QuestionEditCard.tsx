@@ -73,7 +73,6 @@ export default function QuestionEditCard({
                 </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h3 style={{ margin: 0 }}>Question {index + 1}</h3>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     {isEditing ? (
                         <>

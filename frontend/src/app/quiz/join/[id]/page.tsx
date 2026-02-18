@@ -80,10 +80,10 @@ export default function JoinQuizPage() {
 
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-            <h1>{quiz.title}</h1>
+            <h1 style={{ fontWeight: 'bold', fontSize: '32px' }}>{quiz.title}</h1>
             <p>Please answer all questions below:</p>
 
-            {quiz.questions?.map((question, index: number) => {
+            {quiz.questions?.map((question) => {
                 if (!question.id) return null;
                 
                 return (
@@ -93,7 +93,6 @@ export default function JoinQuizPage() {
                         border: '1px solid #ccc',
                         borderRadius: '8px'
                     }}>
-                        <h3>Question {index + 1}</h3>
                         <p style={{ fontSize: '18px', marginBottom: '15px' }}>{question.text}</p>
 
                         {question.questionType === QuestionType.MultipleChoice && question.options ? (
