@@ -1,7 +1,7 @@
-import { MutationCreateQuizArgs, QuestionType } from "@/generated/types";
+import { MutationCreateQuizArgs, MutationCreateUserArgs, QuestionType } from "@/generated/types";
 import { LiveQuizError } from "./error";
 
-export function validateQuizInput(quizMutationArgs: MutationCreateQuizArgs) {
+export function validateQuizInput(quizMutationArgs: MutationCreateQuizArgs & MutationCreateUserArgs) {
     let errorMessage: string = "";
     if (quizMutationArgs.title === "") {
         errorMessage = "A Title for a quiz is required.";

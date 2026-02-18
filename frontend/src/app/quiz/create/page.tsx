@@ -3,8 +3,9 @@
 import { MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/types";
 import { LiveQuizError } from "@/utils/error";
 import { validateQuizInput } from "@/utils/utils";
-import { useMutation } from "@apollo/client/react";
-import { createQuiz as createQuizMutation } from "@/graphql/mutations";
+import { useLazyQuery, useMutation } from "@apollo/client/react";
+import { createQuiz as createQuizMutation, createUser as createUserMutation } from "@/graphql/mutations";
+import { getUserByEmail as getUserByEmailQuery } from "@/graphql/queries";
 import QuestionInputComponent from "@/components/QuestionInput";
 
 import Link from "next/link";
@@ -15,7 +16,7 @@ export default function CreateQuizPage() {
         variables: {
             title: "placeholder",
             questions: [],
-            userId: 9,
+            userId: 0,
         },
         onCompleted: () => {
             setSuccessMessage("Quiz created successfully.");
@@ -26,9 +27,15 @@ export default function CreateQuizPage() {
             setSuccessMessage(null);
         }
     });
+    const [createUser] = useMutation(createUserMutation);
+    const [getUserByEmail] = useLazyQuery(getUserByEmailQuery, {
+        fetchPolicy: "network-only",
+    });
     const [questions, setQuestions] = useState<QuestionInput[]>([]);
     const [title, setTitle] = useState<string>("");
     const [deadline, setDeadline] = useState<string>("");
+    const [ownerName, setOwnerName] = useState<string>("");
+    const [ownerEmail, setOwnerEmail] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -52,19 +59,56 @@ export default function CreateQuizPage() {
         setQuestions(prev => prev.filter((_, i) => i !== index));
     }
 
-    const handleSubmit = (e: SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            validateQuizInput({title, questions, userId: 9})
+            const trimmedOwnerName = ownerName.trim();
+            const trimmedOwnerEmail = ownerEmail.trim().toLowerCase();
+
+            validateQuizInput({
+                title,
+                questions,
+                userId: 0,
+                name: trimmedOwnerName, // user creation field
+                email: trimmedOwnerEmail, // user creation field
+            });
+
+            const existingUserResult = await getUserByEmail({
+                variables: {
+                    email: trimmedOwnerEmail,
+                },
+            });
+
+            if (existingUserResult.data?.getUserByEmail?.id) {
+                throw new LiveQuizError("An account with this email already exists.");
+            }
+
+            const createdUserResult = await createUser({
+                variables: {
+                    name: trimmedOwnerName,
+                    email: trimmedOwnerEmail,
+                    isAdmin: false,
+                },
+            });
+
+            const ownerId = createdUserResult.data?.createUser.id;
+            if (!ownerId) {
+                throw new LiveQuizError("Unable to create user for this quiz.");
+            }
+
             const deadlineIso = deadline ? new Date(deadline).toISOString() : undefined;
-            createQuiz({ variables: { title: title, questions: questions, deadline: deadlineIso, userId: 9 }});
+            await createQuiz({ variables: { title: title, questions: questions, deadline: deadlineIso, userId: ownerId }});
         } catch (error) {
             if (error instanceof LiveQuizError) {
                 setErrorMessage(error.message);
+            } else {
+                setErrorMessage("Failed to create quiz. Please try again.");
             }
             return;
         }
         setTitle("");
+        setOwnerName("");
+        setOwnerEmail("");
         setErrorMessage(null);
         setQuestions([]);
         setDeadline("");
@@ -139,6 +183,50 @@ export default function CreateQuizPage() {
                                 boxSizing: 'border-box'
                             }}
                             placeholder="Enter quiz title"
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '15px' }}>
+                        <label htmlFor="OwnerName" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                            Your Name:
+                        </label>
+                        <input
+                            type="text"
+                            onChange={(e) => setOwnerName(e.target.value)}
+                            value={ownerName}
+                            name="OwnerName"
+                            id="OwnerName"
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                boxSizing: 'border-box'
+                            }}
+                            placeholder="Enter your name"
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '15px' }}>
+                        <label htmlFor="OwnerEmail" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+                            Your Email:
+                        </label>
+                        <input
+                            type="email"
+                            onChange={(e) => setOwnerEmail(e.target.value)}
+                            value={ownerEmail}
+                            name="OwnerEmail"
+                            id="OwnerEmail"
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                fontSize: '14px',
+                                boxSizing: 'border-box'
+                            }}
+                            placeholder="Enter your email"
                         />
                     </div>
 
