@@ -55,6 +55,16 @@ type Entry {
     updatedAt: DateTime!
 }
 
+type LeaderboardEntry {
+    userId: Int
+    name: String!
+    score: Float!
+    correctCount: Int!
+    answeredCount: Int!
+    rank: Int!
+    updatedAt: DateTime!
+}
+
 type Query {
     # User Queries
     getAllUsers: [User!]!
@@ -77,6 +87,9 @@ type Query {
     # Question Queries
     getQuestion(id: Int!): Question
     isQuestionCorrect(questionId: Int!, answer: String!): Boolean!
+
+    # Leaderboard Queries
+    getLeaderboardForQuiz(quizId: Int!): [LeaderboardEntry!]!
 }
 
 type Mutation {
@@ -101,19 +114,6 @@ type Mutation {
     deleteQuiz(id: Int!): Quiz!
 }
 
-type LeaderboardEntry {
-    userId: Int!
-    userName: String!
-    correctAnswers: Int!
-    totalQuestions: Int!
-    score: Float!
-}
-
-type QuizUpdatePayload {
-    quiz: Quiz!
-    leaderboard: [LeaderboardEntry!]!
-}
-
 type Subscription {
-    quizUpdated(quizId: Int!): QuizUpdatePayload!
+    leaderboardUpdated(quizId: Int!): [LeaderboardEntry!]!
 }

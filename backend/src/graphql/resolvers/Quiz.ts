@@ -1,10 +1,10 @@
 import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
-import { PrismaContext } from '../../prisma.js';
+import { ResolverContext } from '../../prisma.js';
 import { generateJoinCode } from '../../utils/generateJoinCode.js';
 
 const QuizResolvers: Resolvers = {
     Query: {
-        getAllQuizzes: (_: any, __: any, context: PrismaContext) => {
+        getAllQuizzes: (_: any, __: any, context: ResolverContext) => {
             return context.prisma.quiz.findMany({
                 include: {
                     questions: {
@@ -15,7 +15,7 @@ const QuizResolvers: Resolvers = {
                 }
             }) as Promise<Quiz[]>;
         },
-        getQuiz(_: any, args: { joinCode: string }, context: PrismaContext) {
+        getQuiz(_: any, args: { joinCode: string }, context: ResolverContext) {
             const { joinCode } = args;
             return context.prisma.quiz.findUnique({
                 where: {
@@ -30,7 +30,7 @@ const QuizResolvers: Resolvers = {
                 }
             }) as unknown as Quiz | null;
         },
-        getQuestionsForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
+        getQuestionsForQuiz(_: any, args: { quizId: number }, context: ResolverContext) {
             const { quizId } = args;
             return context.prisma.question.findMany({
                 where: {
@@ -41,7 +41,7 @@ const QuizResolvers: Resolvers = {
                 },
             }) as Promise<Question[]>;
         },
-        getUsersForQuiz(_: any, args: { quizId: number }, context: PrismaContext) {
+        getUsersForQuiz(_: any, args: { quizId: number }, context: ResolverContext) {
             const { quizId } = args;
             return context.prisma.user.findMany({
                 where: {
@@ -53,7 +53,7 @@ const QuizResolvers: Resolvers = {
                 },
             }) as Promise<User[]>;
         },
-        getQuizzesForUser(_: any, args: { userId: number }, context: PrismaContext) {
+        getQuizzesForUser(_: any, args: { userId: number }, context: ResolverContext) {
             const { userId } = args;
             return context.prisma.quiz.findMany({
                 where: {
@@ -67,7 +67,7 @@ const QuizResolvers: Resolvers = {
         },
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; userId: number; questions?: [Question]; deadline?: string }, context: PrismaContext) {
+        async createQuiz(_: any, args: { title: string; userId: number; questions?: [Question]; deadline?: string }, context: ResolverContext) {
             const { title, userId, questions = null, deadline } = args;
             const joinCode = generateJoinCode();
             
@@ -94,7 +94,7 @@ const QuizResolvers: Resolvers = {
             }) as unknown as Quiz;
             return newQuiz;
         },
-        async deleteQuiz(_: any, args: { id: number }, context: PrismaContext) {
+        async deleteQuiz(_: any, args: { id: number }, context: ResolverContext) {
             const { id } = args;
             return context.prisma.quiz.delete({
                 where: {
@@ -102,7 +102,7 @@ const QuizResolvers: Resolvers = {
                 },
             }) as unknown as Quiz;
         },
-        async updateQuiz(_: any, args: { id: number; title?: string; questions?: any[] }, context: PrismaContext) {
+        async updateQuiz(_: any, args: { id: number; title?: string; questions?: any[] }, context: ResolverContext) {
             const { id, title } = args;
             return context.prisma.quiz.update({
                 where: {
@@ -114,7 +114,7 @@ const QuizResolvers: Resolvers = {
                 },
             }) as unknown as Quiz;
         },
-        async addQuestionToQuiz(_: any, args: { quizId: number; questionId: number }, context: PrismaContext) {
+        async addQuestionToQuiz(_: any, args: { quizId: number; questionId: number }, context: ResolverContext) {
             const { quizId, questionId } = args;
             const quiz = await context.prisma.quiz.findUnique({
                 where: { id: quizId },
@@ -137,7 +137,7 @@ const QuizResolvers: Resolvers = {
             });
             return newQuestion;
         },
-        async removeQuestionFromQuiz(_: any, args: { quizId: number; questionId: number }, context: PrismaContext) {
+        async removeQuestionFromQuiz(_: any, args: { quizId: number; questionId: number }, context: ResolverContext) {
             const { quizId, questionId } = args;
             return context.prisma.question.deleteMany({
                 where: {

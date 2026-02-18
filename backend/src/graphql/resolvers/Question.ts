@@ -1,10 +1,11 @@
-import { PrismaContext } from "../../prisma.js";
+import { ResolverContext } from "../../prisma.js";
 import { QuestionType } from "../../../generated/graphql.js";
 import { Resolvers, Question } from "../../../generated/graphql.js";
+import { publishLeaderboardUpdated } from "../../utils/publishLeaderboardUpdated.js";
 
 const QuestionResolvers: Resolvers = {
     Query: {
-        getQuestion(_: any, args: { id: number }, context: PrismaContext) {
+        getQuestion(_: any, args: { id: number }, context: ResolverContext) {
             const { id } = args;
             return context.prisma.question.findUnique({
                 where: {
@@ -12,7 +13,7 @@ const QuestionResolvers: Resolvers = {
                 },
             }) as unknown as Question;
         },
-        isQuestionCorrect(_: any, args: { questionId: number; answer: string }, context: PrismaContext) {
+        isQuestionCorrect(_: any, args: { questionId: number; answer: string }, context: ResolverContext) {
             const { questionId, answer } = args;
             return context.prisma.question.findUnique({
                 where: {
@@ -27,7 +28,7 @@ const QuestionResolvers: Resolvers = {
         }
     },
     Mutation: {
-        async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer?: string; quizId: number }, context: PrismaContext) {
+        async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer?: string; quizId: number }, context: ResolverContext) {
             const { text, questionType, quizId, correctAnswer = null } = args;
             const newQuestion = await context.prisma.question.create({
                 data: {
@@ -39,7 +40,7 @@ const QuestionResolvers: Resolvers = {
             });
             return newQuestion as Question;
         },
-        async deleteQuestion(_: any, args: { id: number }, context: PrismaContext) {
+        async deleteQuestion(_: any, args: { id: number }, context: ResolverContext) {
             const { id } = args;
             // Implementation for deleting a question by ID
             return context.prisma.question.delete({
@@ -48,10 +49,10 @@ const QuestionResolvers: Resolvers = {
                 },
             }) as unknown as Question;
         },
-        async updateQuestion(_: any, args: { id: number; text?: string; questionType?: QuestionType; correctAnswer?: string, options?: (string | null)[] }, context: PrismaContext) {
+        async updateQuestion(_: any, args: { id: number; text?: string; questionType?: QuestionType; correctAnswer?: string, options?: (string | null)[] }, context: ResolverContext) {
             const { id, text, questionType, correctAnswer, options } = args;
             // Implementation for updating a question by ID
-            return context.prisma.question.update({
+            const updatedQuestion = await context.prisma.question.update({
                 where: {
                     id,
                 },
@@ -61,7 +62,12 @@ const QuestionResolvers: Resolvers = {
                     correctAnswer,
                     options: options ? options : undefined,
                 },
-            }) as unknown as Question;
+            });
+
+            // publish only if answer key/scoring fields changed
+            await publishLeaderboardUpdated(context, updatedQuestion.quizId);
+
+            return updatedQuestion as Question;
         },
     }
 }
