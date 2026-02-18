@@ -52,8 +52,6 @@ model Entry {
   updatedAt DateTime @updatedAt
   quiz      Quiz     @relation(fields: [quizId], references: [id])
   user    User?    @relation(fields: [userId], references: [id])
-
-  @@unique([quizId, userId])
 }
 
 enum QuestionType {

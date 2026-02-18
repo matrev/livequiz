@@ -20,12 +20,10 @@ const EntryResolvers: Resolvers = {
     },
     getEntryForUser(_: any, args: { quizId: number, userId: number }, context: PrismaContext) {
       const { quizId, userId } = args;
-      return context.prisma.entry.findUnique({
+      return context.prisma.entry.findMany({
         where: {
-          quizId_userId: {
-            quizId,
-            userId
-          }
+          quizId,
+          userId
         }
       }) as unknown as Entry;
     },
@@ -56,13 +54,11 @@ const EntryResolvers: Resolvers = {
         throw new Error("Quiz deadline has passed. Submissions are no longer accepted.");
       }
 
-      const existingEntry = await context.prisma.entry.findUnique({
+      const existingEntry = await context.prisma.entry.findFirst({
         where: {
-          quizId_userId: {
-            quizId,
-            userId
-          }
-        }
+          quizId,
+          userId,
+        },
       });
 
       if (existingEntry) {
