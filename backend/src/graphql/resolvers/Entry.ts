@@ -39,8 +39,12 @@ const EntryResolvers: Resolvers = {
     },
   },
   Mutation: {
-    async upsertEntry(_: any, args: { quizId: number; name: string, answers: any, userId?: number }, context: ResolverContext) {
-      const { quizId, name, answers, userId = null } = args;
+    async upsertEntry(
+      _: any,
+      args: { quizId: number; name: string; answers: any; userId?: number },
+      context: ResolverContext
+    ) {
+      const { quizId, name, answers, userId } = args;
 
       // Check if quiz deadline has passed
       const quiz = await context.prisma.quiz.findUnique({
@@ -56,39 +60,33 @@ const EntryResolvers: Resolvers = {
         throw new Error("Quiz deadline has passed. Submissions are no longer accepted.");
       }
 
-      const existingEntry = await context.prisma.entry.findFirst({
-        where: {
-          quizId,
-          userId,
-        },
-      });
+      const existingEntry =
+        userId != null
+          ? await context.prisma.entry.findFirst({
+              where: { quizId, userId },
+            })
+          : null;
 
       if (existingEntry) {
         // Update existing entry
         return context.prisma.entry.update({
-          where: {
-            id: existingEntry.id,
-          },
-          data: {
-            name,
-            answers,
-          },
+          where: { id: existingEntry.id },
+          data: { name, answers },
         }) as unknown as Entry;
-      } else {
-        // Create new entry
-        const savedEntry = await context.prisma.entry.create({
-          data: {
-            quizId,
-            userId,
-            name,
-            answers,
-          },
-        });
-
-        await publishLeaderboardUpdated(context, Number(args.quizId));
-
-        return savedEntry as unknown as Entry;
       }
+
+      // Create new entry
+      const savedEntry = await context.prisma.entry.create({
+        data: {
+          quizId,
+          userId: userId ?? null,
+          name,
+          answers,
+        },
+      });
+
+      await publishLeaderboardUpdated(context, quizId);
+      return savedEntry as unknown as Entry;
     },
   },
 };
