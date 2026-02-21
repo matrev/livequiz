@@ -1,14 +1,12 @@
 import { Resolvers, User } from '../../../generated/graphql.js';
-import { PrismaContext } from '../../prisma.js';
-// import { DateTimeResolver } from 'graphql-scalars';
+import { ResolverContext } from '../../prisma.js';
 
 const UserResolvers: Resolvers = {
-    // DateTime: DateTimeResolver,
     Query: {
-        getAllUsers(_: any, __: any, context: PrismaContext) {
+    getAllUsers(_: any, __: any, context: ResolverContext) {
             return context.prisma.user.findMany() as Promise<User[]>;
         },
-        getUser(_: any, args: { id: number }, context: PrismaContext) {
+        getUser(_: any, args: { id: number }, context: ResolverContext) {
             const { id } = args;
             return context.prisma.user.findUnique({
                 where: {
@@ -16,7 +14,7 @@ const UserResolvers: Resolvers = {
                 },
             }) as unknown as User | null;
         },
-        getUserByEmail(_: any, args: { email: string }, context: PrismaContext) {
+        getUserByEmail(_: any, args: { email: string }, context: ResolverContext) {
             const { email } = args;
             return context.prisma.user.findUnique({
                 where: {
@@ -26,7 +24,7 @@ const UserResolvers: Resolvers = {
         },
     },
     Mutation: {
-        async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }, context: PrismaContext) {
+        async createUser(_: any, args: { name: string; email: string, isAdmin?: boolean }, context: ResolverContext) {
             const { name, email, isAdmin = false} = args;
             const newUser: User = await context.prisma.user.create({
                 data: {
@@ -37,7 +35,7 @@ const UserResolvers: Resolvers = {
             });
             return newUser;
         },
-        async deleteUser(_: any, args: { id: number }, context: PrismaContext) {
+        async deleteUser(_: any, args: { id: number }, context: ResolverContext) {
             const { id } = args;
             const deletedUser: User = await context.prisma.user.delete({
                 where: {
@@ -46,7 +44,7 @@ const UserResolvers: Resolvers = {
             });
             return deletedUser;
         },
-        async updateUser(_: any, args: { id: number; name?: string; email?: string, isAdmin?: boolean }, context: PrismaContext) { 
+        async updateUser(_: any, args: { id: number; name?: string; email?: string, isAdmin?: boolean }, context: ResolverContext) { 
             const { id, name, email, isAdmin } = args;
             const updatedUser: User = await context.prisma.user.update({
                 where: {

@@ -2,10 +2,10 @@ import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 
 import { resolvers } from './graphql/resolvers/resolvers.js';
-import { PrismaContext, createPrismaContext } from './prisma.js';
+import { ResolverContext, createResolverContext } from './prisma.js';
 import { typeDefs } from './graphql/utils.js';
 
-const server = new ApolloServer<PrismaContext>({
+const server = new ApolloServer<ResolverContext>({
   typeDefs,
   resolvers,
 });
@@ -15,9 +15,9 @@ const server = new ApolloServer<PrismaContext>({
 //  2. installs your ApolloServer instance as middleware
 //  3. prepares your app to handle incoming requests
 
-const { url } = await startStandaloneServer<PrismaContext>(server, {
+const { url } = await startStandaloneServer<ResolverContext>(server, {
   listen: { port: 4000 },
-  context: createPrismaContext,
+  context: createResolverContext,
 });
 
 console.log(`🚀  Server ready at: ${url}`);
