@@ -1,7 +1,7 @@
 import { CodegenConfig } from "@graphql-codegen/cli";
 
 const config: CodegenConfig = {
-    schema: "http://localhost:4000", //change to local file path if server is not running
+    schema: "http://localhost:4000/graphql", //change to local file path if server is not running
     documents: ["./src/**/*.{ts,tsx,js,jsx,graphql}"],
     generates: {
         "./src/generated/": {
