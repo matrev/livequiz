@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 import { Resolvers } from "../../../generated/graphql.js";
+import { ResolverContext } from "../../prisma.js";
 
 interface QuizQuestion {
   id: number;
@@ -131,13 +132,18 @@ const LeaderboardResolvers: Resolvers = {
 
   Subscription: {
     leaderboardUpdated: {
-      subscribe(_parent, args, context) {
+      subscribe(_parent: unknown, args: { quizId: number }, context: ResolverContext) {
         const quizId = Number(args.quizId);
         if (!Number.isInteger(quizId)) {
           throw new GraphQLError("Invalid quizId");
         }
 
-        return context.pubsub.asyncIterator(leaderboardTopic(quizId));
+        return context.pubsub.asyncIterableIterator<{
+          leaderboardUpdated: LeaderboardRow[];
+        }>(leaderboardTopic(quizId));
+      },
+      resolve(payload: { leaderboardUpdated: LeaderboardRow[] }): LeaderboardRow[] {
+        return payload.leaderboardUpdated;
       },
     },
   },

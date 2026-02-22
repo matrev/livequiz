@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useSubscription } from "@apollo/client/react";
 import { getLeaderboardForQuiz } from "@/graphql/queries";
@@ -24,22 +24,34 @@ export default function QuizLeaderboardPage() {
     const quizId = Number(params.id);
     const hasValidQuizId = Number.isInteger(quizId) && quizId > 0;
 
+    const [liveState, setLiveState] = useState<{ quizId: number; rows: LeaderboardRow[] }>({
+        quizId: 0,
+        rows: [],
+    });
+
     const { loading, error, data: queryData } = useQuery(getLeaderboardForQuiz, {
         variables: { quizId },
         skip: !hasValidQuizId,
     });
 
     const {
-        data: subscriptionData,
         error: subscriptionError,
     } = useSubscription(leaderboardUpdated, {
         variables: { quizId },
         skip: !hasValidQuizId,
+        onData: ({ data }) => {
+            setLiveState({
+                quizId,
+                rows: data.data?.leaderboardUpdated ?? [],
+            });
+        },
     });
 
+    const hasRealtimeUpdate = liveState.quizId === quizId;
+
     const leaderboardRows = useMemo<LeaderboardRow[]>(
-        () => subscriptionData?.leaderboardUpdated ?? queryData?.getLeaderboardForQuiz ?? [],
-        [subscriptionData, queryData]
+        () => (hasRealtimeUpdate ? liveState.rows : queryData?.getLeaderboardForQuiz ?? []),
+        [hasRealtimeUpdate, liveState.rows, queryData]
     );
 
     const sortedRows = useMemo(
@@ -100,13 +112,16 @@ export default function QuizLeaderboardPage() {
             </div>
 
             <p style={{ marginBottom: "8px" }}>Quiz ID: {quizId}</p>
+            <p style={{ marginBottom: "8px" }}>
+                Realtime status: {subscriptionError ? "Disconnected" : "Connected"}
+            </p>
             <p style={{ marginBottom: "16px" }}>
                 Last updated: {lastUpdated ?? "Waiting for updates"}
             </p>
-
+            
             {subscriptionError ? (
                 <p style={{ marginBottom: "16px", color: "#b45309" }}>
-                    Realtime updates are currently unavailable. Showing latest loaded leaderboard snapshot.
+                    Realtime updates are currently unavailable. Showing latest loaded leaderboard snapshot. {subscriptionError.message}
                 </p>
             ) : null}
 
