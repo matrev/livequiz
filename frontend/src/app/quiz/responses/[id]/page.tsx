@@ -12,18 +12,18 @@ type UserAnswers = Record<number, string>;
 export default function QuizResponseDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const quizId = Number(params.id);
+  const joinCode = String(params.id ?? "").trim();
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const { loading, data, error: queryError } = useQuery(getQuiz, {
-    variables: { id: quizId },
+    variables: { joinCode },
   });
 
   const { data: entryData } = useQuery(getEntryForUser, {
-    variables: { quizId, userId: 0 },
-    skip: true,
+    variables: { quizId: data?.getQuiz?.id ?? 0, userId: 0 },
+    skip: !data?.getQuiz?.id, // Skip until we have a valid quiz ID
   });
 
   const [upsertEntryMutation, { loading: savingEntry }] = useMutation(upsertEntry);
@@ -61,16 +61,16 @@ export default function QuizResponseDetailPage() {
   };
 
   const handleSave = () => {
-    if (!data?.getQuiz) {
+    if (!data?.getQuiz || !data.getQuiz.id) {
       setError("Quiz not found.");
       return;
     }
 
     upsertEntryMutation({
       variables: {
-        quizId,
+        quizId: data.getQuiz.id,
         userId: 0, // Replace with actual user ID if available
-        title: data.getQuiz.title,
+        name: data.getQuiz.title,
         answers: Object.fromEntries(
           Object.entries(editedAnswers).map(([key, value]) => [String(key), value])
         ),

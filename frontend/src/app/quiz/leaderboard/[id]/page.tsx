@@ -116,19 +116,21 @@ export default function QuizLeaderboardPage() {
         <div style={{ padding: "24px", maxWidth: "900px", margin: "0 auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                 <h1 style={{ margin: 0 }}>{quizData?.getQuiz?.title ?? "Live Leaderboard"}</h1>
-                <button
-                    onClick={() => router.push("/quiz/join")}
-                    style={{
-                        padding: "8px 16px",
-                        border: "none",
-                        borderRadius: "6px",
-                        backgroundColor: "#64748b",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
-                >
-                    Back to quizzes
-                </button>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    <button
+                        onClick={() => router.push("/quiz/join")}
+                        style={{
+                            padding: "8px 16px",
+                            border: "none",
+                            borderRadius: "6px",
+                            backgroundColor: "#64748b",
+                            color: "white",
+                            cursor: "pointer",
+                        }}
+                    >
+                        Back to quizzes
+                    </button>
+                </div>
             </div>
 
             <p style={{ marginBottom: "8px" }}>

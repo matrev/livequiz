@@ -178,19 +178,34 @@ export default function EditQuizPage() {
         <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h1>Edit Quiz: {quiz.title}</h1>
-                <button
-                    onClick={() => router.push('/quiz/edit')}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#666',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Back to List
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                        onClick={() => router.push(`/quiz/entries/${joinCode}`)}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#3b82f6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        View Entries
+                    </button>
+                    <button
+                        onClick={() => router.push('/quiz/edit')}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: '#666',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Back to List
+                    </button>
+                </div>
             </div>
 
             {questionsWithId.length === 0 ? (

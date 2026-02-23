@@ -14,7 +14,7 @@ interface UserAnswers {
 export default function JoinQuizPage() {
     const params = useParams();
     const router = useRouter();
-    const joinCode = params.id as string;
+    const joinCode = params.joinCode as string;
     
     const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
     const [username, setUsername] = useState("");

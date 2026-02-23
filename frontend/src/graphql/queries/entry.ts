@@ -19,6 +19,21 @@ type GetAllEntriesQuery = {
 
 type GetAllEntriesQueryVariables = Record<string, never>;
 
+type GetEntriesForQuizQuery = {
+  getEntriesForQuiz: Array<{
+    id?: number | null;
+    name: string;
+    quizId: number;
+    userId?: number | null;
+    answers: Record<string, string> | null;
+    updatedAt: string;
+  }>;
+};
+
+type GetEntriesForQuizQueryVariables = {
+  quizId: number;
+};
+
 export const getEntriesForUser: TypedDocumentNode<
   GetEntriesForUserQuery,
   GetEntriesForUserQueryVariables
@@ -57,6 +72,22 @@ export const getAllEntries: TypedDocumentNode<
 > = gql`
   query GetAllEntries {
     getAllEntries {
+      id
+      name
+      quizId
+      userId
+      answers
+      updatedAt
+    }
+  }
+`;
+
+export const getEntriesForQuiz: TypedDocumentNode<
+  GetEntriesForQuizQuery,
+  GetEntriesForQuizQueryVariables
+> = gql`
+  query GetEntriesForQuiz($quizId: Int!) {
+    getEntriesForQuiz(quizId: $quizId) {
       id
       name
       quizId
