@@ -29,7 +29,7 @@ export default function JoinPage() {
             const quiz = result.data.getQuiz;
             if (quiz.deadline && new Date() > new Date(quiz.deadline)) {
                 setFormError(null);
-                router.push(`/quiz/leaderboard/${quiz.id}`);
+                router.push(`/quiz/leaderboard/${quiz.joinCode}`);
                 return;
             }
 

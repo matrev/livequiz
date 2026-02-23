@@ -106,7 +106,7 @@ export default function QuizResponseDetailPage() {
       <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
         <button onClick={() => router.push("/quiz/responses")}>Back</button>
         <button 
-          onClick={() => router.push(`/quiz/leaderboard/${quizId}`)}
+          onClick={() => router.push(`/quiz/leaderboard/${data.getQuiz?.joinCode ?? params.id}`)}
           style={{
             padding: "8px 16px",
             backgroundColor: "#3b82f6",

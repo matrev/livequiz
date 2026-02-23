@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useSubscription } from "@apollo/client/react";
-import { getLeaderboardForQuiz } from "@/graphql/queries";
+import { getLeaderboardForQuiz, getQuiz } from "@/graphql/queries";
 import { leaderboardUpdated } from "@/graphql/subscriptions";
 import { GetLeaderboardForQuizQuery } from "@/generated/types";
 
@@ -21,7 +21,15 @@ const getSortableTime = (value: unknown): number => {
 export default function QuizLeaderboardPage() {
     const params = useParams();
     const router = useRouter();
-    const quizId = Number(params.id);
+    const joinCode = String(params.id ?? "").trim();
+    const hasValidJoinCode = joinCode.length > 0;
+    
+    const { loading: quizLoading, error: quizError, data: quizData } = useQuery(getQuiz, {
+        variables: { joinCode },
+        skip: !hasValidJoinCode,
+    });
+
+    const quizId = quizData?.getQuiz?.id ?? 0;
     const hasValidQuizId = Number.isInteger(quizId) && quizId > 0;
 
     const [liveState, setLiveState] = useState<{ quizId: number; rows: LeaderboardRow[] }>({
@@ -29,7 +37,7 @@ export default function QuizLeaderboardPage() {
         rows: [],
     });
 
-    const { loading, error, data: queryData } = useQuery(getLeaderboardForQuiz, {
+    const { loading: leaderboardLoading, error: leaderboardError, data: queryData } = useQuery(getLeaderboardForQuiz, {
         variables: { quizId },
         skip: !hasValidQuizId,
     });
@@ -80,22 +88,34 @@ export default function QuizLeaderboardPage() {
         return latestRow?.updatedAt ? new Date(String(latestRow.updatedAt)).toLocaleString() : null;
     }, [sortedRows]);
 
-    if (!hasValidQuizId) {
-        return <div style={{ padding: "24px" }}>Invalid quiz id.</div>;
+    if (!hasValidJoinCode) {
+        return <div style={{ padding: "24px" }}>Invalid join code.</div>;
     }
 
-    if (loading) {
+    if (quizLoading) {
+        return <div style={{ padding: "24px" }}>Loading quiz...</div>;
+    }
+
+    if (quizError) {
+        return <div style={{ padding: "24px" }}>Error loading quiz: {quizError.message}</div>;
+    }
+
+    if (!quizData?.getQuiz) {
+        return <div style={{ padding: "24px" }}>Quiz not found.</div>;
+    }
+
+    if (leaderboardLoading) {
         return <div style={{ padding: "24px" }}>Loading leaderboard...</div>;
     }
 
-    if (error) {
-        return <div style={{ padding: "24px" }}>Error loading leaderboard: {error.message}</div>;
+    if (leaderboardError) {
+        return <div style={{ padding: "24px" }}>Error loading leaderboard: {leaderboardError.message}</div>;
     }
 
     return (
         <div style={{ padding: "24px", maxWidth: "900px", margin: "0 auto" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                <h1 style={{ margin: 0 }}>Live Leaderboard</h1>
+                <h1 style={{ margin: 0 }}>{quizData?.getQuiz?.title ?? "Live Leaderboard"}</h1>
                 <button
                     onClick={() => router.push("/quiz/join")}
                     style={{
@@ -111,17 +131,16 @@ export default function QuizLeaderboardPage() {
                 </button>
             </div>
 
-            <p style={{ marginBottom: "8px" }}>Quiz ID: {quizId}</p>
             <p style={{ marginBottom: "8px" }}>
                 Realtime status: {subscriptionError ? "Disconnected" : "Connected"}
             </p>
             <p style={{ marginBottom: "16px" }}>
                 Last updated: {lastUpdated ?? "Waiting for updates"}
             </p>
-            
+
             {subscriptionError ? (
                 <p style={{ marginBottom: "16px", color: "#b45309" }}>
-                    Realtime updates are currently unavailable. Showing latest loaded leaderboard snapshot. {subscriptionError.message}
+                    Realtime updates are currently unavailable. Showing latest loaded leaderboard snapshot. Refresh the page to try reconnecting or get latest data.
                 </p>
             ) : null}
 
