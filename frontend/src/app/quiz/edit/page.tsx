@@ -8,8 +8,8 @@ export default function EditQuizListPage() {
     const router = useRouter();
     const { loading, error, data } = useQuery(getQuizzes);
     
-    const handleQuizClick = (quizId: number) => {
-        router.push(`/quiz/edit/${quizId}`);
+    const handleQuizClick = (joinCode: string) => {
+        router.push(`/quiz/edit/${joinCode}`);
     };
 
     return (
@@ -18,7 +18,7 @@ export default function EditQuizListPage() {
             {loading && <p>Loading...</p>}
             {error && <p>Error: {error.message}</p>}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '600px' }}>
-                {data?.getAllQuizzes.map(({ id, title}) => (
+                {data?.getAllQuizzes.map(({ id, title, joinCode}) => (
                     <div 
                         key={id}
                         style={{
@@ -29,7 +29,7 @@ export default function EditQuizListPage() {
                             backgroundColor: '#f9f9f9',
                             transition: 'background-color 0.2s'
                         }}
-                        onClick={() => handleQuizClick(id!)}
+                        onClick={() => handleQuizClick(joinCode)}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e9e9e9'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f9f9f9'}
                     >
