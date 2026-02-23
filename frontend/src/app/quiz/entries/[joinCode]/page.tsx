@@ -158,7 +158,6 @@ export default function QuizEntriesPage() {
               >
                 <h2 style={{ margin: 0, fontSize: "18px" }}>{entry.name}</h2>
                 <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>
-                  User ID: {entry.userId ?? "anonymous"} · Updated{" "}
                   {new Date(String(entry.updatedAt)).toLocaleString()}
                 </p>
               </div>
