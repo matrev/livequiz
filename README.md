@@ -52,3 +52,84 @@ Where to add things
 - New domain logic → src/
 - New Prisma models → prisma/schema.prisma
 - New tests → */tests/
+
+## Production env setup
+
+Create env files from templates:
+- Frontend: cp frontend/.env.example frontend/.env
+- Backend: cp backend/.env.example backend/.env
+
+Frontend variables (frontend/.env):
+- NEXT_PUBLIC_GRAPHQL_HTTP_URL=https://api.example.com/graphql
+- NEXT_PUBLIC_GRAPHQL_WS_URL=wss://api.example.com/subscriptions
+
+Backend variables (backend/.env):
+- HOST=0.0.0.0
+- PORT=4000
+- CORS_ORIGINS=https://app.example.com,https://www.app.example.com
+
+Notes:
+- Use wss:// for WebSocket subscriptions when frontend is served over HTTPS.
+- In production, if CORS_ORIGINS is unset, backend denies browser origins by default.
+
+## Hosting setup (Vercel Hobby + Railway)
+
+Quick runbook: see `docs/DEPLOY_CHECKLIST.md` for copy-paste deployment values and rollout order.
+
+This repo is ready to deploy with:
+- Frontend on Vercel Hobby (project root: `frontend/`)
+- Backend on Railway (single instance, project root: `backend/`)
+- PostgreSQL from your existing hosted database via `DATABASE_URL`
+
+Use these placeholders and replace them after Railway gives you a public URL:
+- Backend base URL: `https://api-livequiz.example.com`
+- Frontend base URL: `https://livequiz.example.com`
+
+### 1) Deploy backend (Railway)
+
+In Railway, create a service from this repo with root directory `backend`.
+
+Environment variables:
+- `HOST=0.0.0.0`
+- `PORT=4000` (Railway may override this automatically)
+- `DATABASE_URL=<your hosted postgres connection string>`
+- `CORS_ORIGINS=https://livequiz.example.com,https://www.livequiz.example.com`
+
+Backend deploy behavior is configured in `backend/railway.json`:
+- Runs migrations on deploy: `npm run migrate:deploy`
+- Starts server: `npm run start:prod`
+- Health probe path: `/health`
+
+### 2) Deploy frontend (Vercel Hobby)
+
+In Vercel, import this repo and set project root to `frontend`.
+
+Set frontend environment variables:
+- `NEXT_PUBLIC_GRAPHQL_HTTP_URL=https://api-livequiz.example.com/graphql`
+- `NEXT_PUBLIC_GRAPHQL_WS_URL=wss://api-livequiz.example.com/subscriptions`
+
+Build command:
+- `npm run build`
+
+Install command:
+- `npm i`
+
+### 3) Rollout order
+
+1. Deploy backend on Railway first.
+2. Confirm backend URLs respond:
+	- `https://api-livequiz.example.com/health`
+	- `https://api-livequiz.example.com/graphql`
+3. Set Vercel frontend env vars to that backend URL.
+4. Deploy frontend on Vercel.
+5. Update `CORS_ORIGINS` in Railway if frontend domain changes.
+
+### 4) Smoke test after deploy
+
+- Open frontend and create or join a quiz.
+- Submit an answer from one client and observe live leaderboard updates on another.
+- If subscriptions fail, verify `wss://.../subscriptions` and CORS origins.
+
+### 5) Single-instance realtime note
+
+Current subscriptions use in-memory PubSub, so realtime events are scoped to one backend instance. Keep Railway at a single instance for consistent behavior.

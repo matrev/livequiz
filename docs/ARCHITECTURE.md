@@ -26,3 +26,10 @@ Important invariants
 - Domain reducers must never mutate inputs
 - All public domain APIs are fully typed and have unit tests
 - GraphQL schema is the source of truth for API types, and codegen keeps it in sync with domain models
+
+Deployment topology (current)
+- Frontend is hosted on Vercel Hobby.
+- Backend is hosted as a single instance on Railway.
+- PostgreSQL is external and injected through `DATABASE_URL`.
+- Browser GraphQL subscriptions use `wss://<backend-domain>/subscriptions`.
+- Backend must set `CORS_ORIGINS` to the deployed frontend origins.

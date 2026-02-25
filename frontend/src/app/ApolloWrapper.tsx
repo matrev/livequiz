@@ -10,10 +10,15 @@ import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { createClient } from "graphql-ws";
 
+const httpUri =
+  process.env.NEXT_PUBLIC_GRAPHQL_HTTP_URL ?? "http://localhost:4000/graphql";
+const wsUri =
+  process.env.NEXT_PUBLIC_GRAPHQL_WS_URL ?? "ws://localhost:4000/subscriptions";
+
 // have a function to create a client for you
 function makeClient(): ApolloClient {
   const httpLink = new HttpLink({
-    uri: "http://localhost:4000/graphql",
+    uri: httpUri,
   });
 
   if (typeof window === "undefined") {
@@ -25,7 +30,7 @@ function makeClient(): ApolloClient {
 
   const wsLink = new GraphQLWsLink(
     createClient({
-      url: "ws://localhost:4000/subscriptions",
+      url: wsUri,
       shouldRetry: () => true,
       retryAttempts: Infinity,
     })

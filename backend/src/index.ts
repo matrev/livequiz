@@ -52,19 +52,52 @@ const server = new ApolloServer<ResolverContext>({
 
 await server.start();
 
+const host = process.env.HOST ?? "0.0.0.0";
+const port = Number.parseInt(process.env.PORT ?? "4000", 10);
+
+if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  throw new Error(`Invalid PORT value: ${process.env.PORT ?? ""}`);
+}
+
+const configuredCorsOrigins =
+  process.env.CORS_ORIGINS
+    ?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean) ?? [];
+
+const corsOrigins =
+  configuredCorsOrigins.length > 0
+    ? configuredCorsOrigins
+    : process.env.NODE_ENV === "production"
+      ? []
+      : ["http://localhost:3000"];
+
+const corsOrigin: cors.CorsOptions["origin"] =
+  corsOrigins.length === 0
+    ? false
+    : corsOrigins.length === 1
+      ? corsOrigins[0]
+      : corsOrigins;
+
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use(
   "/graphql",
-  cors<cors.CorsRequest>(),
+  cors<cors.CorsRequest>({
+    origin: corsOrigin,
+  }),
   bodyParser.json(),
   expressMiddleware(server, {
     context: async () => createResolverContext(),
   })
 );
 
-const port = 4000;
 await new Promise<void>((resolve) => {
-  httpServer.listen({ port }, resolve);
+  httpServer.listen({ host, port }, resolve);
 });
 
-console.log(`🚀 GraphQL HTTP ready at: http://localhost:${port}/graphql`);
-console.log(`🚀 GraphQL WS ready at: ws://localhost:${port}/subscriptions`);
+const logHost = host === "0.0.0.0" ? "localhost" : host;
+console.log(`🚀 GraphQL HTTP ready at: http://${logHost}:${port}/graphql`);
+console.log(`🚀 GraphQL WS ready at: ws://${logHost}:${port}/subscriptions`);
