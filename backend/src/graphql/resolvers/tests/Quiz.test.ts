@@ -213,6 +213,8 @@ describe('Quiz Query resolver tests', () => {
 describe('Quiz Mutation resolver tests', () => {
     it('creates a Quiz', async () => {
         mockContext.prisma.quiz.create.mockResolvedValue(mockQuiz);
+        mockContext.prisma.user.findUnique.mockResolvedValue(mockUser);
+        mockContext.emailSender.send.mockResolvedValue();
         const response = await server.executeOperation({
             query: `mutation testCreateQuiz {
                 createQuiz(title: "Test Quiz", userId: 1) {
@@ -238,6 +240,35 @@ describe('Quiz Mutation resolver tests', () => {
         expect(response.body.singleResult.errors).toBeUndefined();
         expect(response.body.singleResult.data?.createQuiz).toEqual(mockQuiz);
         expect(response.body.singleResult.data?.createQuiz).toBeDefined();
+        expect(mockContext.emailSender.send).toHaveBeenCalledWith(
+            expect.objectContaining({
+                to: mockUser.email,
+                subject: expect.stringContaining(mockQuiz.title),
+            })
+        );
+    });
+
+    it('creates a Quiz even when email sending fails', async () => {
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockContext.prisma.quiz.create.mockResolvedValue(mockQuiz);
+        mockContext.prisma.user.findUnique.mockResolvedValue(mockUser);
+        mockContext.emailSender.send.mockRejectedValue(new Error('Email provider unavailable'));
+
+        const response = await server.executeOperation({
+            query: `mutation testCreateQuizEmailFailure {
+                createQuiz(title: "Test Quiz", userId: 1) {
+                    id
+                    title
+                }
+            }`,
+        },
+        { contextValue: mockContext });
+
+        assert(response.body.kind === 'single');
+        expect(response.body.singleResult.errors).toBeUndefined();
+        expect(response.body.singleResult.data?.createQuiz).toBeDefined();
+        expect(mockContext.emailSender.send).toHaveBeenCalled();
+        consoleErrorSpy.mockRestore();
     });
 
     it('deletes a Quiz', async () => {

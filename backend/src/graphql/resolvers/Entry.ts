@@ -49,7 +49,7 @@ const EntryResolvers: Resolvers = {
       // Check if quiz deadline has passed
       const quiz = await context.prisma.quiz.findUnique({
         where: { id: quizId },
-        select: { deadline: true },
+        select: { deadline: true, title: true },
       });
 
       if (!quiz) {
@@ -84,6 +84,30 @@ const EntryResolvers: Resolvers = {
           answers,
         },
       });
+
+      if (userId != null) {
+        const entrant = await context.prisma.user.findUnique({
+          where: { id: userId },
+          select: { email: true, name: true },
+        });
+
+        if (entrant?.email) {
+          try {
+            await context.emailSender.send({
+              to: entrant.email,
+              subject: `Entry received for \"${quiz.title}\"`,
+              text: `Hi ${entrant.name}, your entry for \"${quiz.title}\" was submitted successfully.`,
+            });
+          } catch (error) {
+            console.error("Failed to send entry created email", {
+              quizId,
+              userId,
+              entryId: savedEntry.id,
+              error,
+            });
+          }
+        }
+      }
 
       await publishLeaderboardUpdated(context, quizId);
       return savedEntry as unknown as Entry;

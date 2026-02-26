@@ -37,11 +37,20 @@ const mockQuiz = {
   questions: [],
 };
 
+const mockUser = {
+  id: 1,
+  name: 'Test User',
+  email: 'testing@email.com',
+  isAdmin: false,
+};
+
 describe('Entry Mutation resolver - upsertEntry with deadline validation', () => {
   it('creates a new entry when quiz has no deadline', async () => {
     mockContext.prisma.quiz.findUnique.mockResolvedValue(mockQuiz);
     mockContext.prisma.entry.findUnique.mockResolvedValue(null);
     mockContext.prisma.entry.create.mockResolvedValue(mockEntry);
+    mockContext.prisma.user.findUnique.mockResolvedValue(mockUser);
+    mockContext.emailSender.send.mockResolvedValue();
 
     const response = await server.executeOperation({
       query: `mutation testUpsertEntry {
@@ -57,6 +66,12 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(mockContext.prisma.entry.create).toHaveBeenCalled();
+    expect(mockContext.emailSender.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: mockUser.email,
+        subject: expect.stringContaining(mockQuiz.title),
+      })
+    );
   });
 
   it('allows submission when deadline is in the future', async () => {
@@ -124,7 +139,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
     const quizWithFutureDeadline = { ...mockQuiz, deadline: futureDeadline };
 
     mockContext.prisma.quiz.findUnique.mockResolvedValue(quizWithFutureDeadline);
-    mockContext.prisma.entry.findUnique.mockResolvedValue(mockEntry);
+    mockContext.prisma.entry.findFirst.mockResolvedValue(mockEntry);
     const updatedEntry = { ...mockEntry, answers: { question1: 'updated_answer' } };
     mockContext.prisma.entry.update.mockResolvedValue(updatedEntry);
 
@@ -140,6 +155,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(mockContext.prisma.entry.update).toHaveBeenCalled();
+    expect(mockContext.emailSender.send).not.toHaveBeenCalled();
   });
 
   it('rejects update when deadline has passed', async () => {
@@ -147,7 +163,7 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
     const quizWithPastDeadline = { ...mockQuiz, deadline: pastDeadline };
 
     mockContext.prisma.quiz.findUnique.mockResolvedValue(quizWithPastDeadline);
-    mockContext.prisma.entry.findUnique.mockResolvedValue(mockEntry);
+    mockContext.prisma.entry.findFirst.mockResolvedValue(mockEntry);
 
     const response = await server.executeOperation({
       query: `mutation testUpdateEntryAfterDeadline {
@@ -184,6 +200,31 @@ describe('Entry Mutation resolver - upsertEntry with deadline validation', () =>
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeUndefined();
     expect(mockContext.prisma.entry.create).toHaveBeenCalled();
+    expect(mockContext.emailSender.send).not.toHaveBeenCalled();
+  });
+
+  it('creates an entry even when email sending fails', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+    mockContext.prisma.quiz.findUnique.mockResolvedValue(mockQuiz);
+    mockContext.prisma.entry.findUnique.mockResolvedValue(null);
+    mockContext.prisma.entry.create.mockResolvedValue(mockEntry);
+    mockContext.prisma.user.findUnique.mockResolvedValue(mockUser);
+    mockContext.emailSender.send.mockRejectedValue(new Error('Email provider unavailable'));
+
+    const response = await server.executeOperation({
+      query: `mutation testUpsertEntryEmailFailure {
+        upsertEntry(quizId: 1, userId: 1, name: "Test Quiz", answers: {question1: "answer1"}) {
+          id
+        }
+      }`,
+    },
+    { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(mockContext.prisma.entry.create).toHaveBeenCalled();
+    expect(mockContext.emailSender.send).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
   });
 });
 

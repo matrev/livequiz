@@ -92,6 +92,28 @@ const QuizResolvers: Resolvers = {
                     questions: true,
                 }
             }) as unknown as Quiz;
+
+            const quizOwner = await context.prisma.user.findUnique({
+                where: { id: userId },
+                select: { email: true, name: true },
+            });
+
+            if (quizOwner?.email) {
+                try {
+                    await context.emailSender.send({
+                        to: quizOwner.email,
+                        subject: `Your quiz \"${newQuiz.title}\" is ready`,
+                        text: `Hi ${quizOwner.name}, your quiz \"${newQuiz.title}\" was created successfully. Join code: ${newQuiz.joinCode}.`,
+                    });
+                } catch (error) {
+                    console.error("Failed to send quiz created email", {
+                        quizId: newQuiz.id,
+                        userId,
+                        error,
+                    });
+                }
+            }
+
             return newQuiz;
         },
         async deleteQuiz(_: any, args: { id: number }, context: ResolverContext) {

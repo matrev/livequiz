@@ -67,6 +67,10 @@ Backend variables (backend/.env):
 - HOST=0.0.0.0
 - PORT=4000
 - CORS_ORIGINS=https://app.example.com,https://www.app.example.com
+- EMAIL_PROVIDER=http-api
+- EMAIL_API_ENDPOINT=https://your-email-provider.example.com/send
+- EMAIL_API_KEY=<provider-api-key>
+- EMAIL_FROM=no-reply@example.com
 
 Notes:
 - Use wss:// for WebSocket subscriptions when frontend is served over HTTPS.
@@ -94,6 +98,10 @@ Environment variables:
 - `PORT=4000` (Railway may override this automatically)
 - `DATABASE_URL=<your hosted postgres connection string>`
 - `CORS_ORIGINS=https://livequiz.example.com,https://www.livequiz.example.com`
+- `EMAIL_PROVIDER=http-api`
+- `EMAIL_API_ENDPOINT=https://your-email-provider.example.com/send`
+- `EMAIL_API_KEY=<provider-api-key>`
+- `EMAIL_FROM=no-reply@example.com`
 
 Backend deploy behavior is configured in `backend/railway.json`:
 - Runs migrations on deploy: `npm run migrate:deploy`
