@@ -5,8 +5,8 @@
     "watchPatterns": [
       "backend/**/*"
     ],
-    "buildCommand": "if [ -f package.json ]; then npm ci && npm run build; else cd backend && npm ci && npm run build; fi",
-    "rootDirectory": "./",
+    "buildCommand": "npm ci && npm run build",
+    "rootDirectory": "./backend",
     "nixpacksPlan": {
       "providers": [
         "node"

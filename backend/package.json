@@ -17,6 +17,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "23.x"
+  },
   "type": "module",
   "devDependencies": {
     "@graphql-codegen/cli": "^6.1.1",
