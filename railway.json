@@ -3,9 +3,10 @@
   "build": {
     "builder": "NIXPACKS",
     "watchPatterns": [
-      "src/**/*"
+      "backend/src/**/*"
     ],
-    "buildCommand": "npm install && npm run build"
+    "buildCommand": "npm ci && npm run build",
+    "rootDirectory": "backend"
   },
   "deploy": {
     "startCommand": "npm run start:prod",
