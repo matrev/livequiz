@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": "23.x"
+    "node": "22.x"
   },
   "type": "module",
   "devDependencies": {
