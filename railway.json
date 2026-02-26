@@ -5,8 +5,13 @@
     "watchPatterns": [
       "backend/**/*"
     ],
-    "buildCommand": "npm ci && npm run build",
-    "rootDirectory": "./backend"
+    "buildCommand": "if [ -f package.json ]; then npm ci && npm run build; else cd backend && npm ci && npm run build; fi",
+    "rootDirectory": "./",
+    "nixpacksPlan": {
+      "providers": [
+        "node"
+      ]
+    }
   },
   "deploy": {
     "startCommand": "npm run start:prod",
