@@ -15,6 +15,9 @@ Examples:
 
 Set these in Railway service settings:
 
+- Root directory: `backend`
+- Builder: `RAILPACK`
+
 - `HOST=0.0.0.0`
 - `PORT=4000`
 - `DATABASE_URL=<your prisma-hosted postgres connection string>`

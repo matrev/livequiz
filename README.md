@@ -116,6 +116,10 @@ Backend deploy behavior is configured in `backend/railway.json`:
 - Starts server: `npm run start:prod`
 - Health probe path: `/health`
 
+Important:
+- Keep Railway builder as `RAILPACK`.
+- Ensure the service root directory is `backend` so Railpack detects Node and `npm` correctly.
+
 ### 2) Deploy frontend (Vercel Hobby)
 
 In Vercel, import this repo and set project root to `frontend`.

@@ -3,10 +3,9 @@
   "build": {
     "builder": "RAILPACK",
     "watchPatterns": [
-      "backend/**/*"
+      "**/*"
     ],
-    "buildCommand": "npm ci && npm run build",
-    "rootDirectory": "./backend"
+    "buildCommand": "npm ci && npm run build"
   },
   "deploy": {
     "startCommand": "npm run start:prod",
