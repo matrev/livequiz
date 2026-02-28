@@ -36,6 +36,7 @@ const wsServerCleanup = useServer(
 
 const server = new ApolloServer<ResolverContext>({
   schema,
+  introspection: true,
   plugins: [
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {
