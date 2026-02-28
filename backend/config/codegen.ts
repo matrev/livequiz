@@ -10,7 +10,7 @@ const config: CodegenConfig = {
     },
   },
   config: {
-    contextType: "../dist/src/index.js#ResolverContext"
+    contextType: "../src/prisma.js#ResolverContext"
   }
 
 };

@@ -6,9 +6,9 @@
   "jest": "./config/jest-config.ts",
   "scripts": {
     "test": "jest",
-    "build": "npm run compile",
-    "compile": "npm run generate && npx prisma generate && pwd && ls . && cwd tsc",
-    "start": "npm run compile && node ./dist/src/index.js",
+    "build": "graphql-codegen --config ./config/codegen.ts && prisma generate && tsc",
+    "compile": "tsc",
+    "start": "node ./dist/src/index.js",
     "migrate:deploy": "prisma migrate deploy",
     "generate": "graphql-codegen --config ./config/codegen.ts",
     "watch": "concurrently  --names \"CodeGen,TS,Nodemon\" -c \"bgYellow,bgBlue,bgMagenta\" \"graphql-codegen --watch 'src/**/*.ts'\"  \"tsc -w \" \"nodemon ./dist/index.js \""
