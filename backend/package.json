@@ -20,6 +20,7 @@
   "engines": {
     "node": "22.x"
   },
+  "packageManager": "npm@9.8.1",
   "type": "module",
   "devDependencies": {
     "@graphql-codegen/cli": "^6.1.1",
