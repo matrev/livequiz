@@ -108,7 +108,7 @@ export default function QuizLeaderboardPage() {
             {!sortedRows.length ? (
                 <p className={quizTheme.mutedText}>No leaderboard entries yet.</p>
             ) : (
-                <div className="-mx-4 sm:mx-0">
+                <div className="sm:mx-0">
                     <div className={quizTheme.tableWrap}>
                     <table className="w-full border-collapse">
                         <thead>
@@ -116,9 +116,6 @@ export default function QuizLeaderboardPage() {
                                 <th className={quizTheme.tableHeader}>Rank</th>
                                 <th className={quizTheme.tableHeader}>Name</th>
                                 <th className={quizTheme.tableHeader}>Score</th>
-                                <th className={quizTheme.tableHeader}>Correct</th>
-                                <th className={quizTheme.tableHeader}>Answered</th>
-                                <th className={quizTheme.tableHeader}>Updated</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -127,11 +124,6 @@ export default function QuizLeaderboardPage() {
                                     <td className={quizTheme.tableCell}>{row.rank}</td>
                                     <td className={quizTheme.tableCell}>{row.name}</td>
                                     <td className={quizTheme.tableCell}>{row.score.toFixed(2)}</td>
-                                    <td className={quizTheme.tableCell}>{row.correctCount}</td>
-                                    <td className={quizTheme.tableCell}>{row.answeredCount}</td>
-                                    <td className={quizTheme.tableCell}>
-                                        {new Date(String(row.updatedAt)).toLocaleTimeString()}
-                                    </td>
                                 </tr>
                             ))}
                         </tbody>
