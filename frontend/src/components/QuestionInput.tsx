@@ -77,7 +77,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                 className={quizTheme.input}
             />
 
-            <label className={quizTheme.label}>
+            <label htmlFor={`QuestionType-${index}`} className={quizTheme.label}>
                 Question Type:
             </label>
             <select
@@ -94,7 +94,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
                 <>
-                    <label className={quizTheme.label}>
+                    <label htmlFor={`Question-${index}-Options`} className={quizTheme.label}>
                         Options:
                     </label>
                     {question.options?.map((option, optionIndex) => (
