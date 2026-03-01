@@ -28,7 +28,7 @@ export default function EntryCard({ entry, variant = 'light' }: EntryCardProps) 
         href={`/quiz/responses/${entry.quizId}`}
         className="rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition-all hover:border-white/30 hover:bg-white/10"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex-1">
             <p className="text-sm font-semibold text-white">
               {entry.title}
@@ -41,7 +41,7 @@ export default function EntryCard({ entry, variant = 'light' }: EntryCardProps) 
             </p>
           </div>
           <button
-            className="mt-1 whitespace-nowrap rounded bg-white/10 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-white/20"
+            className="mt-1 inline-flex min-h-11 w-full items-center justify-center whitespace-nowrap rounded bg-white/10 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-white/20 sm:w-auto"
             onClick={(e) => {
               e.preventDefault();
               window.location.href = `/quiz/responses/${entry.quizId}`;
@@ -64,9 +64,8 @@ export default function EntryCard({ entry, variant = 'light' }: EntryCardProps) 
         padding: "16px",
         textDecoration: "none",
         color: "inherit",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "start",
+          display: "flex",
+          flexDirection: "column",
         gap: "12px",
         transition: "all 0.2s",
       }}
@@ -98,7 +97,8 @@ export default function EntryCard({ entry, variant = 'light' }: EntryCardProps) 
           fontWeight: "600",
           fontSize: "14px",
           cursor: "pointer",
-          whiteSpace: "nowrap",
+          minHeight: "44px",
+          width: "100%",
           marginTop: "4px",
         }}
         onClick={(e) => {

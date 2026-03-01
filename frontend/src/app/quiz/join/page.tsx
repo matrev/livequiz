@@ -50,12 +50,12 @@ export default function JoinPage() {
                         <h1 className={quizTheme.title}>Join a Quiz</h1>
                         <p className={quizTheme.subtitle}>Enter the quiz join code to continue.</p>
                     </div>
-                    <Link href="/" className={quizTheme.buttonOutline}>
+                    <Link href="/" className={`${quizTheme.buttonOutline} w-full sm:w-auto`}>
                         Back to Home
                     </Link>
                 </div>
 
-                <div className={`${quizTheme.panel} max-w-xl space-y-4`}>
+                <div className={`${quizTheme.panel} w-full max-w-xl space-y-4`}>
                     <div>
                         <label htmlFor="JoinCode" className={quizTheme.label}>
                             Join Code
@@ -70,8 +70,13 @@ export default function JoinPage() {
                         />
                     </div>
 
-                    <div className={quizTheme.inlineActions}>
-                        <button type="button" onClick={handleJoin} disabled={loading} className={quizTheme.buttonPrimary}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                        <button
+                            type="button"
+                            onClick={handleJoin}
+                            disabled={loading}
+                            className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
+                        >
                             {loading ? "Joining..." : "Join Quiz"}
                         </button>
                     </div>

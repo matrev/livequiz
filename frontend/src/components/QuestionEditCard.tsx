@@ -61,14 +61,14 @@ export default function QuestionEditCard({
                             <button
                                 onClick={() => onSave(question.id)}
                                 disabled={isSaving}
-                                className={quizTheme.buttonPrimary}
+                                className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
                             >
                                 {isSaving ? 'Saving...' : 'Save'}
                             </button>
                             <button
                                 onClick={() => onToggleEdit(question.id)}
                                 disabled={isSaving}
-                                className={quizTheme.buttonOutline}
+                                className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                             >
                                 Cancel
                             </button>
@@ -76,7 +76,7 @@ export default function QuestionEditCard({
                     ) : (
                         <button
                             onClick={() => onToggleEdit(question.id)}
-                            className={quizTheme.buttonPrimary}
+                            className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
                         >
                             Edit
                         </button>
@@ -96,7 +96,7 @@ export default function QuestionEditCard({
                         <label className={quizTheme.label}>
                             Question Text:
                         </label>
-                        <p className="rounded-xl border border-white/20 bg-slate-950/45 p-3 text-white/95">
+                        <p className="rounded-xl border border-white/20 bg-slate-950/45 p-3 text-sm text-white/95 sm:text-base">
                             {question.text}
                         </p>
                     </div>
@@ -105,7 +105,7 @@ export default function QuestionEditCard({
                         <label className={quizTheme.label}>
                             Question Type:
                         </label>
-                        <p className="rounded-xl border border-white/20 bg-slate-950/45 p-3 text-white/95">
+                        <p className="rounded-xl border border-white/20 bg-slate-950/45 p-3 text-sm text-white/95 sm:text-base">
                             {question.questionType}
                         </p>
                     </div>
@@ -115,7 +115,7 @@ export default function QuestionEditCard({
                             <label className={quizTheme.label}>
                                 Options:
                             </label>
-                            <ul className="list-inside list-disc rounded-xl border border-white/20 bg-slate-950/45 p-3 text-white/95">
+                            <ul className="list-inside list-disc rounded-xl border border-white/20 bg-slate-950/45 p-3 text-sm text-white/95 sm:text-base">
                                 {question.options?.map((option: string | null, idx: number) => (
                                     <li key={idx} className="mb-1">{option}</li>
                                 ))}

@@ -63,7 +63,10 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
     };
 
     return (
-        <>
+        <div className="space-y-3">
+            <label htmlFor={`QuestionName-${index}`} className={quizTheme.label}>
+                Question Text:
+            </label>
             <input
                 type="text"
                 onChange={handleTextChange}
@@ -96,7 +99,10 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                     </label>
                     {question.options?.map((option, optionIndex) => (
                         <div key={optionIndex}>
-                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                            <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center">
+                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} className="sr-only">
+                                    Option {optionIndex + 1}:
+                                </label>
                                 <input
                                     type="text"
                                     onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
@@ -104,13 +110,13 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                                     name={`Question-${index}-Option-${optionIndex}`}
                                     id={`Question-${index}-Option-${optionIndex}`}
                                     placeholder={`Enter option ${optionIndex + 1}`}
-                                    className={`${quizTheme.input} mb-0! flex-1`}
+                                    className={`${quizTheme.input} mb-0 flex-1`}
                                 />
                                 {question.options && question.options.length > 2 && (
                                     <button
                                         type="button"
                                         onClick={() => handleRemoveOption(optionIndex)}
-                                        className={`${quizTheme.buttonDanger} self-center`}
+                                        className={`${quizTheme.buttonDanger} w-full self-center sm:w-auto`}
                                     >
                                         Remove
                                     </button>
@@ -121,12 +127,12 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                     <button 
                         type="button" 
                         onClick={handleAddOption}
-                        className={quizTheme.buttonOutline}
+                        className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                     >
                         Add Option
                     </button>
                 </>
             )}
-        </>
+        </div>
     );
 }

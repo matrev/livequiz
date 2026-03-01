@@ -88,13 +88,13 @@ export default function QuizLeaderboardPage() {
                 <h1 className={quizTheme.title}>Live Leaderboard</h1>
                 <button
                     onClick={() => router.push("/quiz/join")}
-                    className={quizTheme.buttonOutline}
+                    className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                 >
                     Back to quizzes
                 </button>
             </div>
 
-            <p className="mb-1 text-white/80">Quiz ID: {quizId}</p>
+            <p className="mb-1 text-sm text-white/80 sm:text-base">Quiz ID: {quizId}</p>
             <p className="mb-4 text-sm text-white/65">
                 Last updated: {lastUpdated ?? "Waiting for updates"}
             </p>
@@ -108,7 +108,8 @@ export default function QuizLeaderboardPage() {
             {!sortedRows.length ? (
                 <p className={quizTheme.mutedText}>No leaderboard entries yet.</p>
             ) : (
-                <div className={quizTheme.tableWrap}>
+                <div className="-mx-4 sm:mx-0">
+                    <div className={quizTheme.tableWrap}>
                     <table className="w-full border-collapse">
                         <thead>
                             <tr>
@@ -135,6 +136,7 @@ export default function QuizLeaderboardPage() {
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
             </div>

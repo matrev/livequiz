@@ -127,7 +127,7 @@ export default function CreateQuizPage() {
                         <h1 className={quizTheme.title}>Create New Quiz</h1>
                         <p className={quizTheme.subtitle}>Set up your quiz details, then add questions.</p>
                     </div>
-                    <Link href="/" className={quizTheme.buttonOutline}>
+                    <Link href="/" className={`${quizTheme.buttonOutline} w-full sm:w-auto`}>
                         Back to Home
                     </Link>
                 </div>
@@ -211,12 +211,12 @@ export default function CreateQuizPage() {
                         ) : (
                             questions.map((question, index) => (
                                 <div key={index} className={`${quizTheme.itemCard}`}>
-                                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                                        <h3 className="text-lg font-semibold text-white">Question {index + 1}</h3>
+                                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <h3 className="text-base font-semibold text-white sm:text-lg">Question {index + 1}</h3>
                                         <button
                                             type="button"
                                             onClick={() => removeQuestion(index)}
-                                            className={quizTheme.buttonDanger}
+                                            className={`${quizTheme.buttonDanger} w-full sm:w-auto`}
                                         >
                                             Remove
                                         </button>
@@ -231,11 +231,11 @@ export default function CreateQuizPage() {
                         )}
                     </div>
 
-                    <div className={quizTheme.inlineActions}>
-                        <button type="button" onClick={addQuestion} className={quizTheme.buttonOutline}>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                        <button type="button" onClick={addQuestion} className={`${quizTheme.buttonOutline} w-full sm:w-auto`}>
                             Add Question
                         </button>
-                        <button type="submit" disabled={loading} className={quizTheme.buttonPrimary}>
+                        <button type="submit" disabled={loading} className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}>
                             {loading ? 'Creating...' : 'Create Quiz'}
                         </button>
                     </div>

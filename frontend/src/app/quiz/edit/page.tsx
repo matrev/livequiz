@@ -26,7 +26,7 @@ export default function EditQuizListPage() {
                         className={`${quizTheme.itemCard} cursor-pointer`}
                         onClick={() => handleQuizClick(joinCode)}
                     >
-                        <h2 className="m-0 text-lg font-semibold text-white">{title}</h2>
+                        <h2 className="m-0 text-base font-semibold text-white sm:text-lg">{title}</h2>
                     </div>
                 ))}
             </div>

@@ -183,13 +183,13 @@ export default function EditQuizPage() {
                 <div className={quizTheme.inlineActions}>
                     <button
                         onClick={() => router.push(`/quiz/entries/${joinCode}`)}
-                        className={quizTheme.buttonPrimary}
+                        className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
                     >
                         View Entries
                     </button>
                     <button
                         onClick={() => router.push('/quiz/edit')}
-                        className={quizTheme.buttonOutline}
+                        className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                     >
                         Back to List
                     </button>

@@ -104,19 +104,19 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                         Options:
                     </label>
                     {question.options?.map((option, optionIndex) => (
-                        <div key={optionIndex} className="mb-2 flex flex-wrap items-center gap-2">
+                        <div key={optionIndex} className="mb-3 flex flex-col gap-2 sm:mb-2 sm:flex-row sm:items-center">
                             <input
                                 type="text"
                                 onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
                                 value={String(option)}
                                 placeholder={`Option ${optionIndex + 1}`}
-                                className={`${quizTheme.input} flex-1`}
+                                className={`${quizTheme.input} mb-0 flex-1`}
                             />
                             {question.options && question.options.length > 2 && (
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveOption(optionIndex)}
-                                    className={quizTheme.buttonDanger}
+                                    className={`${quizTheme.buttonDanger} w-full sm:w-auto`}
                                 >
                                     Remove
                                 </button>
@@ -126,7 +126,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                     <button 
                         type="button" 
                         onClick={handleAddOption}
-                        className={`${quizTheme.buttonOutline} mt-1`}
+                        className={`${quizTheme.buttonOutline} mt-1 w-full sm:w-auto`}
                     >
                         + Add Option
                     </button>

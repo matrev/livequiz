@@ -22,7 +22,7 @@ export default function Home() {
                 <div className="grid gap-4">
                     {data?.getAllQuizzes.map(({ id, title }) => (
                         <div key={id} className={quizTheme.itemCard}>
-                            <h3 className="text-lg font-semibold text-white">Quiz Title: {title}</h3>
+                            <h3 className="text-base font-semibold text-white sm:text-lg">Quiz Title: {title}</h3>
                         </div>
                     ))}
                 </div>

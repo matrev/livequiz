@@ -138,9 +138,9 @@ export default function JoinQuizPage() {
                 <div className={quizTheme.page}>
                     <div className={`${quizTheme.panel} max-w-2xl space-y-4`}>
                         <h1 className={quizTheme.title}>Thank you for completing the quiz!</h1>
-                        <h2 className="text-xl font-semibold text-white">{quiz.title}</h2>
+                        <h2 className="text-lg font-semibold text-white sm:text-xl">{quiz.title}</h2>
                         <p className={quizTheme.mutedText}>Your answers have been submitted.</p>
-                        <button onClick={() => router.push('/quiz/join')} className={quizTheme.buttonPrimary}>
+                        <button onClick={() => router.push('/quiz/join')} className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}>
                             Back to Quiz List
                         </button>
                     </div>
@@ -184,7 +184,7 @@ export default function JoinQuizPage() {
                 
                 return (
                     <div key={question.id} className={`${quizTheme.itemCard} mb-5`}>
-                        <p className="mb-4 text-lg font-medium text-white">{question.text}</p>
+                        <p className="mb-4 text-base font-medium text-white sm:text-lg">{question.text}</p>
 
                         {question.questionType === QuestionType.MultipleChoice && question.options ? (
                             <div className="space-y-2">
@@ -199,7 +199,7 @@ export default function JoinQuizPage() {
                                             value={option ?? ''}
                                             checked={userAnswers[question.id!] === option}
                                             onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
-                                            className="size-4 accent-cyan-300"
+                                            className="size-5 accent-cyan-300"
                                         />
                                         {option}
                                     </label>
@@ -214,7 +214,7 @@ export default function JoinQuizPage() {
                                         value="True"
                                         checked={userAnswers[question.id!] === 'True'}
                                         onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
-                                        className="size-4 accent-cyan-300"
+                                        className="size-5 accent-cyan-300"
                                     />
                                     True
                                 </label>
@@ -225,7 +225,7 @@ export default function JoinQuizPage() {
                                         value="False"
                                         checked={userAnswers[question.id!] === 'False'}
                                         onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
-                                        className="size-4 accent-cyan-300"
+                                        className="size-5 accent-cyan-300"
                                     />
                                     False
                                 </label>
@@ -243,17 +243,17 @@ export default function JoinQuizPage() {
                 );
             })}
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitDisabled}
-                    className={quizTheme.buttonPrimary}
+                    className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
                 >
                     {savingEntry || savingUser || checkingUser ? 'Submitting...' : 'Submit Quiz'}
                 </button>
                 <button
                     onClick={() => router.push('/quiz/join')}
-                    className={quizTheme.buttonOutline}
+                    className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                 >
                     Cancel
                 </button>

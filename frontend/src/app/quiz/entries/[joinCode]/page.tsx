@@ -93,16 +93,16 @@ export default function QuizEntriesPage() {
       <div className={quizTheme.page}>
       <div className={quizTheme.header}>
         <h1 className={quizTheme.title}>{quizData.getQuiz.title} · Entries</h1>
-        <div className={quizTheme.inlineActions}>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
           <button
             onClick={() => router.push(`/quiz/leaderboard/${joinCode}`)}
-            className={quizTheme.buttonPrimary}
+            className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
           >
             View leaderboard
           </button>
           <button
             onClick={() => router.push("/quiz/edit")}
-            className={quizTheme.buttonOutline}
+            className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
           >
             Back to quizzes
           </button>
@@ -121,7 +121,7 @@ export default function QuizEntriesPage() {
               className={quizTheme.itemCard}
             >
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="m-0 text-lg font-semibold text-white">{entry.name}</h2>
+                <h2 className="m-0 text-base font-semibold text-white sm:text-lg">{entry.name}</h2>
                 <p className="m-0 text-xs text-white/65">
                   {new Date(String(entry.updatedAt)).toLocaleString()}
                 </p>
