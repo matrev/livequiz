@@ -12,11 +12,14 @@ export default function Home() {
             Create quizzes and challenge others in real-time, or join existing quizzes and compete for the top score.
           </p>
           <div className="mt-2 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-5">
-            <Link className="landing-btn inline-flex min-h-11 items-center justify-center text-sm sm:text-base" href="/quiz/create">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-landing-pill bg-landing-primary px-6 py-3 text-sm font-semibold text-landing-primaryText transition-transform hover:-translate-y-0.5 sm:text-base"
+              href="/quiz/create"
+            >
               Create a quiz
             </Link>
             <Link
-              className="landing-btn landing-btn-outline inline-flex min-h-11 items-center justify-center text-sm sm:text-base"
+              className="inline-flex min-h-11 items-center justify-center rounded-landing-pill border border-landing-focus bg-transparent px-6 py-3 text-sm font-semibold text-landing-outlineText transition-transform hover:-translate-y-0.5 sm:text-base"
               href="/quiz/join"
             >
               Join a quiz
