@@ -2,6 +2,7 @@
 
 import { QuestionInput as QuestionInputType, QuestionType } from "@/generated/types";
 import { ChangeEvent } from "react";
+import { quizTheme } from "@/app/quiz/theme";
 
 type QuestionInputProps = {
     question: QuestionInputType;
@@ -65,8 +66,8 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
 
     return (
         <div>
-            <div style={{ marginBottom: '15px' }}>
-                <label htmlFor={`QuestionName-${index}`} style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
+            <div className="mb-4">
+                <label htmlFor={`QuestionName-${index}`} className={quizTheme.label}>
                     Question Text:
                 </label>
                 <input
@@ -76,49 +77,45 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                     name={`QuestionName-${index}`}
                     id={`QuestionName-${index}`}
                     placeholder="Enter your question here"
-                    style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        boxSizing: 'border-box'
-                    }}
+                    className={quizTheme.input}
                 />
             </div>
 
-            <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+            <div className="mb-4">
+                <label className={quizTheme.label}>
                     Question Type:
                 </label>
-                <div style={{ display: 'flex', gap: '20px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <div className="flex flex-wrap gap-2">
+                    <label className={quizTheme.radioLabel}>
                         <input 
                             type="radio"
                             name={`QuestionType-${index}`}
                             value={QuestionType.MultipleChoice}
                             onChange={handleQuestionTypeChange} 
                             checked={question.questionType === QuestionType.MultipleChoice} 
+                            className="size-4 accent-cyan-300"
                         />
                         Multiple Choice
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <label className={quizTheme.radioLabel}>
                         <input 
                             type="radio" 
                             name={`QuestionType-${index}`} 
                             value={QuestionType.ShortAnswer} 
                             onChange={handleQuestionTypeChange}
                             checked={question.questionType === QuestionType.ShortAnswer} 
+                            className="size-4 accent-cyan-300"
                         />
                         Short Answer
                     </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                    <label className={quizTheme.radioLabel}>
                         <input 
                             type="radio" 
                             name={`QuestionType-${index}`} 
                             value={QuestionType.TrueFalse} 
                             onChange={handleQuestionTypeChange}
                             checked={question.questionType === QuestionType.TrueFalse} 
+                            className="size-4 accent-cyan-300"
                         />
                         True / False
                     </label>
@@ -126,17 +123,17 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
             </div>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
-                <div style={{ marginBottom: '0' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                <div>
+                    <label className={quizTheme.label}>
                         Options:
                     </label>
-                    <div style={{ marginBottom: '10px' }}>
+                    <div className="mb-2 space-y-2">
                         {question.options?.map((option, optionIndex) => (
-                            <div key={optionIndex} style={{ marginBottom: '10px' }}>
-                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>
+                            <div key={optionIndex}>
+                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} className={`${quizTheme.label} mb-1 text-[11px]`}>
                                     Option {optionIndex + 1}:
                                 </label>
-                                <div style={{ display: 'flex', gap: '10px' }}>
+                                <div className="flex flex-wrap gap-2">
                                     <input
                                         type="text"
                                         onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
@@ -144,28 +141,13 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                                         name={`Question-${index}-Option-${optionIndex}`}
                                         id={`Question-${index}-Option-${optionIndex}`}
                                         placeholder={`Enter option ${optionIndex + 1}`}
-                                        style={{
-                                            flex: 1,
-                                            padding: '10px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '4px',
-                                            fontSize: '14px',
-                                            boxSizing: 'border-box'
-                                        }}
+                                        className={`${quizTheme.input} flex-1`}
                                     />
                                     {question.options && question.options.length > 2 && (
                                         <button
                                             type="button"
                                             onClick={() => handleRemoveOption(optionIndex)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                backgroundColor: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '14px'
-                                            }}
+                                            className={quizTheme.buttonDanger}
                                         >
                                             Remove
                                         </button>
@@ -177,15 +159,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                     <button 
                         type="button" 
                         onClick={handleAddOption}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#17a2b8',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                        }}
+                        className={quizTheme.buttonOutline}
                     >
                         Add Option
                     </button>

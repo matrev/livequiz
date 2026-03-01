@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getQuiz } from "@/graphql/queries";
 import { updateQuestion } from "@/graphql/mutations";
 import QuestionEditCard from "@/components/QuestionEditCard";
+import { quizTheme } from "../../theme";
 
 export default function EditQuizPage() {
     const params = useParams();
@@ -165,9 +166,9 @@ export default function EditQuizPage() {
         }
     };
 
-    if (loading) return <div style={{ padding: '20px' }}>Loading quiz...</div>;
-    if (error) return <div style={{ padding: '20px' }}>Error loading quiz: {error.message}</div>;
-    if (!data?.getQuiz) return <div style={{ padding: '20px' }}>Quiz not found</div>;
+    if (loading) return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Loading quiz...</div>;
+    if (error) return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Error loading quiz: {error.message}</div>;
+    if (!data?.getQuiz) return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Quiz not found</div>;
 
     const quiz = data.getQuiz;
     const questionsWithId = (quiz.questions ?? []).filter(
@@ -175,33 +176,20 @@ export default function EditQuizPage() {
     );
 
     return (
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1>Edit Quiz: {quiz.title}</h1>
-                <div style={{ display: 'flex', gap: '10px' }}>
+        <div className={quizTheme.shell}>
+            <div className={quizTheme.page}>
+            <div className={quizTheme.header}>
+                <h1 className={quizTheme.title}>Edit Quiz: {quiz.title}</h1>
+                <div className={quizTheme.inlineActions}>
                     <button
                         onClick={() => router.push(`/quiz/entries/${joinCode}`)}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#3b82f6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
+                        className={quizTheme.buttonPrimary}
                     >
                         View Entries
                     </button>
                     <button
                         onClick={() => router.push('/quiz/edit')}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#666',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                        }}
+                        className={quizTheme.buttonOutline}
                     >
                         Back to List
                     </button>
@@ -209,9 +197,10 @@ export default function EditQuizPage() {
             </div>
 
             {questionsWithId.length === 0 ? (
-                <p>No questions found for this quiz.</p>
+                <p className={quizTheme.mutedText}>No questions found for this quiz.</p>
             ) : (
-                questionsWithId.map((q, index: number) => {
+                <div className="space-y-5">
+                {questionsWithId.map((q, index: number) => {
                     const isEditing = editingById[q.id] || false;
                     const isSaving = savingById[q.id] || false;
                     const questionDraft = draftById[q.id] ?? {
@@ -236,8 +225,10 @@ export default function EditQuizPage() {
                             onChange={handleQuestionChange}
                         />
                     );
-                })
+                })}
+                </div>
             )}
+            </div>
         </div>
     );
 }

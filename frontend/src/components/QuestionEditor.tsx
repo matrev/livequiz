@@ -2,6 +2,7 @@
 
 import { QuestionInput as QuestionInputType, QuestionType } from "@/generated/types";
 import { ChangeEvent } from "react";
+import { quizTheme } from "@/app/quiz/theme";
 
 type QuestionEditorProps = {
     question: QuestionInputType;
@@ -71,7 +72,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
 
     return (
         <div>
-            <label htmlFor={`QuestionText-${index}`} style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+            <label htmlFor={`QuestionText-${index}`} className={quizTheme.label}>
                 Question Text:
             </label>
             <textarea
@@ -79,18 +80,10 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                 value={question.text || ""}
                 name={`QuestionText-${index}`}
                 id={`QuestionText-${index}`}
-                style={{
-                    width: '100%',
-                    padding: '10px',
-                    fontSize: '16px',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc',
-                    minHeight: '80px',
-                    resize: 'vertical'
-                }}
+                className={quizTheme.textarea}
             />
 
-            <label htmlFor={`QuestionType-${index}`} style={{ display: 'block', marginTop: '15px', marginBottom: '5px', fontWeight: 'bold' }}>
+            <label htmlFor={`QuestionType-${index}`} className={`${quizTheme.label} mt-4`}>
                 Question Type:
             </label>
             <select
@@ -98,13 +91,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                 onChange={handleQuestionTypeChange}
                 name={`QuestionType-${index}`}
                 id={`QuestionType-${index}`}
-                style={{
-                    width: '100%',
-                    padding: '10px',
-                    fontSize: '16px',
-                    borderRadius: '4px',
-                    border: '1px solid #ccc'
-                }}
+                className={quizTheme.select}
             >
                 <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
                 <option value={QuestionType.TrueFalse}>True/False</option>
@@ -112,37 +99,24 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
             </select>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
-                <div style={{ marginTop: '15px' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                <div className="mt-4">
+                    <label className={quizTheme.label}>
                         Options:
                     </label>
                     {question.options?.map((option, optionIndex) => (
-                        <div key={optionIndex} style={{ display: 'flex', gap: '10px', marginBottom: '10px', alignItems: 'center' }}>
+                        <div key={optionIndex} className="mb-2 flex flex-wrap items-center gap-2">
                             <input
                                 type="text"
                                 onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
                                 value={String(option)}
                                 placeholder={`Option ${optionIndex + 1}`}
-                                style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    fontSize: '14px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #ccc'
-                                }}
+                                className={`${quizTheme.input} flex-1`}
                             />
                             {question.options && question.options.length > 2 && (
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveOption(optionIndex)}
-                                    style={{
-                                        padding: '8px 12px',
-                                        backgroundColor: '#dc3545',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer'
-                                    }}
+                                    className={quizTheme.buttonDanger}
                                 >
                                     Remove
                                 </button>
@@ -152,23 +126,15 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                     <button 
                         type="button" 
                         onClick={handleAddOption}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            marginTop: '5px'
-                        }}
+                        className={`${quizTheme.buttonOutline} mt-1`}
                     >
                         + Add Option
                     </button>
                 </div>
             )}
 
-            <div style={{ marginTop: '15px' }}>
-                <label htmlFor={`CorrectAnswer-${index}`} style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+            <div className="mt-4">
+                <label htmlFor={`CorrectAnswer-${index}`} className={quizTheme.label}>
                     Correct Answer:
                 </label>
                 {question.questionType === QuestionType.TrueFalse ? (
@@ -177,13 +143,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                         onChange={handleCorrectAnswerChange}
                         name={`CorrectAnswer-${index}`}
                         id={`CorrectAnswer-${index}`}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            fontSize: '16px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc'
-                        }}
+                        className={quizTheme.select}
                     >
                         <option value="">Select answer...</option>
                         <option value="True">True</option>
@@ -195,13 +155,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                         onChange={handleCorrectAnswerChange}
                         name={`CorrectAnswer-${index}`}
                         id={`CorrectAnswer-${index}`}
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            fontSize: '16px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc'
-                        }}
+                        className={quizTheme.select}
                     >
                         <option value="">Select correct answer...</option>
                         {question.options.map((option, idx) => (
@@ -216,13 +170,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                         name={`CorrectAnswer-${index}`}
                         id={`CorrectAnswer-${index}`}
                         placeholder="Enter correct answer"
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            fontSize: '16px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc'
-                        }}
+                        className={quizTheme.input}
                     />
                 )}
             </div>
