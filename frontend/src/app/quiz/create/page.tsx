@@ -34,6 +34,7 @@ export default function CreateQuizPage() {
     });
     const [questions, setQuestions] = useState<QuestionInput[]>([]);
     const [title, setTitle] = useState<string>("");
+    const [description, setDescription] = useState<string>("");
     const [deadline, setDeadline] = useState<string>("");
     const [ownerName, setOwnerName] = useState<string>("");
     const [ownerEmail, setOwnerEmail] = useState<string>("");
@@ -102,7 +103,7 @@ export default function CreateQuizPage() {
             }
 
             const deadlineIso = deadline ? new Date(deadline).toISOString() : undefined;
-            await createQuiz({ variables: { title: title, questions: questions, deadline: deadlineIso, userId: ownerId }});
+            await createQuiz({ variables: { title: title, description: description || undefined, questions: questions, deadline: deadlineIso, userId: ownerId }});
         } catch (error) {
             if (error instanceof LiveQuizError) {
                 setErrorMessage(error.message);
@@ -112,6 +113,7 @@ export default function CreateQuizPage() {
             return;
         }
         setTitle("");
+        setDescription("");
         setOwnerName("");
         setOwnerEmail("");
         setErrorMessage(null);
@@ -154,6 +156,21 @@ export default function CreateQuizPage() {
                                 id="QuizTitle"
                                 className={`${quizTheme.input} mb-0`}
                                 placeholder="Enter quiz title"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label htmlFor="QuizDescription" className={quizTheme.label}>
+                                Description (optional)
+                            </label>
+                            <textarea
+                                onChange={(e) => setDescription(e.target.value)}
+                                value={description}
+                                name="QuizDescription"
+                                id="QuizDescription"
+                                className={`${quizTheme.input} mb-0`}
+                                placeholder="Enter a description for your quiz"
+                                rows={3}
                             />
                         </div>
 

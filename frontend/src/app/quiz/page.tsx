@@ -20,9 +20,10 @@ export default function Home() {
                 {error && <p className={quizTheme.noticeError}>Error : {error.message}</p>}
 
                 <div className="grid gap-4">
-                    {data?.getAllQuizzes.map(({ id, title }) => (
+                    {data?.getAllQuizzes.map(({ id, title, description }) => (
                         <div key={id} className={quizTheme.itemCard}>
                             <h3 className="text-base font-semibold text-white sm:text-lg">Quiz Title: {title}</h3>
+                            {description && <p className={`mt-1 ${quizTheme.mutedText}`}>{description}</p>}
                         </div>
                     ))}
                 </div>

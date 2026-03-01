@@ -14,6 +14,7 @@ export const getQuiz: TypedDocumentNode<GetQuizQuery, QueryGetQuizArgs> = gql`
             id
             joinCode
             title
+            description
             deadline
             questions {
                 ...QuestionFullFields
@@ -28,6 +29,7 @@ export const getQuizzes: TypedDocumentNode<GetQuizzesQuery, GetQuizzesQueryVaria
             id
             joinCode
             title
+            description
         }
     }
 `;
