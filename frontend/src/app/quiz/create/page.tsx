@@ -1,6 +1,6 @@
 'use client'
 
-import { MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/types";
+import { MutationCreateQuizArgs, QuestionInput, QuestionType, Quiz } from "@/generated/types";
 import { LiveQuizError } from "@/utils/error";
 import { validateQuizInput } from "@/utils/utils";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
@@ -43,7 +43,11 @@ export default function CreateQuizPage() {
     const addQuestion = () => {
         setQuestions(prev => [
             ...prev,
-            {} as QuestionInput
+            {
+                questionType: QuestionType.MultipleChoice,
+                options: ["Option 1", "Option 2"],
+                text: "",
+            } as QuestionInput
         ]);
     }
 

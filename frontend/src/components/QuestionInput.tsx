@@ -26,7 +26,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
         onChange({ ...question, text: e.target.value });
     };
 
-    const handleQuestionTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleQuestionTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const newType = e.target.value as QuestionType;
         let newOptions: string[] | null = null;
         
@@ -38,9 +38,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                 newOptions = ["True", "False"];
                 break;
             case QuestionType.MultipleChoice:
-                newOptions = question.options && question.options.length > 0 
-                    ? question.options.filter((opt): opt is string => opt != null)
-                    : ["Option 1", "Option 2"];
+                newOptions = ["Option 1", "Option 2"];
                 break;
         }
         
@@ -67,9 +65,6 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
     return (
         <div>
             <div className="mb-4">
-                <label htmlFor={`QuestionName-${index}`} className={quizTheme.label}>
-                    Question Text:
-                </label>
                 <input
                     type="text"
                     onChange={handleTextChange}
@@ -85,41 +80,17 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                 <label className={quizTheme.label}>
                     Question Type:
                 </label>
-                <div className="flex flex-wrap gap-2">
-                    <label className={quizTheme.radioLabel}>
-                        <input 
-                            type="radio"
-                            name={`QuestionType-${index}`}
-                            value={QuestionType.MultipleChoice}
-                            onChange={handleQuestionTypeChange} 
-                            checked={question.questionType === QuestionType.MultipleChoice} 
-                            className="size-4 accent-cyan-300"
-                        />
-                        Multiple Choice
-                    </label>
-                    <label className={quizTheme.radioLabel}>
-                        <input 
-                            type="radio" 
-                            name={`QuestionType-${index}`} 
-                            value={QuestionType.ShortAnswer} 
-                            onChange={handleQuestionTypeChange}
-                            checked={question.questionType === QuestionType.ShortAnswer} 
-                            className="size-4 accent-cyan-300"
-                        />
-                        Short Answer
-                    </label>
-                    <label className={quizTheme.radioLabel}>
-                        <input 
-                            type="radio" 
-                            name={`QuestionType-${index}`} 
-                            value={QuestionType.TrueFalse} 
-                            onChange={handleQuestionTypeChange}
-                            checked={question.questionType === QuestionType.TrueFalse} 
-                            className="size-4 accent-cyan-300"
-                        />
-                        True / False
-                    </label>
-                </div>
+                <select
+                    id={`QuestionType-${index}`}
+                    name={`QuestionType-${index}`}
+                    value={question.questionType}
+                    onChange={handleQuestionTypeChange}
+                    className={quizTheme.select}
+                >
+                    <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
+                    <option value={QuestionType.ShortAnswer}>Short Answer</option>
+                    <option value={QuestionType.TrueFalse}>True / False</option>
+                </select>
             </div>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
@@ -127,12 +98,10 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                     <label className={quizTheme.label}>
                         Options:
                     </label>
+                    <hr className="my-2 border-gray-600" />
                     <div className="mb-2 space-y-2">
                         {question.options?.map((option, optionIndex) => (
                             <div key={optionIndex}>
-                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} className={`${quizTheme.label} mb-1 text-[11px]`}>
-                                    Option {optionIndex + 1}:
-                                </label>
                                 <div className="flex flex-wrap gap-2">
                                     <input
                                         type="text"
