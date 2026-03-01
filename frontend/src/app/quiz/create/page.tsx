@@ -141,8 +141,8 @@ export default function CreateQuizPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className={`${quizTheme.panel} space-y-5`}>
-                        <div>
+                    <div className={`${quizTheme.panel} grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2`}>
+                        <div className="md:col-span-2">
                             <label htmlFor="QuizTitle" className={quizTheme.label}>
                                 Quiz Title
                             </label>
@@ -152,7 +152,7 @@ export default function CreateQuizPage() {
                                 value={title}
                                 name="QuizTitle"
                                 id="QuizTitle"
-                                className={quizTheme.input}
+                                className={`${quizTheme.input} mb-0`}
                                 placeholder="Enter quiz title"
                             />
                         </div>
@@ -167,7 +167,7 @@ export default function CreateQuizPage() {
                                 value={ownerName}
                                 name="OwnerName"
                                 id="OwnerName"
-                                className={quizTheme.input}
+                                className={`${quizTheme.input} mb-0`}
                                 placeholder="Enter your name"
                             />
                         </div>
@@ -182,12 +182,12 @@ export default function CreateQuizPage() {
                                 value={ownerEmail}
                                 name="OwnerEmail"
                                 id="OwnerEmail"
-                                className={quizTheme.input}
+                                className={`${quizTheme.input} mb-0`}
                                 placeholder="Enter your email"
                             />
                         </div>
 
-                        <div>
+                        <div className="md:col-span-2">
                             <label htmlFor="QuizDeadline" className={quizTheme.label}>
                                 Deadline for Responses (optional)
                             </label>
@@ -197,7 +197,7 @@ export default function CreateQuizPage() {
                                 value={deadline}
                                 name="QuizDeadline"
                                 id="QuizDeadline"
-                                className={quizTheme.input}
+                                className={`${quizTheme.input} mb-0`}
                             />
                         </div>
                     </div>
