@@ -12,7 +12,7 @@ import { quizTheme } from "../../theme";
 export default function EditQuizPage() {
     const params = useParams();
     const router = useRouter();
-    const joinCode = params.id as string;
+    const joinCode = params.joinCode as string;
 
     const [editingById, setEditingById] = useState<Record<number, boolean>>({});
     const [draftById, setDraftById] = useState<Record<number, QuestionInputType>>({});

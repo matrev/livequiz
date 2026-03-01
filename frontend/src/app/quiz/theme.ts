@@ -1,6 +1,6 @@
 export const quizTheme = {
   shell:
-    "min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950 text-white",
+    "min-h-screen from-slate-950 via-slate-900 to-cyan-950 text-white",
   page: "mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 sm:py-10",
   header: "mb-6 flex flex-col items-start justify-between gap-4 sm:mb-8 sm:flex-row sm:items-center",
   title: "text-2xl font-bold leading-tight text-white sm:text-3xl",
