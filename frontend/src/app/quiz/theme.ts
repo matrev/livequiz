@@ -9,9 +9,9 @@ export const quizTheme = {
   sectionTitle: "mb-4 text-xl font-semibold text-white",
   mutedText: "text-sm text-white/65",
   label: "landing-label",
-  input: "landing-input",
+  input: "landing-input mb-4",
   textarea: "landing-input min-h-24 resize-y",
-  select: "landing-input",
+  select: "landing-input mb-4",
   radioLabel:
     "flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-white/85",
   inlineActions: "flex flex-wrap items-center gap-3",

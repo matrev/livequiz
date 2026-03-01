@@ -210,8 +210,8 @@ export default function CreateQuizPage() {
                             </p>
                         ) : (
                             questions.map((question, index) => (
-                                <div key={index} className={`${quizTheme.itemCard} space-y-3`}>
-                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div key={index} className={`${quizTheme.itemCard}`}>
+                                    <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                                         <h3 className="text-lg font-semibold text-white">Question {index + 1}</h3>
                                         <button
                                             type="button"

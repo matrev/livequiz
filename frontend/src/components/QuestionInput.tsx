@@ -63,68 +63,61 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
     };
 
     return (
-        <div>
-            <div className="mb-4">
-                <input
-                    type="text"
-                    onChange={handleTextChange}
-                    value={question.text || ""}
-                    name={`QuestionName-${index}`}
-                    id={`QuestionName-${index}`}
-                    placeholder="Enter your question here"
-                    className={quizTheme.input}
-                />
-            </div>
+        <>
+            <input
+                type="text"
+                onChange={handleTextChange}
+                value={question.text || ""}
+                name={`QuestionName-${index}`}
+                id={`QuestionName-${index}`}
+                placeholder="Enter your question here"
+                className={quizTheme.input}
+            />
 
-            <div className="mb-4">
-                <label className={quizTheme.label}>
-                    Question Type:
-                </label>
-                <select
-                    id={`QuestionType-${index}`}
-                    name={`QuestionType-${index}`}
-                    value={question.questionType}
-                    onChange={handleQuestionTypeChange}
-                    className={quizTheme.select}
-                >
-                    <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
-                    <option value={QuestionType.ShortAnswer}>Short Answer</option>
-                    <option value={QuestionType.TrueFalse}>True / False</option>
-                </select>
-            </div>
+            <label className={quizTheme.label}>
+                Question Type:
+            </label>
+            <select
+                id={`QuestionType-${index}`}
+                name={`QuestionType-${index}`}
+                value={question.questionType}
+                onChange={handleQuestionTypeChange}
+                className={quizTheme.select}
+            >
+                <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
+                <option value={QuestionType.ShortAnswer}>Short Answer</option>
+                <option value={QuestionType.TrueFalse}>True / False</option>
+            </select>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
-                <div>
+                <>
                     <label className={quizTheme.label}>
                         Options:
                     </label>
-                    <hr className="my-2 border-gray-600" />
-                    <div className="mb-2 space-y-2">
-                        {question.options?.map((option, optionIndex) => (
-                            <div key={optionIndex}>
-                                <div className="flex flex-wrap gap-2">
-                                    <input
-                                        type="text"
-                                        onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
-                                        value={String(option)}
-                                        name={`Question-${index}-Option-${optionIndex}`}
-                                        id={`Question-${index}-Option-${optionIndex}`}
-                                        placeholder={`Enter option ${optionIndex + 1}`}
-                                        className={`${quizTheme.input} flex-1`}
-                                    />
-                                    {question.options && question.options.length > 2 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveOption(optionIndex)}
-                                            className={quizTheme.buttonDanger}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
+                    {question.options?.map((option, optionIndex) => (
+                        <div key={optionIndex}>
+                            <div className="flex flex-wrap items-center gap-2 mb-4">
+                                <input
+                                    type="text"
+                                    onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
+                                    value={String(option)}
+                                    name={`Question-${index}-Option-${optionIndex}`}
+                                    id={`Question-${index}-Option-${optionIndex}`}
+                                    placeholder={`Enter option ${optionIndex + 1}`}
+                                    className={`${quizTheme.input} mb-0! flex-1`}
+                                />
+                                {question.options && question.options.length > 2 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveOption(optionIndex)}
+                                        className={`${quizTheme.buttonDanger} self-center`}
+                                    >
+                                        Remove
+                                    </button>
+                                )}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                     <button 
                         type="button" 
                         onClick={handleAddOption}
@@ -132,8 +125,8 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                     >
                         Add Option
                     </button>
-                </div>
+                </>
             )}
-        </div>
+        </>
     );
 }
