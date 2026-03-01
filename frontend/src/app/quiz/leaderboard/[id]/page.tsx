@@ -94,7 +94,6 @@ export default function QuizLeaderboardPage() {
                 </button>
             </div>
 
-            <p className="mb-1 text-sm text-white/80 sm:text-base">Quiz ID: {quizId}</p>
             <p className="mb-4 text-sm text-white/65">
                 Last updated: {lastUpdated ?? "Waiting for updates"}
             </p>

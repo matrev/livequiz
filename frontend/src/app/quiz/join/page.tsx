@@ -55,22 +55,20 @@ export default function JoinPage() {
                     </Link>
                 </div>
 
-                <div className={`${quizTheme.panel} w-full max-w-xl space-y-4`}>
-                    <div>
-                        <label htmlFor="JoinCode" className={quizTheme.label}>
-                            Join Code
-                        </label>
-                        <input
-                            type="text"
-                            id="JoinCode"
-                            name="JoinCode"
-                            value={joinCode}
-                            onChange={(e) => setJoinCode(e.target.value)}
-                            className={quizTheme.input}
-                        />
-                    </div>
+                <div className={`${quizTheme.panel} w-full max-w-xl`}>
+                    <label htmlFor="JoinCode" className={quizTheme.label}>
+                        Join Code
+                    </label>
+                    <input
+                        type="text"
+                        id="JoinCode"
+                        name="JoinCode"
+                        value={joinCode}
+                        onChange={(e) => setJoinCode(e.target.value)}
+                        className={quizTheme.input}
+                    />
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center mb-4">
                         <button
                             type="button"
                             onClick={handleJoin}
