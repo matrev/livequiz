@@ -9,6 +9,7 @@
     "build": "graphql-codegen --config ./config/codegen.ts && prisma generate && tsc",
     "compile": "tsc",
     "start": "node ./dist/src/index.js",
+    "dev": "npm run build && npm run start",
     "migrate:deploy": "prisma migrate deploy",
     "generate": "graphql-codegen --config ./config/codegen.ts",
     "watch": "concurrently  --names \"CodeGen,TS,Nodemon\" -c \"bgYellow,bgBlue,bgMagenta\" \"graphql-codegen --watch 'src/**/*.ts'\"  \"tsc -w \" \"nodemon ./dist/index.js \""

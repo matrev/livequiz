@@ -6,6 +6,7 @@ import { QuestionType } from "@/generated/types";
 import { useParams, useRouter } from "next/navigation";
 import { getQuiz, getUserByEmail } from "@/graphql/queries";
 import { createUser, upsertEntry } from "@/graphql/mutations";
+import { quizTheme } from "../../theme";
 
 interface UserAnswers {
     [questionId: number]: string;
@@ -121,9 +122,9 @@ export default function JoinQuizPage() {
         }
     };
 
-    if (loading) return <div>Loading quiz...</div>;
-    if (error) return <div>Error loading quiz: {error.message}</div>;
-    if (!data?.getQuiz) return <div>Quiz not found</div>;
+    if (loading) return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Loading quiz...</div>;
+    if (error) return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Error loading quiz: {error.message}</div>;
+    if (!data?.getQuiz) return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Quiz not found</div>;
 
     const quiz = data.getQuiz;
     const allQuestionsAnswered = quiz.questions?.every((q) => 
@@ -133,54 +134,47 @@ export default function JoinQuizPage() {
 
     if (submitted) {
         return (
-            <div style={{ padding: '20px' }}>
-                <h1>Thank you for completing the quiz!</h1>
-                <h2>{quiz.title}</h2>
-                <p>Your answers have been submitted.</p>
-                <button onClick={() => router.push('/quiz/join')}>
-                    Back to Quiz List
-                </button>
+            <div className={quizTheme.shell}>
+                <div className={quizTheme.page}>
+                    <div className={`${quizTheme.panel} max-w-2xl space-y-4`}>
+                        <h1 className={quizTheme.title}>Thank you for completing the quiz!</h1>
+                        <h2 className="text-lg font-semibold text-white sm:text-xl">{quiz.title}</h2>
+                        <p className={quizTheme.mutedText}>Your answers have been submitted.</p>
+                        <button onClick={() => router.push('/quiz/join')} className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}>
+                            Back to Quiz List
+                        </button>
+                    </div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ fontWeight: 'bold', fontSize: '32px' }}>{quiz.title}</h1>
-            <p>Please answer all questions below:</p>
+        <div className={quizTheme.shell}>
+            <div className={quizTheme.page}>
+            <h1 className={quizTheme.title}>{quiz.title}</h1>
+            <p className={`mb-6 mt-2 ${quizTheme.mutedText}`}>Please answer all questions below:</p>
 
-            <div style={{ marginBottom: '24px', padding: '16px', border: '1px solid #ccc', borderRadius: '8px' }}>
-                <label style={{ display: 'block', marginBottom: '12px' }}>
-                    <span style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}>Username *</span>
+            <div className={`${quizTheme.panel} mb-6 space-y-4`}>
+                <label className="block">
+                    <span className={quizTheme.label}>Username *</span>
                     <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         placeholder="Enter your username"
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            fontSize: '16px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                        }}
+                        className={quizTheme.input}
                     />
                 </label>
 
-                <label style={{ display: 'block' }}>
-                    <span style={{ display: 'block', marginBottom: '6px', fontWeight: 600 }}>Email (optional)</span>
+                <label className="block">
+                    <span className={quizTheme.label}>Email (optional)</span>
                     <input
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="Enter your email"
-                        style={{
-                            width: '100%',
-                            padding: '10px',
-                            fontSize: '16px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                        }}
+                        className={quizTheme.input}
                     />
                 </label>
             </div>
@@ -189,24 +183,15 @@ export default function JoinQuizPage() {
                 if (!question.id) return null;
                 
                 return (
-                    <div key={question.id} style={{ 
-                        marginBottom: '30px', 
-                        padding: '20px', 
-                        border: '1px solid #ccc',
-                        borderRadius: '8px'
-                    }}>
-                        <p style={{ fontSize: '18px', marginBottom: '15px' }}>{question.text}</p>
+                    <div key={question.id} className={`${quizTheme.itemCard} mb-5`}>
+                        <p className="mb-4 text-base font-medium text-white sm:text-lg">{question.text}</p>
 
                         {question.questionType === QuestionType.MultipleChoice && question.options ? (
-                            <div>
+                            <div className="space-y-2">
                                 {question.options.map((option: string | null, optIndex: number) => (
                                     <label 
                                         key={optIndex}
-                                        style={{ 
-                                            display: 'block', 
-                                            marginBottom: '10px',
-                                            cursor: 'pointer'
-                                        }}
+                                        className={quizTheme.radioLabel}
                                     >
                                         <input
                                             type="radio"
@@ -214,33 +199,33 @@ export default function JoinQuizPage() {
                                             value={option ?? ''}
                                             checked={userAnswers[question.id!] === option}
                                             onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
-                                            style={{ marginRight: '10px' }}
+                                            className="size-5 accent-cyan-300"
                                         />
                                         {option}
                                     </label>
                                 ))}
                             </div>
                         ) : question.questionType === QuestionType.TrueFalse ? (
-                            <div>
-                                <label style={{ display: 'block', marginBottom: '10px', cursor: 'pointer' }}>
+                            <div className="space-y-2">
+                                <label className={quizTheme.radioLabel}>
                                     <input
                                         type="radio"
                                         name={`question-${question.id}`}
                                         value="True"
                                         checked={userAnswers[question.id!] === 'True'}
                                         onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
-                                        style={{ marginRight: '10px' }}
+                                        className="size-5 accent-cyan-300"
                                     />
                                     True
                                 </label>
-                                <label style={{ display: 'block', marginBottom: '10px', cursor: 'pointer' }}>
+                                <label className={quizTheme.radioLabel}>
                                     <input
                                         type="radio"
                                         name={`question-${question.id}`}
                                         value="False"
                                         checked={userAnswers[question.id!] === 'False'}
                                         onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
-                                        style={{ marginRight: '10px' }}
+                                        className="size-5 accent-cyan-300"
                                     />
                                     False
                                 </label>
@@ -251,53 +236,32 @@ export default function JoinQuizPage() {
                                 value={userAnswers[question.id!] || ''}
                                 onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
                                 placeholder="Enter your answer"
-                                style={{ 
-                                    width: '100%', 
-                                    padding: '10px',
-                                    fontSize: '16px',
-                                    borderRadius: '4px',
-                                    border: '1px solid #ccc'
-                                }}
+                                className={quizTheme.input}
                             />
                         )}
                     </div>
                 );
             })}
 
-            <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <button
                     onClick={handleSubmit}
                     disabled={isSubmitDisabled}
-                    style={{
-                        padding: '12px 24px',
-                        fontSize: '16px',
-                        backgroundColor: !isSubmitDisabled ? '#0070f3' : '#ccc',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: !isSubmitDisabled ? 'pointer' : 'not-allowed'
-                    }}
+                    className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
                 >
                     {savingEntry || savingUser || checkingUser ? 'Submitting...' : 'Submit Quiz'}
                 </button>
                 <button
                     onClick={() => router.push('/quiz/join')}
-                    style={{
-                        padding: '12px 24px',
-                        fontSize: '16px',
-                        backgroundColor: '#666',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                    }}
+                    className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                 >
                     Cancel
                 </button>
             </div>
             {submitError ? (
-                <p style={{ marginTop: '12px', color: '#b91c1c' }}>{submitError}</p>
+                <p className={`${quizTheme.noticeError} mt-3`}>{submitError}</p>
             ) : null}
+            </div>
         </div>
     );
 }

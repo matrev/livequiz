@@ -1,6 +1,6 @@
 'use client'
 
-import { MutationCreateQuizArgs, QuestionInput, Quiz } from "@/generated/types";
+import { MutationCreateQuizArgs, QuestionInput, QuestionType, Quiz } from "@/generated/types";
 import { LiveQuizError } from "@/utils/error";
 import { validateQuizInput } from "@/utils/utils";
 import { useLazyQuery, useMutation } from "@apollo/client/react";
@@ -10,6 +10,7 @@ import QuestionInputComponent from "@/components/QuestionInput";
 
 import Link from "next/link";
 import { SubmitEvent, useState } from "react";
+import { quizTheme } from "../theme";
 
 export default function CreateQuizPage() {
     const [createQuiz, { data, loading }] = useMutation<Quiz,MutationCreateQuizArgs>(createQuizMutation, {
@@ -42,7 +43,11 @@ export default function CreateQuizPage() {
     const addQuestion = () => {
         setQuestions(prev => [
             ...prev,
-            {} as QuestionInput
+            {
+                questionType: QuestionType.MultipleChoice,
+                options: ["Option 1", "Option 2"],
+                text: "",
+            } as QuestionInput
         ]);
     }
 
@@ -115,219 +120,127 @@ export default function CreateQuizPage() {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1>Create New Quiz</h1>
-                <Link href="/" style={{
-                    padding: '10px 20px',
-                    backgroundColor: '#666',
-                    color: 'white',
-                    textDecoration: 'none',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                }}>
-                    Back to Home
-                </Link>
-            </div>
-
-            {errorMessage && (
-                <div style={{
-                    padding: '10px',
-                    marginBottom: '20px',
-                    backgroundColor: '#f8d7da',
-                    color: '#721c24',
-                    border: '1px solid #f5c6cb',
-                    borderRadius: '4px'
-                }}>
-                    {errorMessage}
-                </div>
-            )}
-
-            {successMessage && (
-                <div style={{
-                    padding: '10px',
-                    marginBottom: '20px',
-                    backgroundColor: '#d4edda',
-                    color: '#155724',
-                    border: '1px solid #c3e6cb',
-                    borderRadius: '4px'
-                }}>
-                    {successMessage} {data?.joinCode}
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-                <div style={{
-                    marginBottom: '20px',
-                    padding: '20px',
-                    border: '2px solid #ddd',
-                    borderRadius: '8px'
-                }}>
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="QuizTitle" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                            Quiz Title:
-                        </label>
-                        <input
-                            type="text"
-                            onChange={(e) => setTitle(e.target.value)}
-                            value={title}
-                            name="QuizTitle"
-                            id="QuizTitle"
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                boxSizing: 'border-box'
-                            }}
-                            placeholder="Enter quiz title"
-                        />
+        <div className={quizTheme.shell}>
+            <div className={quizTheme.page}>
+                <div className={quizTheme.header}>
+                    <div>
+                        <h1 className={quizTheme.title}>Create New Quiz</h1>
+                        <p className={quizTheme.subtitle}>Set up your quiz details, then add questions.</p>
                     </div>
-
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="OwnerName" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                            Your Name:
-                        </label>
-                        <input
-                            type="text"
-                            onChange={(e) => setOwnerName(e.target.value)}
-                            value={ownerName}
-                            name="OwnerName"
-                            id="OwnerName"
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                boxSizing: 'border-box'
-                            }}
-                            placeholder="Enter your name"
-                        />
-                    </div>
-
-                    <div style={{ marginBottom: '15px' }}>
-                        <label htmlFor="OwnerEmail" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                            Your Email:
-                        </label>
-                        <input
-                            type="email"
-                            onChange={(e) => setOwnerEmail(e.target.value)}
-                            value={ownerEmail}
-                            name="OwnerEmail"
-                            id="OwnerEmail"
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                boxSizing: 'border-box'
-                            }}
-                            placeholder="Enter your email"
-                        />
-                    </div>
-
-                    <div style={{ marginBottom: '0' }}>
-                        <label htmlFor="QuizDeadline" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                            Deadline for Responses (optional):
-                        </label>
-                        <input
-                            type="datetime-local"
-                            onChange={(e) => setDeadline(e.target.value)}
-                            value={deadline}
-                            name="QuizDeadline"
-                            id="QuizDeadline"
-                            style={{
-                                width: '100%',
-                                padding: '10px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                boxSizing: 'border-box'
-                            }}
-                        />
-                    </div>
+                    <Link href="/" className={`${quizTheme.buttonOutline} w-full sm:w-auto`}>
+                        Back to Home
+                    </Link>
                 </div>
 
-                <div style={{ marginBottom: '20px' }}>
-                    <h2 style={{ marginTop: 0, marginBottom: '15px' }}>Questions</h2>
-                    {questions.length === 0 ? (
-                        <p style={{ color: '#666', fontStyle: 'italic' }}>No questions added yet. Click &quot;Add Question&quot; to get started.</p>
-                    ) : (
-                        questions.map((question, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    marginBottom: '20px',
-                                    padding: '20px',
-                                    border: '2px solid #ddd',
-                                    borderRadius: '8px'
-                                }}
-                            >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                                    <h3 style={{ margin: 0 }}>Question {index + 1}</h3>
-                                    <button
-                                        type="button"
-                                        onClick={() => removeQuestion(index)}
-                                        style={{
-                                            padding: '8px 16px',
-                                            backgroundColor: '#dc3545',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                            fontSize: '14px'
-                                        }}
-                                    >
-                                        Remove
-                                    </button>
+                {errorMessage && <div className={quizTheme.noticeError}>{errorMessage}</div>}
+
+                {successMessage && (
+                    <div className={quizTheme.noticeSuccess}>
+                        {successMessage} {data?.joinCode}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className={`${quizTheme.panel} grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2`}>
+                        <div className="md:col-span-2">
+                            <label htmlFor="QuizTitle" className={quizTheme.label}>
+                                Quiz Title
+                            </label>
+                            <input
+                                type="text"
+                                onChange={(e) => setTitle(e.target.value)}
+                                value={title}
+                                name="QuizTitle"
+                                id="QuizTitle"
+                                className={`${quizTheme.input} mb-0`}
+                                placeholder="Enter quiz title"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="OwnerName" className={quizTheme.label}>
+                                Your Name
+                            </label>
+                            <input
+                                type="text"
+                                onChange={(e) => setOwnerName(e.target.value)}
+                                value={ownerName}
+                                name="OwnerName"
+                                id="OwnerName"
+                                className={`${quizTheme.input} mb-0`}
+                                placeholder="Enter your name"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="OwnerEmail" className={quizTheme.label}>
+                                Your Email
+                            </label>
+                            <input
+                                type="email"
+                                onChange={(e) => setOwnerEmail(e.target.value)}
+                                value={ownerEmail}
+                                name="OwnerEmail"
+                                id="OwnerEmail"
+                                className={`${quizTheme.input} mb-0`}
+                                placeholder="Enter your email"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label htmlFor="QuizDeadline" className={quizTheme.label}>
+                                Deadline for Responses (optional)
+                            </label>
+                            <input
+                                type="datetime-local"
+                                onChange={(e) => setDeadline(e.target.value)}
+                                value={deadline}
+                                name="QuizDeadline"
+                                id="QuizDeadline"
+                                className={`${quizTheme.input} mb-0`}
+                            />
+                        </div>
+                    </div>
+
+                    <div className={`${quizTheme.panel} space-y-4`}>
+                        <h2 className={quizTheme.sectionTitle}>Questions</h2>
+                        {questions.length === 0 ? (
+                            <p className={quizTheme.mutedText}>
+                                No questions added yet. Click &quot;Add Question&quot; to get started.
+                            </p>
+                        ) : (
+                            questions.map((question, index) => (
+                                <div key={index} className={`${quizTheme.itemCard}`}>
+                                    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <h3 className="text-base font-semibold text-white sm:text-lg">Question {index + 1}</h3>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeQuestion(index)}
+                                            className={`${quizTheme.buttonDanger} w-full sm:w-auto`}
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                    <QuestionInputComponent
+                                        question={question}
+                                        index={index}
+                                        onChange={(updated) => updateQuestion(index, updated)}
+                                    />
                                 </div>
-                                <QuestionInputComponent
-                                    question={question}
-                                    index={index}
-                                    onChange={(updated) => updateQuestion(index, updated)}
-                                />
-                            </div>
-                        ))
-                    )}
-                </div>
+                            ))
+                        )}
+                    </div>
 
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-                    <button
-                        type="button"
-                        onClick={addQuestion}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: '#17a2b8',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                        }}
-                    >
-                        Add Question
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: loading ? '#ccc' : '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontSize: '14px'
-                        }}
-                    >
-                        {loading ? 'Creating...' : 'Create Quiz'}
-                    </button>
-                </div>
-            </form>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                        <button type="button" onClick={addQuestion} className={`${quizTheme.buttonOutline} w-full sm:w-auto`}>
+                            Add Question
+                        </button>
+                        <button type="submit" disabled={loading} className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}>
+                            {loading ? 'Creating...' : 'Create Quiz'}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

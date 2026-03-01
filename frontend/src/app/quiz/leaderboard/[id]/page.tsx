@@ -6,6 +6,7 @@ import { useQuery, useSubscription } from "@apollo/client/react";
 import { getLeaderboardForQuiz } from "@/graphql/queries";
 import { leaderboardUpdated } from "@/graphql/subscriptions";
 import { GetLeaderboardForQuizQuery } from "@/generated/types";
+import { quizTheme } from "../../theme";
 
 type LeaderboardRow = GetLeaderboardForQuizQuery["getLeaderboardForQuiz"][number];
 
@@ -69,79 +70,67 @@ export default function QuizLeaderboardPage() {
     }, [sortedRows]);
 
     if (!hasValidQuizId) {
-        return <div style={{ padding: "24px" }}>Invalid quiz id.</div>;
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Invalid quiz id.</div>;
     }
 
     if (loading) {
-        return <div style={{ padding: "24px" }}>Loading leaderboard...</div>;
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Loading leaderboard...</div>;
     }
 
     if (error) {
-        return <div style={{ padding: "24px" }}>Error loading leaderboard: {error.message}</div>;
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Error loading leaderboard: {error.message}</div>;
     }
 
     return (
-        <div style={{ padding: "24px", maxWidth: "900px", margin: "0 auto" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                <h1 style={{ margin: 0 }}>Live Leaderboard</h1>
+        <div className={quizTheme.shell}>
+            <div className={quizTheme.page}>
+            <div className={quizTheme.header}>
+                <h1 className={quizTheme.title}>Live Leaderboard</h1>
                 <button
                     onClick={() => router.push("/quiz/join")}
-                    style={{
-                        padding: "8px 16px",
-                        border: "none",
-                        borderRadius: "6px",
-                        backgroundColor: "#64748b",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
+                    className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                 >
                     Back to quizzes
                 </button>
             </div>
 
-            <p style={{ marginBottom: "8px" }}>Quiz ID: {quizId}</p>
-            <p style={{ marginBottom: "16px" }}>
+            <p className="mb-4 text-sm text-white/65">
                 Last updated: {lastUpdated ?? "Waiting for updates"}
             </p>
 
             {subscriptionError ? (
-                <p style={{ marginBottom: "16px", color: "#b45309" }}>
+                <p className={quizTheme.noticeError}>
                     Realtime updates are currently unavailable. Showing latest loaded leaderboard snapshot.
                 </p>
             ) : null}
 
             {!sortedRows.length ? (
-                <p>No leaderboard entries yet.</p>
+                <p className={quizTheme.mutedText}>No leaderboard entries yet.</p>
             ) : (
-                <div style={{ overflowX: "auto" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <div className="sm:mx-0">
+                    <div className={quizTheme.tableWrap}>
+                    <table className="w-full border-collapse">
                         <thead>
                             <tr>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #d1d5db", padding: "10px" }}>Rank</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #d1d5db", padding: "10px" }}>Name</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #d1d5db", padding: "10px" }}>Score</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #d1d5db", padding: "10px" }}>Correct</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #d1d5db", padding: "10px" }}>Answered</th>
-                                <th style={{ textAlign: "left", borderBottom: "1px solid #d1d5db", padding: "10px" }}>Updated</th>
+                                <th className={quizTheme.tableHeader}>Rank</th>
+                                <th className={quizTheme.tableHeader}>Name</th>
+                                <th className={quizTheme.tableHeader}>Score</th>
                             </tr>
                         </thead>
                         <tbody>
                             {sortedRows.map((row, index) => (
                                 <tr key={`${row.userId ?? row.name}-${index}`}>
-                                    <td style={{ borderBottom: "1px solid #e5e7eb", padding: "10px" }}>{row.rank}</td>
-                                    <td style={{ borderBottom: "1px solid #e5e7eb", padding: "10px" }}>{row.name}</td>
-                                    <td style={{ borderBottom: "1px solid #e5e7eb", padding: "10px" }}>{row.score.toFixed(2)}</td>
-                                    <td style={{ borderBottom: "1px solid #e5e7eb", padding: "10px" }}>{row.correctCount}</td>
-                                    <td style={{ borderBottom: "1px solid #e5e7eb", padding: "10px" }}>{row.answeredCount}</td>
-                                    <td style={{ borderBottom: "1px solid #e5e7eb", padding: "10px" }}>
-                                        {new Date(String(row.updatedAt)).toLocaleTimeString()}
-                                    </td>
+                                    <td className={quizTheme.tableCell}>{row.rank}</td>
+                                    <td className={quizTheme.tableCell}>{row.name}</td>
+                                    <td className={quizTheme.tableCell}>{row.score.toFixed(2)}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }

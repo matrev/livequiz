@@ -2,6 +2,7 @@
 
 import { QuestionInput as QuestionInputType, QuestionType } from "@/generated/types";
 import { ChangeEvent } from "react";
+import { quizTheme } from "@/app/quiz/theme";
 
 type QuestionInputProps = {
     question: QuestionInputType;
@@ -25,7 +26,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
         onChange({ ...question, text: e.target.value });
     };
 
-    const handleQuestionTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleQuestionTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
         const newType = e.target.value as QuestionType;
         let newOptions: string[] | null = null;
         
@@ -37,9 +38,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                 newOptions = ["True", "False"];
                 break;
             case QuestionType.MultipleChoice:
-                newOptions = question.options && question.options.length > 0 
-                    ? question.options.filter((opt): opt is string => opt != null)
-                    : ["Option 1", "Option 2"];
+                newOptions = ["Option 1", "Option 2"];
                 break;
         }
         
@@ -64,132 +63,75 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
     };
 
     return (
-        <div>
-            <div style={{ marginBottom: '15px' }}>
-                <label htmlFor={`QuestionName-${index}`} style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
-                    Question Text:
-                </label>
-                <input
-                    type="text"
-                    onChange={handleTextChange}
-                    value={question.text || ""}
-                    name={`QuestionName-${index}`}
-                    id={`QuestionName-${index}`}
-                    placeholder="Enter your question here"
-                    style={{
-                        width: '100%',
-                        padding: '10px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        boxSizing: 'border-box'
-                    }}
-                />
-            </div>
+        <div className="space-y-3">
+            <label htmlFor={`QuestionName-${index}`} className={quizTheme.label}>
+                Question Text:
+            </label>
+            <input
+                type="text"
+                onChange={handleTextChange}
+                value={question.text || ""}
+                name={`QuestionName-${index}`}
+                id={`QuestionName-${index}`}
+                placeholder="Enter your question here"
+                className={quizTheme.input}
+            />
 
-            <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
-                    Question Type:
-                </label>
-                <div style={{ display: 'flex', gap: '20px' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input 
-                            type="radio"
-                            name={`QuestionType-${index}`}
-                            value={QuestionType.MultipleChoice}
-                            onChange={handleQuestionTypeChange} 
-                            checked={question.questionType === QuestionType.MultipleChoice} 
-                        />
-                        Multiple Choice
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input 
-                            type="radio" 
-                            name={`QuestionType-${index}`} 
-                            value={QuestionType.ShortAnswer} 
-                            onChange={handleQuestionTypeChange}
-                            checked={question.questionType === QuestionType.ShortAnswer} 
-                        />
-                        Short Answer
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                        <input 
-                            type="radio" 
-                            name={`QuestionType-${index}`} 
-                            value={QuestionType.TrueFalse} 
-                            onChange={handleQuestionTypeChange}
-                            checked={question.questionType === QuestionType.TrueFalse} 
-                        />
-                        True / False
-                    </label>
-                </div>
-            </div>
+            <label htmlFor={`QuestionType-${index}`} className={quizTheme.label}>
+                Question Type:
+            </label>
+            <select
+                id={`QuestionType-${index}`}
+                name={`QuestionType-${index}`}
+                value={question.questionType}
+                onChange={handleQuestionTypeChange}
+                className={quizTheme.select}
+            >
+                <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
+                <option value={QuestionType.ShortAnswer}>Short Answer</option>
+                <option value={QuestionType.TrueFalse}>True / False</option>
+            </select>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
-                <div style={{ marginBottom: '0' }}>
-                    <label style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
+                <>
+                    <label htmlFor={`Question-${index}-Options`} className={quizTheme.label}>
                         Options:
                     </label>
-                    <div style={{ marginBottom: '10px' }}>
-                        {question.options?.map((option, optionIndex) => (
-                            <div key={optionIndex} style={{ marginBottom: '10px' }}>
-                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} style={{ display: 'block', marginBottom: '5px', fontSize: '14px' }}>
+                    {question.options?.map((option, optionIndex) => (
+                        <div key={optionIndex}>
+                            <div className="mb-3 flex flex-col gap-2 sm:mb-4 sm:flex-row sm:items-center">
+                                <label htmlFor={`Question-${index}-Option-${optionIndex}`} className="sr-only">
                                     Option {optionIndex + 1}:
                                 </label>
-                                <div style={{ display: 'flex', gap: '10px' }}>
-                                    <input
-                                        type="text"
-                                        onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
-                                        value={String(option)}
-                                        name={`Question-${index}-Option-${optionIndex}`}
-                                        id={`Question-${index}-Option-${optionIndex}`}
-                                        placeholder={`Enter option ${optionIndex + 1}`}
-                                        style={{
-                                            flex: 1,
-                                            padding: '10px',
-                                            border: '1px solid #ddd',
-                                            borderRadius: '4px',
-                                            fontSize: '14px',
-                                            boxSizing: 'border-box'
-                                        }}
-                                    />
-                                    {question.options && question.options.length > 2 && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveOption(optionIndex)}
-                                            style={{
-                                                padding: '8px 12px',
-                                                backgroundColor: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '14px'
-                                            }}
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
+                                <input
+                                    type="text"
+                                    onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
+                                    value={String(option)}
+                                    name={`Question-${index}-Option-${optionIndex}`}
+                                    id={`Question-${index}-Option-${optionIndex}`}
+                                    placeholder={`Enter option ${optionIndex + 1}`}
+                                    className={`${quizTheme.input} mb-0 flex-1`}
+                                />
+                                {question.options && question.options.length > 2 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveOption(optionIndex)}
+                                        className={`${quizTheme.buttonDanger} w-full self-center sm:w-auto`}
+                                    >
+                                        Remove
+                                    </button>
+                                )}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                     <button 
                         type="button" 
                         onClick={handleAddOption}
-                        style={{
-                            padding: '8px 16px',
-                            backgroundColor: '#17a2b8',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                        }}
+                        className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
                     >
                         Add Option
                     </button>
-                </div>
+                </>
             )}
         </div>
     );

@@ -1,36 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
-import { useQuery } from "@apollo/client/react";
-import { getAllEntries } from "@/graphql/queries";
-import EntryCard from "@/components/EntryCard";
 
 export default function Home() {
-  const { data: allEntriesData, loading: isLoadingEntries } = useQuery(getAllEntries);
-
-  const responseCount = useMemo(() => {
-    if (!allEntriesData?.getAllEntries?.length) {
-      return 0;
-    }
-    return allEntriesData.getAllEntries.length;
-  }, [allEntriesData]);
-
   return (
-    <div className="landing-bg relative min-h-screen overflow-hidden">
-      <div className="landing-orb landing-orb-left" />
-      <div className="landing-orb landing-orb-right" />
-      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-10 px-6 py-12 md:flex-row md:items-center md:justify-between">
+    <div>
+      <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 sm:py-12 md:flex-row md:items-center md:justify-between">
         <section className="fade-up flex flex-1 flex-col gap-6">
-          <h1 className="text-4xl font-bold text-white">Welcome to LiveQuiz</h1>
-          <p className="text-pretty text-lg text-white/75">
+          <h1 className="text-3xl font-bold text-white sm:text-4xl">Welcome to LiveQuiz</h1>
+          <p className="text-pretty text-base text-white/75 sm:text-lg">
             Create quizzes and challenge others in real-time, or join existing quizzes and compete for the top score.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Link className="landing-btn" href="/quiz/create">
+          <div className="mt-2 flex flex-col gap-3 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-5">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-landing-pill bg-landing-primary px-6 py-3 text-sm font-semibold text-landing-primaryText transition-transform hover:-translate-y-0.5 sm:text-base"
+              href="/quiz/create"
+            >
               Create a quiz
             </Link>
-            <Link className="landing-btn landing-btn-outline" href="/quiz/join">
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-landing-pill border border-landing-focus bg-transparent px-6 py-3 text-sm font-semibold text-landing-outlineText transition-transform hover:-translate-y-0.5 sm:text-base"
+              href="/quiz/join"
+            >
               Join a quiz
             </Link>
           </div>
