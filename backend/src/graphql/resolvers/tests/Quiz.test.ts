@@ -249,6 +249,8 @@ describe('Quiz Mutation resolver tests', () => {
             expect.objectContaining({
                 to: mockUser.email,
                 subject: expect.stringContaining(mockQuiz.title),
+                text: expect.stringContaining(mockQuiz.joinCode),
+                html: expect.stringContaining(mockQuiz.joinCode),
             })
         );
     });
