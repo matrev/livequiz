@@ -60,6 +60,29 @@ describe('useCountdown', () => {
     expect(result.current).toBe('0m 3s');
   });
 
+  it('updates when deadline changes after initial render', () => {
+    const future = new Date(NOW + 10_000).toISOString(); // 10s
+
+    const { result, rerender } = renderHook(
+      ({ deadline }: { deadline: string | null | undefined }) => useCountdown(deadline),
+      { initialProps: { deadline: null } },
+    );
+
+    expect(result.current).toBeNull();
+
+    act(() => {
+      rerender({ deadline: future });
+    });
+
+    // After the deadline prop updates, the countdown should reflect the new value immediately
+    expect(result.current).toBe('0m 10s');
+
+    act(() => {
+      jest.advanceTimersByTime(1_000);
+    });
+
+    expect(result.current).toBe('0m 9s');
+  });
   it('returns null after countdown reaches zero', () => {
     const future = new Date(NOW + 2_000).toISOString(); // 2s
     const { result } = renderHook(() => useCountdown(future));
