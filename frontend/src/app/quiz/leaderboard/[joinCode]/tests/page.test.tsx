@@ -17,10 +17,17 @@ jest.mock('@apollo/client/react', () => ({
   useSubscription: jest.fn(),
 }));
 
+jest.mock('@/utils/useCountdown', () => ({
+  useCountdown: jest.fn(),
+}));
+
+import { useCountdown } from '@/utils/useCountdown';
+
 describe('QuizLeaderboardPage', () => {
   beforeEach(() => {
     mockUseParams.mockReturnValue({ joinCode: 'JOIN01' });
     (useSubscription as unknown as jest.Mock).mockReturnValue({ error: undefined });
+    (useCountdown as unknown as jest.Mock).mockReturnValue(null);
   });
 
   it('renders invalid join-code state', () => {
@@ -96,5 +103,57 @@ describe('QuizLeaderboardPage', () => {
     await user.click(screen.getByRole('button', { name: 'Back to quizzes' }));
 
     expect(mockPush).toHaveBeenCalledWith('/quiz/join');
+  });
+
+  it('shows countdown when deadline is in the future', () => {
+    (useCountdown as unknown as jest.Mock).mockReturnValue('5m 30s');
+
+    (useQuery as unknown as jest.Mock)
+      .mockReturnValueOnce({
+        loading: false,
+        error: undefined,
+        data: {
+          getQuiz: {
+            id: 1,
+            title: 'Timed Quiz',
+            deadline: new Date(Date.now() + 330_000).toISOString(),
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        loading: false,
+        error: undefined,
+        data: { getLeaderboardForQuiz: [] },
+      });
+
+    renderWithProviders(<QuizLeaderboardPage />);
+
+    expect(screen.getByText('Responses close in: 5m 30s')).toBeInTheDocument();
+  });
+
+  it('does not show countdown when deadline has passed', () => {
+    (useCountdown as unknown as jest.Mock).mockReturnValue(null);
+
+    (useQuery as unknown as jest.Mock)
+      .mockReturnValueOnce({
+        loading: false,
+        error: undefined,
+        data: {
+          getQuiz: {
+            id: 1,
+            title: 'Ended Quiz',
+            deadline: new Date(Date.now() - 60_000).toISOString(),
+          },
+        },
+      })
+      .mockReturnValueOnce({
+        loading: false,
+        error: undefined,
+        data: { getLeaderboardForQuiz: [] },
+      });
+
+    renderWithProviders(<QuizLeaderboardPage />);
+
+    expect(screen.queryByText(/Responses close in:/)).not.toBeInTheDocument();
   });
 });

@@ -6,6 +6,7 @@ import { useQuery, useSubscription } from "@apollo/client/react";
 import { getLeaderboardForQuiz, getQuiz } from "@/graphql/queries";
 import { leaderboardUpdated } from "@/graphql/subscriptions";
 import { GetLeaderboardForQuizQuery } from "@/generated/types";
+import { useCountdown } from "@/utils/useCountdown";
 import { quizTheme } from "../../theme";
 
 type LeaderboardRow = GetLeaderboardForQuizQuery["getLeaderboardForQuiz"][number];
@@ -65,6 +66,9 @@ export default function QuizLeaderboardPage() {
         [leaderboardRows]
     );
 
+    const deadline = quizData?.getQuiz?.deadline ?? null;
+    const countdown = useCountdown(deadline);
+
     const lastUpdated = useMemo(() => {
         if (!sortedRows.length) {
             return null;
@@ -117,6 +121,12 @@ export default function QuizLeaderboardPage() {
             <p className="mb-1 text-sm text-white/65">
                 Last updated: {lastUpdated ?? "Waiting for updates"}
             </p>
+
+            {countdown !== null ? (
+                <p className="mb-1 text-sm text-white/65">
+                    Responses close in: {countdown}
+                </p>
+            ) : null}
 
             <p className="mb-4 text-sm text-white/65">
                 Realtime status: {subscriptionError ? "Disconnected" : "Connected"}
