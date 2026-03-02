@@ -110,7 +110,7 @@ const EntryResolvers: Resolvers = {
             await context.emailSender.send({
               to: entrant.email,
               subject: `Entry received for "${quiz.title}"`,
-              text: `Hi ${entrant.name}, your entry for "${quiz.title}" was submitted successfully.\n\n${deadlineText}\n\nView the live leaderboard here:\n${leaderboardUrl}`,
+              text: `Hi ${entrant.name ?? 'there'}, your entry for "${quiz.title}" was submitted successfully.\n\n${deadlineText}\n\nView the live leaderboard here:\n${leaderboardUrl}`,
               html: `<p>Hi ${escapeHtml(entrant.name ?? '')}, your entry for <strong>${escapeHtml(quiz.title)}</strong> was submitted successfully.</p><p>${escapeHtml(deadlineText)}</p><p><strong>Live leaderboard:</strong> <a href="${leaderboardUrl}">${leaderboardUrl}</a></p>`,
             });
           } catch (error) {
