@@ -1,6 +1,7 @@
 import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
 import { ResolverContext } from '../../prisma.js';
 import { generateJoinCode } from '../../utils/generateJoinCode.js';
+import { escapeHtml } from '../../utils/escapeHtml.js';
 
 const QuizResolvers: Resolvers = {
     Query: {
