@@ -112,9 +112,10 @@ const QuizResolvers: Resolvers = {
             if (quizOwner?.email) {
                 try {
                     const baseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
-                    const joinUrl = `${baseUrl}/quiz/join/${newQuiz.joinCode}`;
-                    const leaderboardUrl = `${baseUrl}/quiz/leaderboard/${newQuiz.joinCode}`;
-                    const editUrl = `${baseUrl}/quiz/edit/${newQuiz.joinCode}`;
+                    const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
+                    const joinUrl = `${normalizedBaseUrl}/quiz/join/${newQuiz.joinCode}`;
+                    const leaderboardUrl = `${normalizedBaseUrl}/quiz/leaderboard/${newQuiz.joinCode}`;
+                    const editUrl = `${normalizedBaseUrl}/quiz/edit/${newQuiz.joinCode}`;
                     await context.emailSender.send({
                         to: quizOwner.email,
                         subject: `Your quiz "${newQuiz.title}" is ready`,
