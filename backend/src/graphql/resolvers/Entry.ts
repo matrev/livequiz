@@ -1,16 +1,7 @@
 import { Resolvers, Entry } from "../../../generated/graphql.js";
 import { ResolverContext } from "../../prisma.js";
 import { publishLeaderboardUpdated } from "../../utils/publishLeaderboardUpdated.js";
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
+import { escapeHtml } from "../../utils/escapeHtml.js";
 
 const EntryResolvers: Resolvers = {
   Query: {
