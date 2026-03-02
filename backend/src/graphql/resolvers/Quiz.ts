@@ -67,7 +67,17 @@ const QuizResolvers: Resolvers = {
         },
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; userId: number; questions?: [Question]; deadline?: string; description?: string }, context: ResolverContext) {
+        async createQuiz(
+            _: any,
+            args: {
+                title: string;
+                userId: number;
+                questions?: Question[] | null;
+                deadline?: string | null;
+                description?: string | null;
+            },
+            context: ResolverContext,
+        ) {
             const { title, userId, questions = null, deadline, description } = args;
             const joinCode = generateJoinCode();
             
