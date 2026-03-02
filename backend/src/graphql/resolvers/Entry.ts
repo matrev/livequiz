@@ -102,7 +102,8 @@ const EntryResolvers: Resolvers = {
 
         if (entrant?.email) {
           try {
-            const baseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
+            const rawBaseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
+            const baseUrl = rawBaseUrl.replace(/\/+$/, '');
             const leaderboardUrl = `${baseUrl}/quiz/leaderboard/${quiz.joinCode}`;
             const deadlineText = quiz.deadline
               ? `The quiz closes on ${new Date(quiz.deadline).toLocaleString('en-US', { timeZone: 'UTC', dateStyle: 'long', timeStyle: 'short' })} UTC.`
