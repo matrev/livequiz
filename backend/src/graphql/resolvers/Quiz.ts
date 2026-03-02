@@ -67,13 +67,24 @@ const QuizResolvers: Resolvers = {
         },
     },
     Mutation: {
-        async createQuiz(_: any, args: { title: string; userId: number; questions?: [Question]; deadline?: string }, context: ResolverContext) {
-            const { title, userId, questions = null, deadline } = args;
+        async createQuiz(
+            _: any,
+            args: {
+                title: string;
+                userId: number;
+                questions?: Question[] | null;
+                deadline?: string | null;
+                description?: string | null;
+            },
+            context: ResolverContext,
+        ) {
+            const { title, userId, questions = null, deadline, description } = args;
             const joinCode = generateJoinCode();
             
             const newQuiz: Quiz = await context.prisma.quiz.create({
                 data: {
                     title,
+                    description: description ?? null,
                     joinCode,
                     userId,
                     deadline: deadline ? new Date(deadline) : null,
@@ -124,14 +135,15 @@ const QuizResolvers: Resolvers = {
                 },
             }) as unknown as Quiz;
         },
-        async updateQuiz(_: any, args: { id: number; title?: string; questions?: any[] }, context: ResolverContext) {
-            const { id, title } = args;
+        async updateQuiz(_: any, args: { id: number; title?: string; description?: string; questions?: any[] }, context: ResolverContext) {
+            const { id, title, description } = args;
             return context.prisma.quiz.update({
                 where: {
                     id,
                 },
                 data: {
                     title,
+                    description,
                     updatedAt: new Date(),
                 },
             }) as unknown as Quiz;

@@ -19,6 +19,7 @@ beforeEach(() => {
 const mockQuiz = {
     id: 1,
     title: 'Test Quiz',
+    description: null,
     joinCode: 'ABCDEFGH',
     userId: 1,
     deadline: null,
@@ -52,6 +53,7 @@ describe('Quiz Query resolver tests', () => {
                 getAllQuizzes {
                     id
                     title
+                    description
                     deadline
                     entries {
                         id
@@ -84,6 +86,7 @@ describe('Quiz Query resolver tests', () => {
                 getQuiz(joinCode: "ABCDEFGH") {
                     id
                     title
+                    description
                     deadline
                     entries {
                         id
@@ -183,6 +186,7 @@ describe('Quiz Query resolver tests', () => {
                 getQuizzesForUser(userId: 1) {
                     id
                     title
+                    description
                     deadline
                     entries {
                         id
@@ -219,6 +223,7 @@ describe('Quiz Mutation resolver tests', () => {
             query: `mutation testCreateQuiz {
                 createQuiz(title: "Test Quiz", userId: 1) {
                     id
+                    description
                     deadline
                     entries {
                         id
@@ -278,6 +283,7 @@ describe('Quiz Mutation resolver tests', () => {
                 deleteQuiz(id: 1) {
                     id
                     title
+                    description
                     createdAt
                     updatedAt
                     deadline
@@ -307,6 +313,7 @@ describe('Quiz Mutation resolver tests', () => {
                 updateQuiz(id: 1, title: "Updated Test Quiz") {
                     id
                     title
+                    description
                     createdAt
                     updatedAt
                     deadline
@@ -336,6 +343,7 @@ describe('Quiz Mutation resolver tests', () => {
                 updateQuiz(id: 1) {
                     id
                     title
+                    description
                     deadline
                     entries {
                         id
@@ -365,6 +373,7 @@ describe('Quiz Mutation resolver tests', () => {
                 updateQuiz(id: 1) {
                     id
                     title
+                    description
                     deadline
                     entries {
                         id

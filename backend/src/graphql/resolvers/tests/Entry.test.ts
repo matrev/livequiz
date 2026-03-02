@@ -28,6 +28,7 @@ const mockEntry = {
 const mockQuiz = {
   id: 1,
   title: 'Test Quiz',
+  description: null,
   joinCode: 'TEST123',
   userId: 1,
   deadline: null,

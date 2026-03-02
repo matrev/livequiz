@@ -153,6 +153,7 @@ export default function JoinQuizPage() {
         <div className={quizTheme.shell}>
             <div className={quizTheme.page}>
             <h1 className={quizTheme.title}>{quiz.title}</h1>
+            {quiz.description && <p className={`mb-2 mt-1 ${quizTheme.mutedText}`}>{quiz.description}</p>}
             <p className={`mb-6 mt-2 ${quizTheme.mutedText}`}>Please answer all questions below:</p>
 
             <div className={`${quizTheme.panel} mb-6 space-y-4`}>

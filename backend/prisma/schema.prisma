@@ -20,16 +20,17 @@ model User {
 }
 
 model Quiz {
-  id        Int        @id @default(autoincrement())
-  title     String
-  joinCode  String     @unique
-  userId    Int
-  deadline  DateTime?
-  entries   Entry[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  questions Question[]
-  user      User       @relation(fields: [userId], references: [id])
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  joinCode    String     @unique
+  userId      Int
+  deadline    DateTime?
+  entries     Entry[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  questions   Question[]
+  user        User       @relation(fields: [userId], references: [id])
 }
 
 model Question {
