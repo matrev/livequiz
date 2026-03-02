@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useSubscription } from "@apollo/client/react";
-import { getLeaderboardForQuiz } from "@/graphql/queries";
+import { getLeaderboardForQuiz, getQuiz } from "@/graphql/queries";
 import { leaderboardUpdated } from "@/graphql/subscriptions";
 import { GetLeaderboardForQuizQuery } from "@/generated/types";
 import { quizTheme } from "../../theme";
@@ -22,7 +22,15 @@ const getSortableTime = (value: unknown): number => {
 export default function QuizLeaderboardPage() {
     const params = useParams();
     const router = useRouter();
-    const quizId = Number(params.id);
+    const joinCode = String(params.joinCode ?? "").trim();
+    const hasValidJoinCode = joinCode.length > 0;
+
+    const { loading: quizLoading, error: quizError, data: quizData } = useQuery(getQuiz, {
+        variables: { joinCode },
+        skip: !hasValidJoinCode,
+    });
+
+    const quizId = quizData?.getQuiz?.id ?? 0;
     const hasValidQuizId = Number.isInteger(quizId) && quizId > 0;
 
     const { loading, error, data: queryData } = useQuery(getLeaderboardForQuiz, {
@@ -52,7 +60,7 @@ export default function QuizLeaderboardPage() {
                 if (a.score !== b.score) {
                     return b.score - a.score;
                 }
-                return a.name.localeCompare(b.name);
+                return (a.name ?? "").localeCompare(b.name ?? "");
             }),
         [leaderboardRows]
     );
@@ -69,8 +77,20 @@ export default function QuizLeaderboardPage() {
         return latestRow?.updatedAt ? new Date(String(latestRow.updatedAt)).toLocaleString() : null;
     }, [sortedRows]);
 
-    if (!hasValidQuizId) {
-        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Invalid quiz id.</div>;
+    if (!hasValidJoinCode) {
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Invalid join code.</div>;
+    }
+
+    if (quizLoading) {
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Loading quiz...</div>;
+    }
+
+    if (quizError) {
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Error loading quiz: {quizError.message}</div>;
+    }
+
+    if (!quizData?.getQuiz) {
+        return <div className={`${quizTheme.shell} ${quizTheme.page}`}>Quiz not found.</div>;
     }
 
     if (loading) {
@@ -85,7 +105,7 @@ export default function QuizLeaderboardPage() {
         <div className={quizTheme.shell}>
             <div className={quizTheme.page}>
             <div className={quizTheme.header}>
-                <h1 className={quizTheme.title}>Live Leaderboard</h1>
+                <h1 className={quizTheme.title}>{quizData.getQuiz.title}</h1>
                 <button
                     onClick={() => router.push("/quiz/join")}
                     className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
@@ -94,8 +114,12 @@ export default function QuizLeaderboardPage() {
                 </button>
             </div>
 
-            <p className="mb-4 text-sm text-white/65">
+            <p className="mb-1 text-sm text-white/65">
                 Last updated: {lastUpdated ?? "Waiting for updates"}
+            </p>
+
+            <p className="mb-4 text-sm text-white/65">
+                Realtime status: {subscriptionError ? "Disconnected" : "Connected"}
             </p>
 
             {subscriptionError ? (
@@ -118,8 +142,8 @@ export default function QuizLeaderboardPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedRows.map((row, index) => (
-                                <tr key={`${row.userId ?? row.name}-${index}`}>
+                            {sortedRows.map((row) => (
+                                <tr key={row.userId ?? row.name}>
                                     <td className={quizTheme.tableCell}>{row.rank}</td>
                                     <td className={quizTheme.tableCell}>{row.name}</td>
                                     <td className={quizTheme.tableCell}>{row.score.toFixed(2)}</td>

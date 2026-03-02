@@ -19,12 +19,12 @@ jest.mock('@apollo/client/react', () => ({
 
 describe('QuizLeaderboardPage', () => {
   beforeEach(() => {
-    mockUseParams.mockReturnValue({ id: 'JOIN01' });
+    mockUseParams.mockReturnValue({ joinCode: 'JOIN01' });
     (useSubscription as unknown as jest.Mock).mockReturnValue({ error: undefined });
   });
 
   it('renders invalid join-code state', () => {
-    mockUseParams.mockReturnValue({ id: '' });
+    mockUseParams.mockReturnValue({ joinCode: '' });
 
     (useQuery as unknown as jest.Mock)
       .mockReturnValueOnce({ loading: false, error: undefined, data: undefined })
