@@ -2,15 +2,6 @@ import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
 import { ResolverContext } from '../../prisma.js';
 import { generateJoinCode } from '../../utils/generateJoinCode.js';
 
-function escapeHtml(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
-
 const QuizResolvers: Resolvers = {
     Query: {
         getAllQuizzes: (_: any, __: any, context: ResolverContext) => {
