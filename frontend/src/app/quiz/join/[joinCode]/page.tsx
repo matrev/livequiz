@@ -231,6 +231,14 @@ export default function JoinQuizPage() {
                                     False
                                 </label>
                             </div>
+                        ) : question.questionType === QuestionType.Numerical ? (
+                            <input
+                                type="number"
+                                value={userAnswers[question.id!] || ''}
+                                onChange={(e) => handleAnswerChange(question.id!, e.target.value)}
+                                placeholder="Enter a number"
+                                className={quizTheme.input}
+                            />
                         ) : (
                             <input
                                 type="text"

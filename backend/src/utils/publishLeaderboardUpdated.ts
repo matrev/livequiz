@@ -7,7 +7,7 @@ interface ResolverContext {
       findUnique: (args: {
         where: { id: number };
         include: {
-          questions: { select: { id: true; correctAnswer: true } };
+          questions: { select: { id: true; correctAnswer: true; questionType: true } };
           entries: {
             include: {
               user: { select: { id: true; name: true } };
@@ -15,7 +15,7 @@ interface ResolverContext {
           };
         };
       }) => Promise<{
-        questions: Array<{ id: number; correctAnswer: string | null }>;
+        questions: Array<{ id: number; correctAnswer: string | null; questionType: string }>;
         entries: Array<{
           id: number;
           name: string | null;
@@ -57,6 +57,7 @@ export const publishLeaderboardUpdated = async (
         select: {
           id: true,
           correctAnswer: true,
+          questionType: true,
         },
       },
       entries: {

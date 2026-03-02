@@ -40,6 +40,9 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
             case QuestionType.MultipleChoice:
                 newOptions = ["Option 1", "Option 2"];
                 break;
+            case QuestionType.Numerical:
+                newOptions = null;
+                break;
         }
         
         onChange({ ...question, questionType: newType, options: newOptions });
@@ -90,6 +93,7 @@ export default function QuestionInput({ question, index, onChange }: QuestionInp
                 <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
                 <option value={QuestionType.ShortAnswer}>Short Answer</option>
                 <option value={QuestionType.TrueFalse}>True / False</option>
+                <option value={QuestionType.Numerical}>Numerical</option>
             </select>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (

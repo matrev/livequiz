@@ -5,6 +5,7 @@ import { ResolverContext } from "../../prisma.js";
 interface QuizQuestion {
   id: number;
   correctAnswer: string | null;
+  questionType: string;
 }
 
 interface QuizEntry {
@@ -45,10 +46,49 @@ const toAnswerMap = (answers: unknown): Record<string, string> => {
   return mapped;
 };
 
+const isNumericalCorrect = (
+  questionId: number,
+  correctAnswer: string | null,
+  entries: QuizEntry[]
+): Set<string> => {
+  const correct = parseFloat(correctAnswer ?? "");
+  if (isNaN(correct)) return new Set();
+
+  let bestDiff = Infinity;
+  const answerMaps = entries.map((e) => toAnswerMap(e.answers));
+
+  for (const map of answerMaps) {
+    const val = parseFloat(map[String(questionId)] ?? "");
+    if (!isNaN(val) && val <= correct) {
+      const diff = correct - val;
+      if (diff < bestDiff) bestDiff = diff;
+    }
+  }
+
+  if (!isFinite(bestDiff)) return new Set();
+
+  const winners = new Set<string>();
+  for (const map of answerMaps) {
+    const raw = (map[String(questionId)] ?? "").trim();
+    const val = parseFloat(raw);
+    if (!isNaN(val) && val <= correct && correct - val === bestDiff) {
+      winners.add(raw);
+    }
+  }
+  return winners;
+};
+
 const computeLeaderboard = (
   questions: QuizQuestion[],
   entries: QuizEntry[]
 ): LeaderboardRow[] => {
+  const numericalWinners = new Map<number, Set<string>>();
+  for (const q of questions) {
+    if (q.questionType === "NUMERICAL") {
+      numericalWinners.set(q.id, isNumericalCorrect(q.id, q.correctAnswer, entries));
+    }
+  }
+
   const rows = entries.map((entry) => {
     const answerMap = toAnswerMap(entry.answers);
 
@@ -61,7 +101,12 @@ const computeLeaderboard = (
         answeredCount += 1;
       }
 
-      if (
+      if (q.questionType === "NUMERICAL") {
+        const winners = numericalWinners.get(q.id);
+        if (winners && submitted && winners.has(submitted.trim())) {
+          correctCount += 1;
+        }
+      } else if (
         normalizeAnswer(submitted) !== "" &&
         normalizeAnswer(submitted) === normalizeAnswer(q.correctAnswer)
       ) {
@@ -103,7 +148,8 @@ const LeaderboardResolvers: Resolvers = {
           questions: {
             select: {
               id: true,
-              correctAnswer: true, // adjust if your field name differs
+              correctAnswer: true,
+              questionType: true,
             },
           },
           entries: {

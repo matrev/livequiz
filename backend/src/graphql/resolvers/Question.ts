@@ -23,6 +23,12 @@ const QuestionResolvers: Resolvers = {
                 if (!question) {
                     throw new Error("Question not found");
                 }
+                if (question.questionType === QuestionType.Numerical) {
+                    const submitted = parseFloat(answer);
+                    const correct = parseFloat(question.correctAnswer ?? "");
+                    if (isNaN(submitted) || isNaN(correct)) return false;
+                    return submitted <= correct;
+                }
                 return question.correctAnswer === answer;
             }) as unknown as boolean;
         }
