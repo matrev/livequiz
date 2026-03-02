@@ -33,6 +33,7 @@ export const useCountdown = (deadline: string | null | undefined): string | null
             setRemaining(diff > 0 ? diff : null);
         };
 
+        update();
         const id = setInterval(update, 1000);
         return () => clearInterval(id);
     }, [deadline]);
