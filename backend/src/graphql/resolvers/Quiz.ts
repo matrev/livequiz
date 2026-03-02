@@ -119,7 +119,7 @@ const QuizResolvers: Resolvers = {
                     await context.emailSender.send({
                         to: quizOwner.email,
                         subject: `Your quiz "${newQuiz.title}" is ready`,
-                        text: `Hi ${quizOwner.name}, your quiz "${newQuiz.title}" was created successfully.\n\nShare this link with participants so they can join and submit their answers:\n${joinUrl}\n\nShare this link so anyone can follow the live leaderboard:\n${leaderboardUrl}\n\nUse this private link to edit your quiz questions (keep it to yourself):\n${editUrl}`,
+                        text: `Hi ${quizOwner.name ?? ''}, your quiz "${newQuiz.title}" was created successfully.\n\nShare this link with participants so they can join and submit their answers:\n${joinUrl}\n\nShare this link so anyone can follow the live leaderboard:\n${leaderboardUrl}\n\nUse this private link to edit your quiz questions (keep it to yourself):\n${editUrl}`,
                         html: `<p>Hi ${escapeHtml(quizOwner.name ?? '')}, your quiz <strong>${escapeHtml(newQuiz.title)}</strong> was created successfully.</p><ul><li><strong>Participants join &amp; answer:</strong> <a href="${joinUrl}">${joinUrl}</a></li><li><strong>Live leaderboard:</strong> <a href="${leaderboardUrl}">${leaderboardUrl}</a></li></ul><p style="color:#999;font-size:0.85em;">Edit your quiz questions (private): <a href="${editUrl}" style="color:#999;">${editUrl}</a></p>`,
                     });
                 } catch (error) {
