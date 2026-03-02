@@ -2,6 +2,15 @@ import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
 import { ResolverContext } from '../../prisma.js';
 import { generateJoinCode } from '../../utils/generateJoinCode.js';
 
+function escapeHtml(str: string): string {
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 const QuizResolvers: Resolvers = {
     Query: {
         getAllQuizzes: (_: any, __: any, context: ResolverContext) => {
@@ -111,10 +120,15 @@ const QuizResolvers: Resolvers = {
 
             if (quizOwner?.email) {
                 try {
+                    const baseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
+                    const joinUrl = `${baseUrl}/quiz/join/${newQuiz.joinCode}`;
+                    const leaderboardUrl = `${baseUrl}/quiz/leaderboard/${newQuiz.joinCode}`;
+                    const editUrl = `${baseUrl}/quiz/edit/${newQuiz.joinCode}`;
                     await context.emailSender.send({
                         to: quizOwner.email,
-                        subject: `Your quiz \"${newQuiz.title}\" is ready`,
-                        text: `Hi ${quizOwner.name}, your quiz \"${newQuiz.title}\" was created successfully. Join code: ${newQuiz.joinCode}.`,
+                        subject: `Your quiz "${newQuiz.title}" is ready`,
+                        text: `Hi ${quizOwner.name}, your quiz "${newQuiz.title}" was created successfully.\n\nShare this link with participants so they can join and submit their answers:\n${joinUrl}\n\nShare this link so anyone can follow the live leaderboard:\n${leaderboardUrl}\n\nUse this private link to edit your quiz questions (keep it to yourself):\n${editUrl}`,
+                        html: `<p>Hi ${escapeHtml(quizOwner.name ?? '')}, your quiz <strong>${escapeHtml(newQuiz.title)}</strong> was created successfully.</p><ul><li><strong>Participants join &amp; answer:</strong> <a href="${joinUrl}">${joinUrl}</a></li><li><strong>Live leaderboard:</strong> <a href="${leaderboardUrl}">${leaderboardUrl}</a></li></ul><p style="color:#999;font-size:0.85em;">Edit your quiz questions (private): <a href="${editUrl}" style="color:#999;">${editUrl}</a></p>`,
                     });
                 } catch (error) {
                     console.error("Failed to send quiz created email", {
