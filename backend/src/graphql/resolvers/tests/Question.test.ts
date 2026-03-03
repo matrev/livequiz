@@ -130,6 +130,87 @@ describe('Question Mutation resolver tests', () => {
   });
 });
 
+describe('isQuestionCorrect for SHORT_ANSWER questions', () => {
+  const mockShortAnswerQuestion = {
+    id: 2,
+    text: 'Short Answer Question',
+    quizId: 1,
+    questionType: QuestionType.ShortAnswer,
+    correctAnswer: 'Paris',
+    options: [],
+  };
+
+  it('returns true for an exact match', async () => {
+    mockContext.prisma.question.findUnique.mockResolvedValue(mockShortAnswerQuestion);
+    const response = await server.executeOperation({
+      query: `query testIsShortAnswerCorrectExact {
+        isQuestionCorrect(questionId: 2, answer: "Paris")
+      }`,
+    }, { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.isQuestionCorrect).toBe(true);
+  });
+
+  it('returns true when answer differs only in case and whitespace', async () => {
+    mockContext.prisma.question.findUnique.mockResolvedValue(mockShortAnswerQuestion);
+    const response = await server.executeOperation({
+      query: `query testIsShortAnswerCorrectNormalized {
+        isQuestionCorrect(questionId: 2, answer: "  paris  ")
+      }`,
+    }, { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.isQuestionCorrect).toBe(true);
+  });
+
+  it('returns true for a minor spelling mistake within the allowed threshold', async () => {
+    mockContext.prisma.question.findUnique.mockResolvedValue(mockShortAnswerQuestion);
+    const response = await server.executeOperation({
+      query: `query testIsShortAnswerCorrectFuzzy {
+        isQuestionCorrect(questionId: 2, answer: "Pares")
+      }`,
+    }, { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.isQuestionCorrect).toBe(true);
+  });
+
+  it('returns false when the answer exceeds the spelling mistake threshold', async () => {
+    mockContext.prisma.question.findUnique.mockResolvedValue(mockShortAnswerQuestion);
+    const response = await server.executeOperation({
+      query: `query testIsShortAnswerIncorrectFuzzy {
+        isQuestionCorrect(questionId: 2, answer: "Bares")
+      }`,
+    }, { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.isQuestionCorrect).toBe(false);
+  });
+
+  it('throws an error when correctAnswer is null for a SHORT_ANSWER question', async () => {
+    mockContext.prisma.question.findUnique.mockResolvedValue({
+      ...mockShortAnswerQuestion,
+      correctAnswer: null,
+    });
+    const response = await server.executeOperation({
+      query: `query testIsShortAnswerNullCorrectAnswer {
+        isQuestionCorrect(questionId: 2, answer: "Paris")
+      }`,
+    }, { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeDefined();
+    expect(response.body.singleResult.errors?.[0].message).toBe(
+      "Short answer question has no correct answer configured"
+    );
+  });
+});
+
 describe('Question Query resolver edge cases', () => {
   it('returns null for non-existent question', async () => {
     mockContext.prisma.question.findUnique.mockResolvedValue(null);
