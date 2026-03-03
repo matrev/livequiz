@@ -1,4 +1,5 @@
 import { GraphQLError } from "graphql";
+import { QuestionType } from "../../generated/prisma/enums.js";
 import { computeLeaderboard, leaderboardTopic } from "../graphql/resolvers/Leaderboard.js";
 
 interface ResolverContext {
@@ -7,7 +8,7 @@ interface ResolverContext {
       findUnique: (args: {
         where: { id: number };
         include: {
-          questions: { select: { id: true; correctAnswer: true; questionType: true } };
+          questions: { select: { id: true; questionType: true; correctAnswer: true } };
           entries: {
             include: {
               user: { select: { id: true; name: true } };
@@ -15,7 +16,7 @@ interface ResolverContext {
           };
         };
       }) => Promise<{
-        questions: Array<{ id: number; correctAnswer: string | null; questionType: string }>;
+        questions: Array<{ id: number; questionType: QuestionType; correctAnswer: string | null }>;
         entries: Array<{
           id: number;
           name: string | null;
@@ -56,6 +57,7 @@ export const publishLeaderboardUpdated = async (
       questions: {
         select: {
           id: true,
+          questionType: true,
           correctAnswer: true,
           questionType: true,
         },

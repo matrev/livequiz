@@ -1,9 +1,12 @@
 import { GraphQLError } from "graphql";
 import { Resolvers } from "../../../generated/graphql.js";
+import { QuestionType } from "../../../generated/prisma/enums.js";
 import { ResolverContext } from "../../prisma.js";
+import { isShortAnswerCorrect } from "../../utils/normalizeAnswer.js";
 
 interface QuizQuestion {
   id: number;
+  questionType: QuestionType;
   correctAnswer: string | null;
   questionType: string;
 }
@@ -28,9 +31,6 @@ interface LeaderboardRow {
 
 const leaderboardTopic = (quizId: number): string =>
   `LEADERBOARD_UPDATED:${quizId}`;
-
-const normalizeAnswer = (value: string | null | undefined): string =>
-  (value ?? "").trim().toLowerCase();
 
 const toAnswerMap = (answers: unknown): Record<string, string> => {
   if (!answers || typeof answers !== "object" || Array.isArray(answers)) {
@@ -106,11 +106,16 @@ const computeLeaderboard = (
         if (winners && submitted && winners.has(submitted.trim())) {
           correctCount += 1;
         }
-      } else if (
-        normalizeAnswer(submitted) !== "" &&
-        normalizeAnswer(submitted) === normalizeAnswer(q.correctAnswer)
-      ) {
-        correctCount += 1;
+      }
+      
+      if (submitted && q.correctAnswer !== null) {
+        const isCorrect =
+          q.questionType === QuestionType.SHORT_ANSWER
+            ? isShortAnswerCorrect(q.correctAnswer, submitted)
+            : submitted === q.correctAnswer;
+        if (isCorrect) {
+          correctCount += 1;
+        }
       }
     }
 
@@ -148,8 +153,8 @@ const LeaderboardResolvers: Resolvers = {
           questions: {
             select: {
               id: true,
-              correctAnswer: true,
               questionType: true,
+              correctAnswer: true, // adjust if your field name differs
             },
           },
           entries: {

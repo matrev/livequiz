@@ -1,7 +1,7 @@
 import { Resolvers, Entry } from "../../../generated/graphql.js";
 import { ResolverContext } from "../../prisma.js";
 import { publishLeaderboardUpdated } from "../../utils/publishLeaderboardUpdated.js";
-
+import { escapeHtml } from "../../utils/escapeHtml.js";
 
 const EntryResolvers: Resolvers = {
   Query: {
@@ -49,7 +49,7 @@ const EntryResolvers: Resolvers = {
       // Check if quiz deadline has passed
       const quiz = await context.prisma.quiz.findUnique({
         where: { id: quizId },
-        select: { deadline: true, title: true },
+        select: { deadline: true, title: true, joinCode: true },
       });
 
       if (!quiz) {
@@ -93,10 +93,17 @@ const EntryResolvers: Resolvers = {
 
         if (entrant?.email) {
           try {
+            const rawBaseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
+            const baseUrl = rawBaseUrl.replace(/\/+$/, '');
+            const leaderboardUrl = `${baseUrl}/quiz/leaderboard/${quiz.joinCode}`;
+            const deadlineText = quiz.deadline
+              ? `The quiz closes on ${new Date(quiz.deadline).toLocaleString('en-US', { timeZone: 'UTC', dateStyle: 'long', timeStyle: 'short' })} UTC.`
+              : 'This quiz has no submission deadline.';
             await context.emailSender.send({
               to: entrant.email,
-              subject: `Entry received for \"${quiz.title}\"`,
-              text: `Hi ${entrant.name}, your entry for \"${quiz.title}\" was submitted successfully.`,
+              subject: `Entry received for "${quiz.title}"`,
+              text: `Hi ${entrant.name ?? 'there'}, your entry for "${quiz.title}" was submitted successfully.\n\n${deadlineText}\n\nView the live leaderboard here:\n${leaderboardUrl}`,
+              html: `<p>Hi ${escapeHtml(entrant.name ?? '')}, your entry for <strong>${escapeHtml(quiz.title)}</strong> was submitted successfully.</p><p>${escapeHtml(deadlineText)}</p><p><strong>Live leaderboard:</strong> <a href="${leaderboardUrl}">${leaderboardUrl}</a></p>`,
             });
           } catch (error) {
             console.error("Failed to send entry created email", {
