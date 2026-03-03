@@ -8,7 +8,6 @@ interface QuizQuestion {
   id: number;
   questionType: QuestionType;
   correctAnswer: string | null;
-  questionType: string;
 }
 
 interface QuizEntry {
