@@ -98,9 +98,16 @@ export default function EditQuizPage() {
         setIsSavingDetails(true);
         setDetailsErrorMessage('');
         try {
-            const deadlineIso = detailsDraft.deadline
-                ? new Date(detailsDraft.deadline).toISOString()
-                : null;
+            let deadlineIso: string | null = null;
+            if (detailsDraft.deadline) {
+                const parsedDate = new Date(detailsDraft.deadline);
+                if (isNaN(parsedDate.getTime())) {
+                    setDetailsErrorMessage('Invalid deadline date. Please enter a valid date and time.');
+                    setIsSavingDetails(false);
+                    return;
+                }
+                deadlineIso = parsedDate.toISOString();
+            }
             await updateQuizMutation({
                 variables: {
                     id: data.getQuiz.id,
