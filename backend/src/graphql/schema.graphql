@@ -109,7 +109,7 @@ type Mutation {
     
     # Quiz Mutations
     createQuiz(title: String!, userId: Int!, questions: [QuestionInput], deadline: DateTime, description: String): Quiz!
-    updateQuiz(id: Int!, title: String, description: String): Quiz!
+    updateQuiz(id: Int!, title: String, description: String, deadline: DateTime): Quiz!
     addQuestionToQuiz(quizId: Int!, questionId: Int!): Quiz!
     removeQuestionFromQuiz(quizId: Int!, questionId: Int!): Quiz!
     deleteQuiz(id: Int!): Quiz!
