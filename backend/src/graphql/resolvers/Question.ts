@@ -2,6 +2,7 @@ import { ResolverContext } from "../../prisma.js";
 import { QuestionType } from "../../../generated/graphql.js";
 import { Resolvers, Question } from "../../../generated/graphql.js";
 import { publishLeaderboardUpdated } from "../../utils/publishLeaderboardUpdated.js";
+import { isShortAnswerCorrect } from "../../utils/normalizeAnswer.js";
 
 const QuestionResolvers: Resolvers = {
     Query: {
@@ -22,6 +23,12 @@ const QuestionResolvers: Resolvers = {
             }).then((question) => {
                 if (!question) {
                     throw new Error("Question not found");
+                }
+                if (question.questionType === QuestionType.ShortAnswer) {
+                    if (question.correctAnswer === null) {
+                        throw new Error("Short answer question has no correct answer configured");
+                    }
+                    return isShortAnswerCorrect(question.correctAnswer, answer);
                 }
                 return question.correctAnswer === answer;
             }) as unknown as boolean;
