@@ -43,6 +43,9 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                     ? question.options.filter((opt): opt is string => opt !== null && opt !== undefined)
                     : ["Option 1", "Option 2", "Option 3", "Option 4"];
                 break;
+            case QuestionType.Numerical:
+                newOptions = null;
+                break;
         }
         
         onChange({ ...question, questionType: newType, options: newOptions });
@@ -96,6 +99,7 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                 <option value={QuestionType.MultipleChoice}>Multiple Choice</option>
                 <option value={QuestionType.TrueFalse}>True/False</option>
                 <option value={QuestionType.ShortAnswer}>Short Answer</option>
+                <option value={QuestionType.Numerical}>Numerical</option>
             </select>
 
             {question.options !== null && question.questionType === QuestionType.MultipleChoice && (
@@ -162,6 +166,16 @@ export default function QuestionEditor({ question, index, onChange }: QuestionEd
                             <option key={idx} value={option || ''}>{option}</option>
                         ))}
                     </select>
+                ) : question.questionType === QuestionType.Numerical ? (
+                    <input
+                        type="number"
+                        onChange={handleCorrectAnswerChange}
+                        value={question.correctAnswer || ""}
+                        name={`CorrectAnswer-${index}`}
+                        id={`CorrectAnswer-${index}`}
+                        placeholder="Enter correct numerical answer"
+                        className={quizTheme.input}
+                    />
                 ) : (
                     <input
                         type="text"

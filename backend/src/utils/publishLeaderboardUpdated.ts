@@ -59,6 +59,7 @@ export const publishLeaderboardUpdated = async (
           id: true,
           questionType: true,
           correctAnswer: true,
+          questionType: true,
         },
       },
       entries: {

@@ -109,6 +109,8 @@ describe('Question Mutation resolver tests', () => {
 
   it('updates a Question', async () => {
     mockContext.prisma.question.update.mockResolvedValue(mockQuestion);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mockContext.prisma.quiz.findUnique.mockResolvedValue({ id: 1, questions: [], entries: [] } as any);
     const response = await server.executeOperation({
       query: `mutation testUpdateQuestion {
         updateQuestion(id: 1, text: "Updated Test Question", correctAnswer: "Updated Test Answer") {
@@ -245,5 +247,35 @@ describe('Question Query resolver edge cases', () => {
     assert(response.body.kind === 'single');
     expect(response.body.singleResult.errors).toBeDefined();
     expect(response.body.singleResult.errors?.[0].message).toBe("Question not found");
+  });
+
+  it('returns true for numerical question when answer does not exceed correct answer', async () => {
+    const numericalQuestion = { ...mockQuestion, questionType: QuestionType.Numerical, correctAnswer: '500' };
+    mockContext.prisma.question.findUnique.mockResolvedValue(numericalQuestion);
+    const response = await server.executeOperation({
+      query: `query testNumericalCorrect {
+        isQuestionCorrect(questionId: 1, answer: "499")
+      }`,
+    },
+    { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.isQuestionCorrect).toBe(true);
+  });
+
+  it('returns false for numerical question when answer exceeds correct answer', async () => {
+    const numericalQuestion = { ...mockQuestion, questionType: QuestionType.Numerical, correctAnswer: '500' };
+    mockContext.prisma.question.findUnique.mockResolvedValue(numericalQuestion);
+    const response = await server.executeOperation({
+      query: `query testNumericalOver {
+        isQuestionCorrect(questionId: 1, answer: "501")
+      }`,
+    },
+    { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.isQuestionCorrect).toBe(false);
   });
 });

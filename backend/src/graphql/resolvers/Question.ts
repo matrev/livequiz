@@ -24,6 +24,12 @@ const QuestionResolvers: Resolvers = {
                 if (!question) {
                     throw new Error("Question not found");
                 }
+                if (question.questionType === QuestionType.Numerical) {
+                    const submitted = parseFloat(answer);
+                    const correct = parseFloat(question.correctAnswer ?? "");
+                    if (isNaN(submitted) || isNaN(correct)) return false;
+                    return submitted <= correct;
+                }
                 if (question.questionType === QuestionType.ShortAnswer) {
                     if (question.correctAnswer === null) {
                         throw new Error("Short answer question has no correct answer configured");
