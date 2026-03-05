@@ -1,22 +1,8 @@
 import { GraphQLError } from "graphql";
-import { Resolvers } from "../../../generated/graphql.js";
+import { Entry, Question, Resolvers } from "../../../generated/graphql.js";
 import { QuestionType } from "../../../generated/prisma/enums.js";
 import { ResolverContext } from "../../prisma.js";
 import { isShortAnswerCorrect } from "../../utils/normalizeAnswer.js";
-
-interface QuizQuestion {
-  id: number;
-  questionType: QuestionType;
-  correctAnswer: string | null;
-}
-
-interface QuizEntry {
-  id: number;
-  name: string | null;
-  updatedAt: Date;
-  answers: unknown;
-  user: { id: number; name: string | null } | null;
-}
 
 interface LeaderboardRow {
   userId: number | null;
@@ -48,7 +34,7 @@ const toAnswerMap = (answers: unknown): Record<string, string> => {
 const isNumericalCorrect = (
   questionId: number,
   correctAnswer: string | null,
-  entries: QuizEntry[]
+  entries: Entry[]
 ): Set<string> => {
   const correct = parseFloat(correctAnswer ?? "");
   if (isNaN(correct)) return new Set();
@@ -78,8 +64,8 @@ const isNumericalCorrect = (
 };
 
 const computeLeaderboard = (
-  questions: QuizQuestion[],
-  entries: QuizEntry[]
+  questions: Question[],
+  entries: Entry[]
 ): LeaderboardRow[] => {
   const numericalWinners = new Map<number, Set<string>>();
   for (const q of questions) {
@@ -119,8 +105,8 @@ const computeLeaderboard = (
     }
 
     return {
-      userId: entry.user?.id ?? null,
-      name: entry.name?.trim() || entry.user?.name?.trim() || `Player ${entry.id}`,
+      userId: entry.userId ?? null,
+      name: entry.name?.trim() || `Player ${entry.id}`,
       score: correctCount,
       correctCount,
       answeredCount,
@@ -174,8 +160,8 @@ const LeaderboardResolvers: Resolvers = {
       }
 
       return computeLeaderboard(
-        quiz.questions as QuizQuestion[],
-        quiz.entries as QuizEntry[]
+        quiz.questions as Question[],
+        quiz.entries as Entry[]
       );
     },
   },

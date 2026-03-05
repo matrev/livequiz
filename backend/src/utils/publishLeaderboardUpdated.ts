@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql";
 import { QuestionType } from "../../generated/prisma/enums.js";
 import { computeLeaderboard, leaderboardTopic } from "../graphql/resolvers/Leaderboard.js";
+import { Entry, Question } from "../../generated/graphql.js";
 
 interface ResolverContext {
   prisma: {
@@ -59,7 +60,6 @@ export const publishLeaderboardUpdated = async (
           id: true,
           questionType: true,
           correctAnswer: true,
-          questionType: true,
         },
       },
       entries: {
@@ -79,7 +79,7 @@ export const publishLeaderboardUpdated = async (
     throw new GraphQLError("Quiz not found");
   }
 
-  const rows = computeLeaderboard(quiz.questions, quiz.entries);
+  const rows = computeLeaderboard(quiz.questions as Question[], quiz.entries as unknown as Entry[]);
   await context.pubsub.publish(leaderboardTopic(quizId), {
     leaderboardUpdated: rows,
   });
