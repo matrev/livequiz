@@ -37,13 +37,16 @@ const QuestionResolvers: Resolvers = {
     Mutation: {
         async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer?: string; options?: (string | null)[]; quizId: number }, context: ResolverContext) {
             const { text, questionType, quizId, correctAnswer = null, options } = args;
+            console.log("Creating question with text:", text, "type:", questionType, "correctAnswer:", correctAnswer, "options:", options);
             const newQuestion = await context.prisma.question.create({
                 data: {
                     text,
                     questionType,
-                    quizId,
                     correctAnswer,
                     ...(options ? { options } : {}),
+                    quiz: {
+                        connect: { id: quizId },
+                    },
                 },
             });
             return newQuestion as Question;
