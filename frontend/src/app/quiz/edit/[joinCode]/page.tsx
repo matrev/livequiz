@@ -262,6 +262,7 @@ export default function EditQuizPage() {
                     questionType: newQuestionDraft.questionType,
                     correctAnswer: newQuestionDraft.correctAnswer || undefined,
                     quizId: data.getQuiz.id,
+                    options: newQuestionDraft.options,
                 },
             });
             setIsAddingQuestion(false);
