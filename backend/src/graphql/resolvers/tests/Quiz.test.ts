@@ -338,6 +338,57 @@ describe('Quiz Mutation resolver tests', () => {
         expect(response.body.singleResult.data?.updateQuiz).toBeDefined();
     });
 
+    it('updates a Quiz with deadline', async () => {
+        const deadline = new Date('2026-12-31T23:59:00.000Z');
+        const mockQuizWithDeadline = { ...mockQuiz, deadline };
+        mockContext.prisma.quiz.update.mockResolvedValue(mockQuizWithDeadline);
+        const response = await server.executeOperation({
+            query: `mutation testUpdateQuizWithDeadline {
+                updateQuiz(id: 1, title: "Updated Quiz", deadline: "2026-12-31T23:59:00.000Z") {
+                    id
+                    title
+                    deadline
+                }
+            }`,
+        },
+        { contextValue: mockContext });
+
+        assert(response.body.kind === 'single');
+        expect(response.body.singleResult.errors).toBeUndefined();
+        expect(response.body.singleResult.data?.updateQuiz).toBeDefined();
+        expect(mockContext.prisma.quiz.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    deadline: expect.any(Date),
+                }),
+            })
+        );
+    });
+
+    it('clears deadline when null is passed to updateQuiz', async () => {
+        mockContext.prisma.quiz.update.mockResolvedValue({ ...mockQuiz, deadline: null });
+        const response = await server.executeOperation({
+            query: `mutation testUpdateQuizClearDeadline {
+                updateQuiz(id: 1, deadline: null) {
+                    id
+                    title
+                    deadline
+                }
+            }`,
+        },
+        { contextValue: mockContext });
+
+        assert(response.body.kind === 'single');
+        expect(response.body.singleResult.errors).toBeUndefined();
+        expect(mockContext.prisma.quiz.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                data: expect.objectContaining({
+                    deadline: null,
+                }),
+            })
+        );
+    });
+
     it('adds questions to a Quiz', async () => {
         mockContext.prisma.quiz.update.mockResolvedValue(mockQuiz);
         const response = await server.executeOperation({

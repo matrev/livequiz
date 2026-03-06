@@ -142,8 +142,12 @@ const QuizResolvers: Resolvers = {
                 },
             }) as unknown as Quiz;
         },
-        async updateQuiz(_: any, args: { id: number; title?: string; description?: string; questions?: any[] }, context: ResolverContext) {
-            const { id, title, description } = args;
+        async updateQuiz(_: any, args: { id: number; title?: string; description?: string; deadline?: string | null; questions?: any[] }, context: ResolverContext) {
+            const { id, title, description, deadline } = args;
+            let deadlineValue: Date | null | undefined;
+            if (deadline !== undefined) {
+                deadlineValue = deadline ? new Date(deadline) : null;
+            }
             return context.prisma.quiz.update({
                 where: {
                     id,
@@ -151,6 +155,7 @@ const QuizResolvers: Resolvers = {
                 data: {
                     title,
                     description,
+                    deadline: deadlineValue,
                     updatedAt: new Date(),
                 },
             }) as unknown as Quiz;

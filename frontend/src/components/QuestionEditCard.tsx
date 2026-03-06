@@ -17,6 +17,7 @@ type QuestionEditCardProps = {
     onSave: (questionId: number) => void;
     onToggleEdit: (questionId: number) => void;
     onChange: (questionId: number, updatedQuestion: QuestionInputType) => void;
+    onRemove?: (questionId: number) => void;
 };
 
 export default function QuestionEditCard({
@@ -29,7 +30,8 @@ export default function QuestionEditCard({
     questionSuccessMessage,
     onSave,
     onToggleEdit,
-    onChange
+    onChange,
+    onRemove
 }: QuestionEditCardProps) {
     return (
         <div
@@ -79,6 +81,14 @@ export default function QuestionEditCard({
                             className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
                         >
                             Edit
+                        </button>
+                    )}
+                    {onRemove && !isEditing && (
+                        <button
+                            onClick={() => onRemove(question.id)}
+                            className={`${quizTheme.buttonDanger} w-full sm:w-auto`}
+                        >
+                            Remove
                         </button>
                     )}
                 </div>

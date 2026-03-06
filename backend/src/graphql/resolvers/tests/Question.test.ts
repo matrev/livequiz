@@ -85,6 +85,38 @@ describe('Question Mutation resolver tests', () => {
     expect(response.body.singleResult.data?.createQuestion).toBeDefined();
   });
 
+  it('creates a Question with options', async () => {
+    const mockQuestionWithOptions = {
+      ...mockQuestion,
+      options: ['Option A', 'Option B', 'Option C'],
+    };
+    mockContext.prisma.question.create.mockResolvedValue(mockQuestionWithOptions);
+    const response = await server.executeOperation({
+      query: `mutation testCreateQuestionWithOptions {
+        createQuestion(text: "MC Question", questionType: MULTIPLE_CHOICE, correctAnswer: "Option A", options: ["Option A", "Option B", "Option C"], quizId: 1) {
+          id
+          quizId
+          text
+          correctAnswer
+          questionType
+          options
+        }
+      }`,
+    },
+    { contextValue: mockContext });
+
+    assert(response.body.kind === 'single');
+    expect(response.body.singleResult.errors).toBeUndefined();
+    expect(response.body.singleResult.data?.createQuestion).toEqual(mockQuestionWithOptions);
+    expect(mockContext.prisma.question.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          options: ['Option A', 'Option B', 'Option C'],
+        }),
+      })
+    );
+  });
+
   it('deletes a Question', async () => {
     mockContext.prisma.question.delete.mockResolvedValue(mockQuestion);
     const response = await server.executeOperation({
