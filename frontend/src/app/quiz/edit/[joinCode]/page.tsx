@@ -10,6 +10,13 @@ import QuestionEditCard from "@/components/QuestionEditCard";
 import QuestionInputComponent from "@/components/QuestionInput";
 import { quizTheme } from "../../theme";
 
+const EMPTY_QUESTION_DRAFT: QuestionInputType = {
+    text: '',
+    questionType: QuestionType.MultipleChoice,
+    options: ['Option 1', 'Option 2'],
+    correctAnswer: '',
+};
+
 export default function EditQuizPage() {
     const params = useParams();
     const router = useRouter();
@@ -32,12 +39,7 @@ export default function EditQuizPage() {
     const detailsSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // New question state
-    const [newQuestionDraft, setNewQuestionDraft] = useState<QuestionInputType>({
-        text: '',
-        questionType: QuestionType.MultipleChoice,
-        options: ['Option 1', 'Option 2'],
-        correctAnswer: '',
-    });
+    const [newQuestionDraft, setNewQuestionDraft] = useState<QuestionInputType>(EMPTY_QUESTION_DRAFT);
     const [isAddingQuestion, setIsAddingQuestion] = useState(false);
     const [addQuestionError, setAddQuestionError] = useState('');
 
@@ -271,12 +273,7 @@ export default function EditQuizPage() {
                 },
             });
             setIsAddingQuestion(false);
-            setNewQuestionDraft({
-                text: '',
-                questionType: QuestionType.MultipleChoice,
-                options: ['Option 1', 'Option 2'],
-                correctAnswer: '',
-            });
+            setNewQuestionDraft(EMPTY_QUESTION_DRAFT);
             await refetch();
         } catch (err) {
             console.error("Error adding question:", err);
@@ -286,12 +283,7 @@ export default function EditQuizPage() {
 
     const handleCancelAddQuestion = () => {
         setIsAddingQuestion(false);
-        setNewQuestionDraft({
-            text: '',
-            questionType: QuestionType.MultipleChoice,
-            options: ['Option 1', 'Option 2'],
-            correctAnswer: '',
-        });
+        setNewQuestionDraft(EMPTY_QUESTION_DRAFT);
         setAddQuestionError('');
     };
 
