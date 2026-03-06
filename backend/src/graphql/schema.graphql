@@ -103,7 +103,7 @@ type Mutation {
     upsertEntry(quizId: Int!, name: String!, answers: JSON!, userId: Int): Entry!
     
     # Question Mutations
-    createQuestion(text: String!, questionType: QuestionType!, correctAnswer: String, quizId: Int!): Question!
+    createQuestion(text: String!, questionType: QuestionType!, correctAnswer: String, options: [String], quizId: Int!): Question!
     deleteQuestion(id: Int!): Question!
     updateQuestion(id: Int!, text: String, questionType: QuestionType, correctAnswer: String, options: [String]): Question!
     

@@ -13,8 +13,8 @@ export const updateQuestion: TypedDocumentNode<UpdateQuestionMutation, MutationU
 
 export const createQuestion: TypedDocumentNode<CreateQuestionMutation, MutationCreateQuestionArgs> = gql`
     ${questionFullFields}
-    mutation CreateQuestion($text: String!, $questionType: QuestionType!, $correctAnswer: String, $quizId: Int!) {
-        createQuestion(text: $text, questionType: $questionType, correctAnswer: $correctAnswer, quizId: $quizId) {
+    mutation CreateQuestion($text: String!, $questionType: QuestionType!, $correctAnswer: String, $options: [String], $quizId: Int!) {
+        createQuestion(text: $text, questionType: $questionType, correctAnswer: $correctAnswer, options: $options, quizId: $quizId) {
             ...QuestionFullFields
             quizId
         }

@@ -35,14 +35,15 @@ const QuestionResolvers: Resolvers = {
         }
     },
     Mutation: {
-        async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer?: string; quizId: number }, context: ResolverContext) {
-            const { text, questionType, quizId, correctAnswer = null } = args;
+        async createQuestion(_: any, args: { text: string; questionType: QuestionType; correctAnswer?: string; options?: (string | null)[]; quizId: number }, context: ResolverContext) {
+            const { text, questionType, quizId, correctAnswer = null, options } = args;
             const newQuestion = await context.prisma.question.create({
                 data: {
                     text,
                     questionType,
                     quizId,
-                    correctAnswer
+                    correctAnswer,
+                    ...(options ? { options } : {}),
                 },
             });
             return newQuestion as Question;
