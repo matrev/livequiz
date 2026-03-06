@@ -244,6 +244,8 @@ export default function EditQuizPage() {
             await refetch();
         } catch (err) {
             console.error("Error removing question:", err);
+            // Surface a user-facing error so the user knows the removal failed
+            setDetailsErrorMessage("Unable to remove question. Please try again.");
         }
     };
 
