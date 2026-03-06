@@ -10,12 +10,12 @@ import QuestionEditCard from "@/components/QuestionEditCard";
 import QuestionInputComponent from "@/components/QuestionInput";
 import { quizTheme } from "../../theme";
 
-const EMPTY_QUESTION_DRAFT: QuestionInputType = {
+const createEmptyQuestionDraft = (): QuestionInputType => ({
     text: '',
     questionType: QuestionType.MultipleChoice,
     options: ['Option 1', 'Option 2'],
     correctAnswer: '',
-};
+});
 
 export default function EditQuizPage() {
     const params = useParams();
@@ -39,7 +39,7 @@ export default function EditQuizPage() {
     const detailsSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // New question state
-    const [newQuestionDraft, setNewQuestionDraft] = useState<QuestionInputType>(EMPTY_QUESTION_DRAFT);
+    const [newQuestionDraft, setNewQuestionDraft] = useState<QuestionInputType>(createEmptyQuestionDraft());
     const [isAddingQuestion, setIsAddingQuestion] = useState(false);
     const [addQuestionError, setAddQuestionError] = useState('');
 
@@ -273,7 +273,7 @@ export default function EditQuizPage() {
                 },
             });
             setIsAddingQuestion(false);
-            setNewQuestionDraft(EMPTY_QUESTION_DRAFT);
+            setNewQuestionDraft(createEmptyQuestionDraft());
             await refetch();
         } catch (err) {
             console.error("Error adding question:", err);
@@ -283,7 +283,7 @@ export default function EditQuizPage() {
 
     const handleCancelAddQuestion = () => {
         setIsAddingQuestion(false);
-        setNewQuestionDraft(EMPTY_QUESTION_DRAFT);
+        setNewQuestionDraft(createEmptyQuestionDraft());
         setAddQuestionError('');
     };
 
