@@ -1,4 +1,4 @@
-import { getFrontendBaseUrl } from './getFrontendBaseUrl';
+import { getFrontendBaseUrl } from './getFrontendBaseUrl.js';
 
 describe('getFrontendBaseUrl', () => {
     const originalEnv = process.env;
