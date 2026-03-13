@@ -1,16 +1,28 @@
 import { getFrontendBaseUrl } from './getFrontendBaseUrl.js';
 
 describe('getFrontendBaseUrl', () => {
-    const originalEnv = process.env;
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalFrontendBaseUrl = process.env.FRONTEND_BASE_URL;
 
     beforeEach(() => {
-        process.env = { ...originalEnv };
-        delete process.env.FRONTEND_BASE_URL;
-        delete process.env.NODE_ENV;
+        // Ensure FRONTEND_BASE_URL is unset for each test unless explicitly set.
+        if (originalFrontendBaseUrl === undefined) {
+            delete process.env.FRONTEND_BASE_URL;
+        } else {
+            process.env.FRONTEND_BASE_URL = undefined as any;
+        }
+        // Keep NODE_ENV stable unless a test overrides it.
+        process.env.NODE_ENV = originalNodeEnv;
     });
 
-    afterAll(() => {
-        process.env = originalEnv;
+    afterEach(() => {
+        // Restore original values after each test to avoid cross-test pollution.
+        process.env.NODE_ENV = originalNodeEnv;
+        if (originalFrontendBaseUrl === undefined) {
+            delete process.env.FRONTEND_BASE_URL;
+        } else {
+            process.env.FRONTEND_BASE_URL = originalFrontendBaseUrl;
+        }
     });
 
     it('returns FRONTEND_BASE_URL when set', () => {
