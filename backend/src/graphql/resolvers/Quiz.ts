@@ -2,6 +2,7 @@ import { Resolvers, Quiz, Question, User } from '../../../generated/graphql.js';
 import { ResolverContext } from '../../prisma.js';
 import { generateJoinCode } from '../../utils/generateJoinCode.js';
 import { escapeHtml } from '../../utils/escapeHtml.js';
+import { getFrontendBaseUrl } from '../../utils/getFrontendBaseUrl.js';
 
 const QuizResolvers: Resolvers = {
     Query: {
@@ -112,11 +113,10 @@ const QuizResolvers: Resolvers = {
 
             if (quizOwner?.email) {
                 try {
-                    const baseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
-                    const normalizedBaseUrl = baseUrl.replace(/\/+$/, '');
-                    const joinUrl = `${normalizedBaseUrl}/quiz/join/${newQuiz.joinCode}`;
-                    const leaderboardUrl = `${normalizedBaseUrl}/quiz/leaderboard/${newQuiz.joinCode}`;
-                    const editUrl = `${normalizedBaseUrl}/quiz/edit/${newQuiz.joinCode}`;
+                    const baseUrl = getFrontendBaseUrl();
+                    const joinUrl = `${baseUrl}/quiz/join/${newQuiz.joinCode}`;
+                    const leaderboardUrl = `${baseUrl}/quiz/leaderboard/${newQuiz.joinCode}`;
+                    const editUrl = `${baseUrl}/quiz/edit/${newQuiz.joinCode}`;
                     await context.emailSender.send({
                         to: quizOwner.email,
                         subject: `Your quiz "${newQuiz.title}" is ready`,

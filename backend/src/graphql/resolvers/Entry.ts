@@ -2,6 +2,7 @@ import { Resolvers, Entry } from "../../../generated/graphql.js";
 import { ResolverContext } from "../../prisma.js";
 import { publishLeaderboardUpdated } from "../../utils/publishLeaderboardUpdated.js";
 import { escapeHtml } from "../../utils/escapeHtml.js";
+import { getFrontendBaseUrl } from "../../utils/getFrontendBaseUrl.js";
 
 const EntryResolvers: Resolvers = {
   Query: {
@@ -93,8 +94,7 @@ const EntryResolvers: Resolvers = {
 
         if (entrant?.email) {
           try {
-            const rawBaseUrl = process.env.FRONTEND_BASE_URL ?? 'http://localhost:3000';
-            const baseUrl = rawBaseUrl.replace(/\/+$/, '');
+            const baseUrl = getFrontendBaseUrl();
             const leaderboardUrl = `${baseUrl}/quiz/leaderboard/${quiz.joinCode}`;
             const deadlineText = quiz.deadline
               ? `The quiz closes on ${new Date(quiz.deadline).toLocaleString('en-US', { timeZone: 'UTC', dateStyle: 'long', timeStyle: 'short' })} UTC.`
