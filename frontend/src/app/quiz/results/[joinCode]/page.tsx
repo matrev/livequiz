@@ -83,6 +83,41 @@ const isAnswerCorrect = (
   return userAnswer.trim().toLowerCase() === correctAnswer!.trim().toLowerCase();
 };
 
+const findNumericalWinners = (
+  grouped: Map<string, { answer: string; voters: string[] }>,
+  correctAnswer: string | null | undefined,
+): Set<string> => {
+  const winners = new Set<string>();
+  const correct = parseFloat(correctAnswer ?? "");
+  if (isNaN(correct)) return winners;
+
+  let bestDiff = Infinity;
+
+  for (const [, value] of grouped) {
+    if (value.voters.length === 0) continue;
+    const submitted = parseFloat(value.answer);
+    if (!isNaN(submitted) && submitted <= correct) {
+      const diff = correct - submitted;
+      if (diff < bestDiff) bestDiff = diff;
+    }
+  }
+
+  if (!isFinite(bestDiff)) return winners;
+
+  for (const [key, value] of grouped) {
+    const submitted = parseFloat(value.answer);
+    if (
+      !isNaN(submitted) &&
+      submitted <= correct &&
+      correct - submitted === bestDiff
+    ) {
+      winners.add(key);
+    }
+  }
+
+  return winners;
+};
+
 const formatQuestionType = (questionType: QuestionType): string => {
   switch (questionType) {
     case QuestionType.MultipleChoice:
@@ -152,12 +187,19 @@ const getGroupedAnswersForQuestion = ({
     addAnswer(correctAnswer);
   }
 
+  const numericalWinners =
+    questionType === QuestionType.Numerical
+      ? findNumericalWinners(grouped, correctAnswer)
+      : null;
+
   return Array.from(grouped.entries())
     .map(([key, value]) => ({
       key,
       answer: value.answer,
       voters: value.voters,
-      isCorrect: isAnswerCorrect(value.answer, correctAnswer, questionType),
+      isCorrect: numericalWinners
+        ? numericalWinners.has(key)
+        : isAnswerCorrect(value.answer, correctAnswer, questionType),
     }))
     .sort((a, b) => {
       if (a.isCorrect !== b.isCorrect) {
