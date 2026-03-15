@@ -270,12 +270,6 @@ export default function QuizResultsPage() {
             >
               View leaderboard
             </button>
-            <button
-              onClick={() => router.push("/quiz/join")}
-              className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
-            >
-              Back to quizzes
-            </button>
           </div>
         </div>
 
@@ -314,48 +308,81 @@ export default function QuizResultsPage() {
                           No responses yet.
                         </p>
                       ) : (
-                        <div className={quizTheme.tableWrap}>
-                          <table className="w-full border-collapse">
-                            <thead>
-                              <tr>
-                                <th className={quizTheme.tableHeader}>Answer</th>
-                                <th className={quizTheme.tableHeader}>
-                                  Participants
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {groupedAnswers.map((groupedAnswer) => (
-                                <tr
-                                  key={groupedAnswer.key}
-                                  className={
-                                    groupedAnswer.isCorrect
-                                      ? "bg-emerald-500/10"
-                                      : undefined
-                                  }
-                                >
-                                  <td className={quizTheme.tableCell}>
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      <span>{groupedAnswer.answer}</span>
-                                      {groupedAnswer.isCorrect ? (
-                                        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-300">
-                                          ✓ Correct
-                                        </span>
-                                      ) : null}
-                                    </div>
-                                  </td>
-                                  <td className={quizTheme.tableCell}>
-                                    {groupedAnswer.voters.length === 0 ? (
-                                      <span className="text-white/45">No votes</span>
-                                    ) : (
-                                      groupedAnswer.voters.join(", ")
-                                    )}
-                                  </td>
+                        <>
+                          {/* Mobile: stacked cards */}
+                          <div className="flex flex-col gap-2.5 sm:hidden">
+                            {groupedAnswers.map((groupedAnswer) => (
+                              <div
+                                key={groupedAnswer.key}
+                                className={`rounded-lg border px-3 py-2.5 ${
+                                  groupedAnswer.isCorrect
+                                    ? "border-emerald-500/30 bg-emerald-500/10"
+                                    : "border-landing-border bg-landing-surface"
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-white">
+                                    {groupedAnswer.answer}
+                                  </span>
+                                  {groupedAnswer.isCorrect ? (
+                                    <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-300">
+                                      ✓ Correct
+                                    </span>
+                                  ) : null}
+                                </div>
+                                <p className="mt-1 text-xs text-white/55">
+                                  {groupedAnswer.voters.length === 0
+                                    ? "No votes"
+                                    : groupedAnswer.voters.join(", ")}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Desktop: table */}
+                          <div className={`hidden sm:block ${quizTheme.tableWrap}`}>
+                            <table className="w-full border-collapse">
+                              <thead>
+                                <tr>
+                                  <th className={quizTheme.tableHeader}>Answer</th>
+                                  <th className={quizTheme.tableHeader}>
+                                    Participants
+                                  </th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                              </thead>
+                              <tbody>
+                                {groupedAnswers.map((groupedAnswer) => (
+                                  <tr
+                                    key={groupedAnswer.key}
+                                    className={
+                                      groupedAnswer.isCorrect
+                                        ? "bg-emerald-500/10"
+                                        : undefined
+                                    }
+                                  >
+                                    <td className={quizTheme.tableCell}>
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <span>{groupedAnswer.answer}</span>
+                                        {groupedAnswer.isCorrect ? (
+                                          <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-300">
+                                            ✓ Correct
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    </td>
+                                    <td className={quizTheme.tableCell}>
+                                      {groupedAnswer.voters.length === 0 ? (
+                                        <span className="text-white/45">No votes</span>
+                                      ) : (
+                                        groupedAnswer.voters.join(", ")
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </>
                       )}
                     </>
                   );
