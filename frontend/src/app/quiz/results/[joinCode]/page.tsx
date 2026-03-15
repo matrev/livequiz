@@ -77,7 +77,7 @@ const isAnswerCorrect = (
     const submitted = parseFloat(userAnswer);
     const correct = parseFloat(correctAnswer);
     if (isNaN(submitted) || isNaN(correct)) return false;
-    return submitted <= correct;
+    return submitted === correct;
   }
 
   return userAnswer.trim().toLowerCase() === correctAnswer!.trim().toLowerCase();
