@@ -67,7 +67,11 @@ const isAnswerCorrect = (
   correctAnswer: string | null | undefined,
   questionType: QuestionType,
 ): boolean => {
-  if (!correctAnswer || !userAnswer) return false;
+  const isCorrectAnswerMissing =
+    correctAnswer == null || correctAnswer.trim() === "";
+  const isUserAnswerMissing = userAnswer.trim() === "";
+
+  if (isCorrectAnswerMissing || isUserAnswerMissing) return false;
 
   if (questionType === QuestionType.Numerical) {
     const submitted = parseFloat(userAnswer);
@@ -76,7 +80,7 @@ const isAnswerCorrect = (
     return submitted === correct;
   }
 
-  return userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+  return userAnswer.trim().toLowerCase() === correctAnswer!.trim().toLowerCase();
 };
 
 const formatQuestionType = (questionType: QuestionType): string => {
