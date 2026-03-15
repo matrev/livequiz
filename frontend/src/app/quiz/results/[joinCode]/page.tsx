@@ -294,6 +294,10 @@ export default function QuizResultsPage() {
                     correctAnswer: question.correctAnswer,
                   });
 
+                  const hasAnyVotes = groupedAnswers.some(
+                    (answer) => answer.voters.length > 0,
+                  );
+
                   return (
                     <>
                       <div className="mb-3">
@@ -307,7 +311,7 @@ export default function QuizResultsPage() {
                         </div>
                       </div>
 
-                      {groupedAnswers.length === 0 ? (
+                      {!hasAnyVotes ? (
                         <p className="text-sm text-white/55">
                           No responses yet.
                         </p>
