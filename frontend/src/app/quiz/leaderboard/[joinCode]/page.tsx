@@ -68,6 +68,7 @@ export default function QuizLeaderboardPage() {
 
     const deadline = quizData?.getQuiz?.deadline ?? null;
     const countdown = useCountdown(deadline);
+    const isQuizClosed = deadline !== null && countdown === null;
 
     const lastUpdated = useMemo(() => {
         if (!sortedRows.length) {
@@ -110,12 +111,16 @@ export default function QuizLeaderboardPage() {
             <div className={quizTheme.page}>
             <div className={quizTheme.header}>
                 <h1 className={quizTheme.title}>{quizData.getQuiz.title}</h1>
-                <button
-                    onClick={() => router.push("/quiz/join")}
-                    className={`${quizTheme.buttonOutline} w-full sm:w-auto`}
-                >
-                    Back to quizzes
-                </button>
+                <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+                    {isQuizClosed ? (
+                        <button
+                            onClick={() => router.push(`/quiz/results/${joinCode}`)}
+                            className={`${quizTheme.buttonPrimary} w-full sm:w-auto`}
+                        >
+                            View results
+                        </button>
+                    ) : null}
+                </div>
             </div>
 
             <p className="mb-1 text-sm text-white/65">
@@ -155,7 +160,9 @@ export default function QuizLeaderboardPage() {
                             {sortedRows.map((row) => (
                                 <tr key={row.userId ?? row.name}>
                                     <td className={quizTheme.tableCell}>{row.rank}</td>
-                                    <td className={quizTheme.tableCell}>{row.name}</td>
+                                    <td className={quizTheme.tableCell}>
+                                        {isQuizClosed && row.rank === 1 ? "👑 " : ""}{row.name}
+                                    </td>
                                     <td className={quizTheme.tableCell}>{row.score.toFixed(2)}</td>
                                 </tr>
                             ))}
