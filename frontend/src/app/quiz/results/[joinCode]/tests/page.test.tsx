@@ -209,4 +209,115 @@ describe('QuizResultsPage', () => {
 
     expect(screen.getByText('This quiz has no questions yet.')).toBeInTheDocument();
   });
+
+  describe('numerical questions - Price is Right rules', () => {
+    const numericalQuizData = {
+      getQuiz: {
+        id: 20,
+        title: 'Number Quiz',
+        questions: [
+          {
+            id: 1,
+            text: 'How many bones in the human body?',
+            questionType: 'NUMERICAL',
+            correctAnswer: '206',
+            options: null,
+          },
+        ],
+      },
+    };
+
+    it('marks closest answer without going over as correct', () => {
+      (useQuery as unknown as jest.Mock)
+        .mockReturnValueOnce({ loading: false, error: undefined, data: numericalQuizData })
+        .mockReturnValueOnce({
+          loading: false,
+          error: undefined,
+          data: {
+            getEntriesForQuiz: [
+              { id: 1, name: 'Alice', userId: 100, answers: { '1': '200' }, updatedAt: '2026-03-01T10:00:00.000Z' },
+              { id: 2, name: 'Bob', userId: 101, answers: { '1': '100' }, updatedAt: '2026-03-01T11:00:00.000Z' },
+              { id: 3, name: 'Carol', userId: 102, answers: { '1': '210' }, updatedAt: '2026-03-01T12:00:00.000Z' },
+            ],
+          },
+        });
+
+      renderWithProviders(<QuizResultsPage />);
+
+      // Alice's answer (200) is closest without going over 206 → correct
+      // Both mobile and desktop views render the marker, so 1 correct answer = 2 markers
+      const correctMarkers = screen.getAllByText('✓ Correct');
+      expect(correctMarkers).toHaveLength(2);
+
+      // 200 should be in the document (Alice's answer, the winner)
+      expect(screen.getAllByText('200').length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('does not mark answers that go over as correct', () => {
+      (useQuery as unknown as jest.Mock)
+        .mockReturnValueOnce({ loading: false, error: undefined, data: numericalQuizData })
+        .mockReturnValueOnce({
+          loading: false,
+          error: undefined,
+          data: {
+            getEntriesForQuiz: [
+              { id: 1, name: 'Alice', userId: 100, answers: { '1': '210' }, updatedAt: '2026-03-01T10:00:00.000Z' },
+              { id: 2, name: 'Bob', userId: 101, answers: { '1': '300' }, updatedAt: '2026-03-01T11:00:00.000Z' },
+            ],
+          },
+        });
+
+      renderWithProviders(<QuizResultsPage />);
+
+      // Both answers go over 206, so none should be correct
+      expect(screen.queryAllByText('✓ Correct')).toHaveLength(0);
+    });
+
+    it('marks exact match as correct', () => {
+      (useQuery as unknown as jest.Mock)
+        .mockReturnValueOnce({ loading: false, error: undefined, data: numericalQuizData })
+        .mockReturnValueOnce({
+          loading: false,
+          error: undefined,
+          data: {
+            getEntriesForQuiz: [
+              { id: 1, name: 'Alice', userId: 100, answers: { '1': '206' }, updatedAt: '2026-03-01T10:00:00.000Z' },
+              { id: 2, name: 'Bob', userId: 101, answers: { '1': '200' }, updatedAt: '2026-03-01T11:00:00.000Z' },
+            ],
+          },
+        });
+
+      renderWithProviders(<QuizResultsPage />);
+
+      // Alice's exact match (206) is the closest without going over → correct
+      // Both mobile and desktop views render the marker
+      const correctMarkers = screen.getAllByText('✓ Correct');
+      expect(correctMarkers).toHaveLength(2);
+    });
+
+    it('marks tied answers as both correct', () => {
+      (useQuery as unknown as jest.Mock)
+        .mockReturnValueOnce({ loading: false, error: undefined, data: numericalQuizData })
+        .mockReturnValueOnce({
+          loading: false,
+          error: undefined,
+          data: {
+            getEntriesForQuiz: [
+              { id: 1, name: 'Alice', userId: 100, answers: { '1': '200' }, updatedAt: '2026-03-01T10:00:00.000Z' },
+              { id: 2, name: 'Bob', userId: 101, answers: { '1': '200' }, updatedAt: '2026-03-01T11:00:00.000Z' },
+            ],
+          },
+        });
+
+      renderWithProviders(<QuizResultsPage />);
+
+      // Both answered 200, which is closest without going over → both correct (grouped as one row)
+      // Both mobile and desktop views render the marker
+      const correctMarkers = screen.getAllByText('✓ Correct');
+      expect(correctMarkers).toHaveLength(2);
+
+      // Both voters should appear
+      expect(screen.getAllByText('Alice, Bob')).toHaveLength(2);
+    });
+  });
 });
