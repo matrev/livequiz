@@ -4,10 +4,17 @@ import { useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@apollo/client/react";
 import { getEntriesForQuiz, getQuiz } from "@/graphql/queries";
-import { QuestionType } from "@/generated/types";
+import { type GetEntriesForQuizQuery, QuestionType } from "@/generated/types";
 import { quizTheme } from "../../theme";
 
 type EntryAnswers = Record<string, string>;
+
+type GroupedAnswerRow = {
+  key: string;
+  answer: string;
+  voters: string[];
+  isCorrect: boolean;
+};
 
 const getAnswerValue = (
   answers: unknown,
@@ -19,6 +26,40 @@ const getAnswerValue = (
 
   const answerMap = answers as EntryAnswers;
   return answerMap[String(questionId)] ?? "";
+};
+
+const normalizeAnswerForGrouping = (
+  answer: string,
+  questionType: QuestionType,
+): { key: string; display: string } | null => {
+  const trimmed = answer.trim();
+  if (!trimmed) return null;
+
+  if (questionType === QuestionType.Numerical) {
+    const numeric = Number(trimmed);
+    if (Number.isFinite(numeric)) {
+      const normalized = String(numeric);
+      return {
+        key: `num:${normalized}`,
+        display: normalized,
+      };
+    }
+  }
+
+  if (questionType === QuestionType.TrueFalse) {
+    const normalized = trimmed.toLowerCase();
+    if (normalized === "true" || normalized === "false") {
+      return {
+        key: `bool:${normalized}`,
+        display: normalized === "true" ? "True" : "False",
+      };
+    }
+  }
+
+  return {
+    key: `text:${trimmed.toLowerCase()}`,
+    display: trimmed,
+  };
 };
 
 const isAnswerCorrect = (
@@ -49,6 +90,82 @@ const formatQuestionType = (questionType: QuestionType): string => {
     default:
       return "Short Answer";
   }
+};
+
+const getGroupedAnswersForQuestion = ({
+  entries,
+  questionId,
+  questionType,
+  options,
+  correctAnswer,
+}: {
+  entries: GetEntriesForQuizQuery["getEntriesForQuiz"];
+  questionId: number | null | undefined;
+  questionType: QuestionType;
+  options?: Array<string | null> | null;
+  correctAnswer?: string | null;
+}): GroupedAnswerRow[] => {
+  const grouped = new Map<string, { answer: string; voters: string[] }>();
+
+  const addAnswer = (answerValue: string, voterName?: string) => {
+    const normalized = normalizeAnswerForGrouping(answerValue, questionType);
+    if (!normalized) return;
+
+    const existing = grouped.get(normalized.key);
+    if (existing) {
+      if (voterName) {
+        existing.voters.push(voterName);
+      }
+      return;
+    }
+
+    grouped.set(normalized.key, {
+      answer: normalized.display,
+      voters: voterName ? [voterName] : [],
+    });
+  };
+
+  if (questionType === QuestionType.MultipleChoice) {
+    (options ?? []).forEach((option) => {
+      if (typeof option === "string" && option.trim()) {
+        addAnswer(option);
+      }
+    });
+  }
+
+  if (questionType === QuestionType.TrueFalse) {
+    addAnswer("True");
+    addAnswer("False");
+  }
+
+  entries.forEach((entry) => {
+    const submittedAnswer = getAnswerValue(entry.answers, questionId);
+    if (!submittedAnswer) return;
+    addAnswer(submittedAnswer, entry.name);
+  });
+
+  if (correctAnswer) {
+    addAnswer(correctAnswer);
+  }
+
+  return Array.from(grouped.entries())
+    .map(([key, value]) => ({
+      key,
+      answer: value.answer,
+      voters: value.voters,
+      isCorrect: isAnswerCorrect(value.answer, correctAnswer, questionType),
+    }))
+    .sort((a, b) => {
+      if (a.isCorrect !== b.isCorrect) {
+        return a.isCorrect ? -1 : 1;
+      }
+
+      if (a.voters.length !== b.voters.length) {
+        return b.voters.length - a.voters.length;
+      }
+
+      return a.answer.localeCompare(b.answer);
+    });
 };
 
 export default function QuizResultsPage() {
@@ -170,85 +287,79 @@ export default function QuizResultsPage() {
           <div className="grid gap-6">
             {questions.map((question, questionIndex) => (
               <section key={question.id} className={quizTheme.itemCard}>
-                <div className="mb-3">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <h2 className="m-0 text-base font-semibold text-white sm:text-lg">
-                      Q{questionIndex + 1}. {question.text}
-                    </h2>
-                    <span className="shrink-0 text-xs text-white/55">
-                      {formatQuestionType(question.questionType)}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm font-medium text-emerald-300">
-                    Correct answer: {question.correctAnswer ?? "Not set"}
-                  </p>
-                </div>
+                {(() => {
+                  const groupedAnswers = getGroupedAnswersForQuestion({
+                    entries,
+                    questionId: question.id,
+                    questionType: question.questionType,
+                    options: question.options,
+                    correctAnswer: question.correctAnswer,
+                  });
 
-                {entries.length === 0 ? (
-                  <p className="text-sm text-white/55">
-                    No responses yet.
-                  </p>
-                ) : (
-                  <div className={quizTheme.tableWrap}>
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr>
-                          <th className={quizTheme.tableHeader}>
-                            Participant
-                          </th>
-                          <th className={quizTheme.tableHeader}>Answer</th>
-                          <th className={quizTheme.tableHeader}>Result</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {entries.map((entry, entryIndex) => {
-                          const answer = getAnswerValue(
-                            entry.answers,
-                            question.id,
-                          );
-                          const correct = isAnswerCorrect(
-                            answer,
-                            question.correctAnswer,
-                            question.questionType,
-                          );
+                  return (
+                    <>
+                      <div className="mb-3">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <h2 className="m-0 text-base font-semibold text-white sm:text-lg">
+                            {question.text}
+                          </h2>
+                          <span className="shrink-0 text-xs text-white/55">
+                            {formatQuestionType(question.questionType)}
+                          </span>
+                        </div>
+                      </div>
 
-                          return (
-                            <tr
-                              key={
-                                entry.id ??
-                                `${entry.name}-${entry.userId ?? "anon"}-${entryIndex}`
-                              }
-                            >
-                              <td className={quizTheme.tableCell}>
-                                {entry.name}
-                              </td>
-                              <td className={quizTheme.tableCell}>
-                                {answer || (
-                                  <span className="text-white/45">
-                                    No answer
-                                  </span>
-                                )}
-                              </td>
-                              <td className={quizTheme.tableCell}>
-                                {!answer ? (
-                                  <span className="text-white/45">—</span>
-                                ) : correct ? (
-                                  <span className="font-medium text-emerald-400">
-                                    ✓ Correct
-                                  </span>
-                                ) : (
-                                  <span className="font-medium text-red-400">
-                                    ✗ Incorrect
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                      {groupedAnswers.length === 0 ? (
+                        <p className="text-sm text-white/55">
+                          No responses yet.
+                        </p>
+                      ) : (
+                        <div className={quizTheme.tableWrap}>
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr>
+                                <th className={quizTheme.tableHeader}>Answer</th>
+                                <th className={quizTheme.tableHeader}>
+                                  Participants
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {groupedAnswers.map((groupedAnswer) => (
+                                <tr
+                                  key={groupedAnswer.key}
+                                  className={
+                                    groupedAnswer.isCorrect
+                                      ? "bg-emerald-500/10"
+                                      : undefined
+                                  }
+                                >
+                                  <td className={quizTheme.tableCell}>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span>{groupedAnswer.answer}</span>
+                                      {groupedAnswer.isCorrect ? (
+                                        <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-300">
+                                          ✓ Correct
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                  </td>
+                                  <td className={quizTheme.tableCell}>
+                                    {groupedAnswer.voters.length === 0 ? (
+                                      <span className="text-white/45">No votes</span>
+                                    ) : (
+                                      groupedAnswer.voters.join(", ")
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </section>
             ))}
           </div>
